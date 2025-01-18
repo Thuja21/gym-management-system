@@ -1,0 +1,117 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  padding: 0;
+  overflow: hidden;
+  width: 100%; /* Ensure it takes the full width of the viewport */
+  height: 100%; /* Ensure it takes the full height of the viewport */
+}
+
+.login-container {
+  display: flex;
+  align-items: center;
+  height: 100vh; /* Full height of the viewport */
+  width: 100vw; /* Full width of the viewport */
+  box-sizing: border-box; /* Prevents unwanted padding/margins */
+  background: url("../../assets/loginbg.png") no-repeat center center / cover;
+  background-size: cover;
+  background-position: center;
+}
+
+.login-box {
+  background-color: rgba(255, 255, 255, 0.4); /* White with 80% opacity */
+  color: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 350px;
+  height: 500px;
+  color: white;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  margin-top: 20px; /* Add a slight indent from the top */
+  margin-left: 810px; /* Add a slight indent from the left */
+}
+
+.login-box h2 {
+  text-align: center;
+  margin-bottom: 2.9rem;
+  margin-top: 2rem;
+  font-size: 2rem;
+}
+
+.input-group {
+  margin-bottom: 2.2rem;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.1rem;
+  color: white;
+}
+
+.input-group input {
+  width: 95%;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  margin-top: 0.1rem;
+}
+
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.9rem;
+}
+
+.forgot-password {
+  margin-top: -50px;
+  margin-left: 82px;
+  color: #a9c3f1;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+.remember-me {
+  position: relative;
+  left: 0px; /* Moves it to the right */
+  top: -20px; /* Moves it downward */
+  color: #a9c3f1;
+  display: flex;
+  align-items: center; /* Aligns the label text and the radio button vertically */
+  white-space: nowrap;
+  font-size: 15px;
+}
+
+.login-button {
+  background-color: #870000;
+  color: white;
+  padding: 0.7rem;
+  border: none;
+  width: 100%;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: #6e0404;
+}
+
+.signup-text {
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.signup-text a {
+  color: #f1c40f;
+  text-decoration: none;
+}

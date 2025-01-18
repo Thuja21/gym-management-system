@@ -1,0 +1,119 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* Signup Container */
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background: url("../../assets/loginbg.png") no-repeat center center/cover;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden; /* Ensure content stays within viewport */
+}
+
+.signup-form {
+  background-color: rgba(255, 255, 255, 0.4); /* White with 80% opacity */
+  color: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 800px;
+  height: 550px;
+  text-align: center;
+  margin-top: -25px;
+  max-height: 90vh; /* Ensure the form doesn't exceed the viewport */
+  overflow-y: auto; /* Add vertical scrolling */
+}
+
+.SignUp-title {
+  text-align: center;
+  margin-bottom: 2.9rem;
+  margin-top: 0.25rem;
+  font-size: 1.8rem;
+}
+
+.user-type {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center; /* Ensures vertical alignment */
+  gap: 1rem; /* Adds space between the radio buttons and labels */
+  margin-bottom: 3rem;
+  margin-top: -15px;
+}
+
+.user-type label {
+  display: flex;
+  align-items: center; /* Aligns the label text and the radio button vertically */
+  gap: 0.5rem; /* Adds space between the radio button and the text */
+  font-size: 1.3rem;
+  color: white;
+  white-space: nowrap; /* Prevents text from breaking into multiple lines */
+}
+
+/* Form Group for Two Columns */
+.form-group {
+  display: flex;
+  justify-content: space-between; /* Space between the input fields */
+  gap: 1rem; /* Add gap between the two input fields */
+  margin-bottom: 1.5rem; /* Spacing between rows */
+  margin-right: 15px;
+  margin-left: 22px;
+  text-align: left;
+}
+
+/* Input Fields Style */
+.form-group input {
+  border: none;
+  border-radius: 5px; /* Fully rounded corners */
+  padding: 0.8rem 1rem; /* Add padding for better spacing */
+  font-size: 1rem;
+  transition: all 0.3s ease; /* Smooth transitions */
+  width: 85%; /* Ensure consistent width for inputs inside flex */
+  margin-top: 0.1rem;
+  width: 333px; /* Adjust the width to your preference */
+  height: 36px; /* Adjust the height to your preference */
+  padding: 5px; /* Optional: for better spacing */
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.1rem;
+  color: whitesmoke;
+}
+
+.input-field select {
+  width: 315px; /* Adjust the width to your preference */
+  height: 40px; /* Adjust the height to your preference */
+  padding: 5px; /* Optional: for better spacing */
+  font-size: 16px; /* Optional: for text size */
+}
+
+/* Register Button */
+.register-btn {
+  background-color: #870000;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  width: 210px;
+  height: 35px;
+  transition: background-color 0.3s ease;
+  text-align: center;
+  margin-top: 47px;
+}
+
+.register-btn:hover {
+  background-color: #6e0404;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin; /* Makes the scrollbar thinner */
+  scrollbar-color: #888 #888; /* Thumb color and track color */
+}
