@@ -29,13 +29,13 @@ const Login = () => {
       if (response.status === 200) {
         const userType = response.data.user_type; // Assuming 'userType' is sent from the backend
         localStorage.setItem("userType", userType); // Store user type in localStorage
-
         // Redirect based on user type
         switch (userType) {
           case "CUSTOMER":
-            navigate("/CustomerDashboard");
+            navigate("/customerDashboard");
+            break;
           case "MEMBER":
-            navigate("/MemberDashboard");
+            navigate("/memberDashboard");
             break;
           case "TRAINER":
             navigate("/TrainerDashboard");
