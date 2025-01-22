@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./signup.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -7,6 +7,7 @@ const Signup = () => {
   const [userType, setUserType] = useState("MEMBER");
   const [dob, setDob] = useState("");
   const [age, setAge] = useState("");
+  const [membershipTypes, setMembershipTypes] = useState([]); // State to store membership types
   const [formData, setFormData] = useState({
     username: "",
     fullname: "",
@@ -25,6 +26,18 @@ const Signup = () => {
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchMembershipTypes = async () => {
+      try {
+        const response = await axios.get("http://localhost:8800/api/members/membership-types");
+        setMembershipTypes(response.data); // Store membership types in the state
+      } catch (error) {
+        console.error("Error fetching membership types:", error);
+      }
+    };
+    fetchMembershipTypes();
+  }, []);
 
   const handleUserTypeChange = (event) => {
     setUserType(event.target.value);
@@ -387,20 +400,22 @@ const Signup = () => {
                 <label>Membership Type</label>
                 <div className="input-field">
                   <select
-                    name="membershipType"
-                    value={formData.membershipType}
-                    onChange={handleChange}
-                    required
+                      name="membershipType"
+                      value={formData.membershipType}
+                      onChange={handleChange}
+                      required
                   >
                     <option value="" disabled>
                       Select Membership Type
                     </option>
-                    <option value="1">Monthly</option>
-                    <option value="2">Quarterly</option>
-                    <option value="3">Annual</option>
+                    {membershipTypes.map((type) => (
+                        <option key={type.plan_id} value={type.plan_id}>
+                          {type.plan_name} {/* Assuming 'type.id' is the ID and 'type.name' is the name */}
+                        </option>
+                    ))}
                   </select>
                   {errors.membershipType && (
-                    <span className="error">{errors.membershipType}</span>
+                      <span className="error">{errors.membershipType}</span>
                   )}
                 </div>
               </div>

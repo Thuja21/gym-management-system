@@ -1,0 +1,95 @@
+.dashboard-container {
+    background-color: #0a0a0a;
+    min-height: 100vh;
+    width: 100vw;
+    padding: 20px;
+    font-weight: bold;
+}
+
+.divider-bar {
+    width: 2550px;
+    height: 5px;
+    background-color: #1a1c23;
+    border: none;
+    position: absolute;
+    margin-top: 60px;
+    margin-left: -20px;
+}
+
+.gradient-bar {
+    width: 1242px;
+    height: 90px;
+    background: linear-gradient(
+            to right,
+            rgba(61, 4, 4, 1.8),
+            rgba(178, 4, 34, 0.7),
+            rgba(255, 0, 0, 0.7)
+    );
+    border: none;
+    margin: 90px 0 6px 245px;
+    border-radius: 8px;
+}
+
+.dashboard-image {
+    width: auto;
+    height: auto;
+    margin: -93px 0 0 -500px;
+    position: absolute;
+    padding: 0;
+    border-radius: 32px;
+}
+
+.box {
+    width: 290px;
+    height: 120px;
+    background-color: #1a1b23;
+    border: none;
+    border-radius: 8px;
+}
+
+.box1 {
+    margin: 35px 0 6px 245px;
+}
+
+.box2 {
+    margin: -123px 0 6px 565px;
+}
+
+.box3 {
+    margin: -125px 0 6px 880px;
+}
+
+.box4 {
+    margin: -125px 0 6px 1195px;
+}
+
+.large-box {
+    background-color: #1a1b23;
+    border: none;
+    border-radius: 8px;
+}
+
+.large-box1 {
+    width: 490px;
+    height: 340px;
+    margin: 21px 0 6px 246px;
+}
+
+.large-box2 {
+    width: 725px;
+    height: 340px;
+    margin: -344px 0 6px 760px;
+}
+
+.sidebar-Box {
+    width: 33px;
+    height: 33px;
+    borderRadius: 50%;
+    backgroundColor: iconBgColor;
+    display: flex;
+    justifyContent: center;
+    alignItems: center;
+    marginRight: 15px;
+    marginLeft: 2px;
+}
+

@@ -1,6 +1,7 @@
 import express from "express";
 const app = express();
 import authRoutes from "./routes/auth.js";
+import membersRoutes from "./routes/member.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -18,6 +19,7 @@ app.use(
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/members", membersRoutes);
 
 app.listen(8800, () => {
   console.log("API working!!!");

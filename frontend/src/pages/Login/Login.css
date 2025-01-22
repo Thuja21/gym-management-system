@@ -13,7 +13,7 @@ body {
   height: 100vh; /* Full height of the viewport */
   width: 100vw; /* Full width of the viewport */
   box-sizing: border-box; /* Prevents unwanted padding/margins */
-  background: url("../../assets/loginbg.png") no-repeat center center / cover;
+  background: url("../../assets/images/loginbg.png") no-repeat center center / cover;
   background-size: cover;
   background-position: center;
 }
