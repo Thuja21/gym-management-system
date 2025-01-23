@@ -2,19 +2,21 @@ import React from "react";
 import { AppBar, Toolbar, Typography, Box, InputBase, IconButton } from "@mui/material";
 import { Search as SearchIcon } from "@mui/icons-material";
 import Logo from "../assets/images/logo.png";
+import "../pages/Admin/Admin.css";
 
-const TopBar = ({ userName, logo, onSearch }) => {
+const TopBar = ({ userName, title, onSearch }) => {
     return (
+
         <AppBar
-            position="static"
+            position="fixed"
             sx={{
-                backgroundColor: "#000000", // Background color for the top bar
-                boxShadow: "none", // Remove default shadow
+                backgroundColor: "#000000",
+                boxShadow: "none",
                 padding: "0 16px",
-                margin: "-60px -20px",
-                width: "100vw",
             }}
+
         >
+
             <Toolbar
                 sx={{
                     display: "flex",
@@ -22,15 +24,15 @@ const TopBar = ({ userName, logo, onSearch }) => {
                     alignItems: "center",
                 }}
             >
-                {/* Logo Section */}
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <img src={Logo} alt="Logo" style={{ height: "40px", marginRight: "15px", marginLeft: "-13px" }} />
-                    <Typography variant="h6" component="div">
-                        Dashboard
-                    </Typography>
+                    <img src={Logo} alt="Logo" style={{ height: "40px", marginRight: "15px" }} />
                 </Box>
 
-                {/* Search Section */}
+                {/* Dynamically Updated Title */}
+                <Typography variant="h6" component="div" sx={{ color: "#ffffff" , marginTop: "10px" }}>
+                    {title}
+                </Typography>
+
                 <Box
                     sx={{
                         display: "flex",
@@ -56,12 +58,17 @@ const TopBar = ({ userName, logo, onSearch }) => {
                     />
                 </Box>
 
-                {/* User Section */}
                 <Typography variant="subtitle1" component="div" sx={{ color: "#ffffff" }}>
                     {userName}
                 </Typography>
+                <Box className="divider-bar2" />
             </Toolbar>
+
         </AppBar>
+
+
+
+
     );
 };
 

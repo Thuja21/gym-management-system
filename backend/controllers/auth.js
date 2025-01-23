@@ -48,8 +48,8 @@ export const register = (req, res) => {
 
         if (user_type === "MEMBER") {
           subTableInsertQuery =
-            "INSERT INTO gym_members (`user_id`, `age`, `gender`, `height`, `weight`, `blood_group`, `current_fitness_level`, `fitness_goal`, `health_issues`, `plan_id`) VALUES (?)";
-          subTableValues = [result.insertId, req.body.age, req.body.gender, req.body.height, req.body.weight, req.body.bloodGroup, req.body.currentFitnessLevel, req.body.fitnessGoal, req.body.healthIssues, req.body.membershipType];
+            "INSERT INTO gym_members (`user_id`, `age`, `gender`, `dob`, `status`,`registered_date`, `height`, `weight`, `blood_group`, `current_fitness_level`, `fitness_goal`, `health_issues`, `plan_id`) VALUES (?)";
+          subTableValues = [result.insertId, req.body.age, req.body.gender, req.body.dob, 1, new Date(), req.body.height, req.body.weight, req.body.bloodGroup, req.body.currentFitnessLevel, req.body.fitnessGoal, req.body.healthIssues, req.body.membershipType];
         } else if (user_type === "CUSTOMER") {
           subTableInsertQuery =
             "INSERT INTO customers (`user_id`) VALUES (?)";

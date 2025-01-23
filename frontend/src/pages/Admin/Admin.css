@@ -7,13 +7,11 @@
 }
 
 .divider-bar {
+    position: fixed;
     width: 2550px;
-    height: 5px;
+    height: 7px;
     background-color: #1a1c23;
     border: none;
-    position: absolute;
-    margin-top: 60px;
-    margin-left: -20px;
 }
 
 .gradient-bar {
@@ -26,7 +24,7 @@
             rgba(255, 0, 0, 0.7)
     );
     border: none;
-    margin: 90px 0 6px 245px;
+    margin: 29px 0 8px 245px;
     border-radius: 8px;
 }
 
@@ -91,5 +89,43 @@
     alignItems: center;
     marginRight: 15px;
     marginLeft: 2px;
+}
+
+.divider-bar2 {
+    position: fixed;
+    width: 100vw;
+    height: 4px;
+    background-color: #1a1c23;
+    border: none;
+    margin-top: 64px;
+    margin-left: -39px;
+
+}
+
+.table-container {
+    margin-top: 16px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.table-header {
+    background-color: #1a1b23;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.table-row:nth-of-type(odd) {
+    background-color: #f5f5f5;
+}
+
+.table-row:hover {
+    background-color: #e0e0e0;
+}
+
+.table-cell-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
 }
 

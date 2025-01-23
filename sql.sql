@@ -19,6 +19,8 @@ CREATE TABLE `users` (
 CREATE TABLE `trainers` (
   `trainer_id` bigint NOT NULL AUTO_INCREMENT,
   `specialization` varchar(255) NOT NULL,
+  `dob` date NOT NULL,
+  `age` int NOT NULL,
   `user_id` bigint NOT NULL,
   PRIMARY KEY (`trainer_id`),
   KEY `user_id` (`user_id`),
@@ -50,6 +52,9 @@ CREATE TABLE `gym_members` (
 	`member_id` bigint NOT NULL AUTO_INCREMENT,
 	`user_id` bigint NOT NULL,
 	`age` int DEFAULT NULL,
+    `dob` date NOT NULL,
+    `registered_date` date NOT NULL,
+    `status` int not null,
 	`gender` varchar(10) DEFAULT NULL,
 	`height` double DEFAULT NULL,
 	`weight` double DEFAULT NULL,

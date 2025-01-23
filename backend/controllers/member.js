@@ -11,6 +11,7 @@ export const viewAllMembers = (req, res) => {
             u.contact_no,
             u.address,
             gm.age,
+            gm.dob,
             gm.gender,
             gm.height,
             gm.weight,
@@ -19,7 +20,9 @@ export const viewAllMembers = (req, res) => {
             gm.fitness_goal,
             gm.plan_id,
             gm.schedule_id,
-            gm.health_issues
+            gm.health_issues,
+            gm.registered_date,
+            gm.status
         FROM 
             gym_members gm
         JOIN 
@@ -70,48 +73,67 @@ export const deleteMember = (req, res) => {
     db.beginTransaction((err) => {
         if (err) return res.status(500).json(err);
 
-        // Delete from gym_members table
-        const deleteGymMemberQuery = `DELETE FROM gym_members WHERE member_id = ?`;
-        db.query(deleteGymMemberQuery, [memberId], (err, result) => {
+        // Step 1: Get the user_id from gym_members table
+        const getUserIdQuery = `SELECT user_id FROM gym_members WHERE member_id = ?`;
+        db.query(getUserIdQuery, [memberId], (err, result) => {
             if (err) {
                 return db.rollback(() => {
                     res.status(500).json(err);
                 });
             }
 
-            // Check if gym member exists
-            if (result.affectedRows === 0) {
+            // Check if the member exists in gym_members table
+            if (result.length === 0) {
                 return db.rollback(() => {
                     res.status(404).json("Member not found in gym_members!");
                 });
             }
 
-            // Delete from users table
-            const deleteUserQuery = `DELETE FROM users WHERE id = ?`;
-            db.query(deleteUserQuery, [memberId], (err, result) => {
+            const userId = result[0].user_id; // Retrieve the user_id from the result
+
+            // Step 2: Delete from gym_members table
+            const deleteGymMemberQuery = `DELETE FROM gym_members WHERE member_id = ?`;
+            db.query(deleteGymMemberQuery, [memberId], (err, result) => {
                 if (err) {
                     return db.rollback(() => {
                         res.status(500).json(err);
                     });
                 }
 
-                // Check if user exists
+                // Check if gym member exists
                 if (result.affectedRows === 0) {
                     return db.rollback(() => {
-                        res.status(404).json("User not found!");
+                        res.status(404).json("Member not found in gym_members!");
                     });
                 }
 
-                // Commit the transaction if both deletions succeed
-                db.commit((err) => {
+                // Step 3: Delete from users table using user_id from gym_members
+                const deleteUserQuery = `DELETE FROM users WHERE id = ?`;
+                db.query(deleteUserQuery, [userId], (err, result) => {
                     if (err) {
                         return db.rollback(() => {
                             res.status(500).json(err);
                         });
                     }
 
-                    // Send success response
-                    res.status(200).json("Member and associated user deleted successfully!");
+                    // Check if user exists
+                    if (result.affectedRows === 0) {
+                        return db.rollback(() => {
+                            res.status(404).json("User not found!");
+                        });
+                    }
+
+                    // Commit the transaction if both deletions succeed
+                    db.commit((err) => {
+                        if (err) {
+                            return db.rollback(() => {
+                                res.status(500).json(err);
+                            });
+                        }
+
+                        // Send success response
+                        res.status(200).json("Member and associated user deleted successfully!");
+                    });
                 });
             });
         });

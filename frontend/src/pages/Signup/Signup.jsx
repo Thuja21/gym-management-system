@@ -125,7 +125,7 @@ const Signup = () => {
       try {
         const response = await axios.post(
             "http://localhost:8800/api/auth/register",
-            {...formData, userType: userType}
+            {...formData, userType: userType, dob: dob, age: age},
 
         );
         alert(response.data); // Success message

@@ -1,16 +1,13 @@
 import React, { useState } from "react";
 import {
     Box,
-    IconButton,
     Drawer,
     List,
     ListItem,
-    ListItemIcon,
     ListItemText,
     Typography,
 } from "@mui/material";
-import { Link } from "react-router-dom";
-import "./Admin.css";
+import { Link, useLocation } from "react-router-dom";
 import {
     HomeOutlined as HomeOutlinedIcon,
     PeopleOutlined as PeopleOutlinedIcon,
@@ -24,15 +21,37 @@ import {
     CampaignOutlined as CampaignOutlinedIcon,
     EventOutlined as EventOutlinedIcon,
 } from "@mui/icons-material";
+import TopBar from "../../components/TopBar.jsx";
+
+
+
 
 const AdminSideBar = () => {
+
+    const routeTitles = {
+        "/adminDashboard": "Dashboard",
+        "/members": "Manage Members",
+        "/trainers": "Manage Trainers",
+        "/attendance": "Attendance",
+        "/plans": "Manage Plans",
+        "/announcements": "Announcements",
+        "/equipments": "Gym Equipments",
+        "/supplements": "Manage Supplements",
+        "/schedules": "View Schedules",
+        "/payments": "Payments",
+        "/report": "Report",
+    };
+
+    const location = useLocation(); // Hook to get the current route
+    const currentTitle = routeTitles[location.pathname] || "Dashboard"; // Get the title based on the current route
+
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const sidebarBgColor = "#1a1b23";
     const textColor = "#726e8f";
-    const hoverBgColor = "#353545";
-    const hoverTextColor = "#ffffff";
     const iconBgColor = "#262626";
+    const activeBgColor = "rgba(61, 4, 4, 1.8)"; // Active bar and icon background color (red)
+    const activeTextColor = "#b5b5c5"; // White text for active item
     const fontSize = "14.5px";
     const iconSize = "17px";
 
@@ -50,43 +69,56 @@ const AdminSideBar = () => {
         report: "#009688",
     };
 
-    const Item = ({ title, to, icon, color }) => (
-        <ListItem
-            button
-            component={Link}
-            to={to}
-            sx={{
-                color: textColor,
-                "&:hover": {
-                    backgroundColor: hoverBgColor,
-                    color: hoverTextColor,
-                },
-            }}
-        >
-            <Box
+    const Item = ({ title, to, icon, color }) => {
+        const isActive = location.pathname === to; // Check if the route is active
+
+        return (
+            <ListItem
+                button
+                component={Link}
+                to={to}
                 sx={{
-                    width: "35px",
-                    height: "35px",
-                    borderRadius: "50%",
-                    backgroundColor: iconBgColor,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginRight: "10px",
+                    backgroundColor: isActive ? activeBgColor : "transparent",
+                    color: isActive ? activeTextColor : textColor,
+                    "&:hover": {
+                        backgroundColor: activeBgColor,
+                        color: activeTextColor,
+                    },
                 }}
             >
-                {React.cloneElement(icon, { sx: { fontSize: iconSize, color } })}
-            </Box>
-            <ListItemText
-                primary={title}
-                primaryTypographyProps={{
-                    sx: { fontSize, color: textColor },
-                }}
-            />
-        </ListItem>
-    );
+                <Box
+                    sx={{
+                        width: "35px",
+                        height: "35px",
+                        borderRadius: "50%",
+                        backgroundColor: isActive ? activeBgColor : iconBgColor,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginRight: "10px",
+                        "&:hover": {
+                            backgroundColor: activeBgColor, // Change icon background color on hover
+                        },
+                    }}
+                >
+                    {React.cloneElement(icon, {
+                        sx: {
+                            fontSize: iconSize,
+                            color: isActive ? activeTextColor : color, // Fix for icon color
+                        }
+                    })}
+                </Box>
+                <ListItemText primary={title} />
+            </ListItem>
+        );
+    };
+
 
     return (
+        <>
+        <TopBar userName="Admin" title={currentTitle} /> {/* Pass the current title */}
+            {/* Divider */}
+
         <Box sx={{ display: "flex" }}>
             <Drawer
                 variant="permanent"
@@ -97,7 +129,7 @@ const AdminSideBar = () => {
                     "& .MuiDrawer-paper": {
                         width: isCollapsed ? 80 : 240,
                         height: "90vh",
-                        marginTop: "9.2vh",
+                        marginTop: "8.8vh",
                         padding: "25px 0",
                         backgroundColor: sidebarBgColor,
                         overflow: "hidden",
@@ -125,7 +157,7 @@ const AdminSideBar = () => {
                 </Typography>
 
                 <List>
-                    <Item title="Dashboard" to="/" icon={<HomeOutlinedIcon />} color={iconColors.dashboard} />
+                    <Item title="Dashboard" to="/adminDashboard" icon={<HomeOutlinedIcon />} color={iconColors.dashboard} />
                     <Item title="Manage Members" to="/members" icon={<PeopleOutlinedIcon />} color={iconColors.members} />
                     <Item title="Manage Trainers" to="/trainers" icon={<SportsOutlinedIcon />} color={iconColors.trainers} />
                     <Item title="Attendance" to="/attendance" icon={<AccessTimeOutlinedIcon />} color={iconColors.attendance} />
@@ -143,6 +175,7 @@ const AdminSideBar = () => {
                 {/* Content goes here */}
             </Box>
         </Box>
+        </>
     );
 };
 

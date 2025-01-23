@@ -36,9 +36,6 @@ const MemberDashboard = () => {
                 }}
             />
 
-
-
-
             <Box
                 sx={{
                     width: "1242px",

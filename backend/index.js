@@ -4,6 +4,8 @@ import authRoutes from "./routes/auth.js";
 import membersRoutes from "./routes/member.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { db } from "./config/connectDatabase.js";
+import cron from "node-cron";
 
 //middlewares
 app.use((req, res, next) => {
@@ -20,6 +22,21 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/members", membersRoutes);
+
+// cron.schedule("0 0 * * *", async () => {
+//     try {
+//       const query = `
+//       UPDATE users
+//       SET status = 'expired'
+//       WHERE DATE_ADD(plan_start_date, INTERVAL plan_duration MONTH) < CURDATE()
+//         AND status = 'active';
+//     `;
+//         await db.query(query); // Execute the query
+//         console.log("Cron job executed: Plan statuses updated successfully.");
+//     } catch (error) {
+//         console.error("Cron job error:", error.message);
+//     }
+// });
 
 app.listen(8800, () => {
   console.log("API working!!!");

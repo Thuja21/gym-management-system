@@ -3,14 +3,13 @@ import React from "react";
 import AdminSideBar from "./AdminSideBar.jsx";
 
 
-
-const Attendance = () => {
+const ViewSchedules = () => {
     return (
         <div>
             <AdminSideBar/>
-            <h1>Welcome to the Attendance</h1>
+            <h1>Welcome to the Payments </h1>
         </div>
     );
 };
 
-export default Attendance;
+export default ViewSchedules;
