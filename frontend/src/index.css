@@ -1,5 +1,5 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif, "Times New Roman";
   line-height: 1.5;
   font-weight: 400;
 
@@ -75,3 +75,6 @@ button:focus-visible {
 ::-webkit-scrollbar-track {background: #e0e0e0;}
 ::-webkit-scrollbar-thumb {background: #888;}
 ::-webkit-scrollbar-thumb:hover {background: #555;}
+
+
+

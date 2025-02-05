@@ -13,9 +13,8 @@ body {
   height: 100vh; /* Full height of the viewport */
   width: 100vw; /* Full width of the viewport */
   box-sizing: border-box; /* Prevents unwanted padding/margins */
-  background: url("../../assets/images/loginbg.png") no-repeat center center / cover;
-  background-size: cover;
-  background-position: center;
+  /*background: url("../../assets/images/loginbg.png") no-repeat center center / cover;*/
+  background: url("../../assets/images/img7.png")  no-repeat center center / cover;
 }
 
 .login-box {
@@ -23,13 +22,17 @@ body {
   color: white;
   padding: 2rem;
   border-radius: 10px;
-  width: 350px;
-  height: 500px;
-  color: white;
+  width: 420px;
+  height: 540px;
+  /*color: white;*/
   text-align: center;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  margin-top: 20px; /* Add a slight indent from the top */
-  margin-left: 810px; /* Add a slight indent from the left */
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-bottom: 15px; /* Add a slight indent from the top */
+  margin-left: 910px; /* Add a slight indent from the left */
+  /*border-color: white;*/
+
 }
 
 .login-box h2 {

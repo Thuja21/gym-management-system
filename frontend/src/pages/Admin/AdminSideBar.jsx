@@ -24,8 +24,6 @@ import {
 import TopBar from "../../components/TopBar.jsx";
 
 
-
-
 const AdminSideBar = () => {
 
     const routeTitles = {
@@ -50,10 +48,11 @@ const AdminSideBar = () => {
     const sidebarBgColor = "#1a1b23";
     const textColor = "#726e8f";
     const iconBgColor = "#262626";
-    const activeBgColor = "rgba(61, 4, 4, 1.8)"; // Active bar and icon background color (red)
+    const activeBgColor = "#590404"
     const activeTextColor = "#b5b5c5"; // White text for active item
     const fontSize = "14.5px";
     const iconSize = "17px";
+    const fontFamily = "Times New Roman";
 
     const iconColors = {
         dashboard: "#4caf50",
@@ -151,6 +150,7 @@ const AdminSideBar = () => {
                         fontWeight: "bold",
                         letterSpacing: "1px",
                         fontSize: "13px",
+
                     }}
                 >
                     Navigation
@@ -171,9 +171,7 @@ const AdminSideBar = () => {
                 </List>
             </Drawer>
 
-            <Box component="main" sx={{ flexGrow: 1, padding: "20px" }}>
-                {/* Content goes here */}
-            </Box>
+            <Box component="main" sx={{ flexGrow: 1, padding: "20px" }}>  </Box>
         </Box>
         </>
     );

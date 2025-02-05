@@ -7,7 +7,7 @@ const Signup = () => {
   const [userType, setUserType] = useState("MEMBER");
   const [dob, setDob] = useState("");
   const [age, setAge] = useState("");
-  const [membershipTypes, setMembershipTypes] = useState([]); // State to store membership types
+  const [plans, setPlans] = useState([]); // State to store membership types
   const [formData, setFormData] = useState({
     username: "",
     fullname: "",
@@ -22,21 +22,21 @@ const Signup = () => {
     currentFitnessLevel: "",
     fitnessGoal: "",
     healthIssues: "",
-    membershipType: "",
+    plan_id: "",
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchMembershipTypes = async () => {
+    const fetchPlans = async () => {
       try {
-        const response = await axios.get("http://localhost:8800/api/members/membership-types");
-        setMembershipTypes(response.data); // Store membership types in the state
+        const response = await axios.get("http://localhost:8800/api/members/plans");
+        setPlans(response.data); // Store membership plans in the state
       } catch (error) {
-        console.error("Error fetching membership types:", error);
+        console.error("Error fetching membership plans:", error);
       }
     };
-    fetchMembershipTypes();
+    fetchPlans();
   }, []);
 
   const handleUserTypeChange = (event) => {
@@ -67,55 +67,80 @@ const Signup = () => {
     }
   };
 
+
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+    // Update form data
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
+
+    // Validate field and update errors
+    setErrors((prev) => ({
+      ...prev,
+      [name]: validateForm(name, value),
+    }));
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.username.trim())
-      newErrors.username = "User Name is required.";
-    if (!formData.fullname.trim())
-      newErrors.fullname = "Full Name is required.";
-    if (!formData.password) newErrors.password = "Password is required.";
-    else if (formData.password.length < 6)
-      newErrors.password = "Password must be at least 6 characters.";
-    if (!formData.email) newErrors.email = "Email is required.";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      newErrors.email = "Email format is invalid.";
-    if (!formData.contactNo)
-      newErrors.contactNo = "Contact Number is required.";
-    else if (!/^\d{10}$/.test(formData.contactNo))
-      newErrors.contactNo = "Contact Number must be 10 digits.";
-    if (!formData.address.trim()) newErrors.address = "Address is required.";
 
-    if (userType === "MEMBER") {
-      if (!dob) newErrors.dob = "Date of Birth is required.";
-      if (!formData.gender) newErrors.gender = "Gender is required.";
-      if (!formData.height) newErrors.height = "Height is required.";
-      else if (!/^\d+(\.\d+)?$/.test(formData.height))
-        newErrors.height = "Height must be a valid number.";
-      if (!formData.weight) newErrors.weight = "Weight is required.";
-      else if (!/^\d+(\.\d+)?$/.test(formData.weight))
-        newErrors.weight = "Weight must be a valid number.";
-      if (!formData.membershipType)
-        newErrors.membershipType = "Membership Type is required.";
-      if (!formData.bloodGroup)
-        newErrors.bloodGroup = "Blood Group is required.";
-      if (!formData.fitnessGoal)
-        newErrors.fitnessGoal = "Fitness Goal is required.";
-      if (!formData.currentFitnessLevel)
-        newErrors.currentFitnessLevel = "Current Fitness Level is required.";
-      if (!formData.healthIssues)
-        newErrors.healthIssues =
-          "Please specify if there are any health issues.";
+  const validateForm = (name, value) => {
+    let error = "";
+
+    switch (name) {
+      case "username":
+        if (!value.trim()) error = "User Name is required.";
+        break;
+      case "fullname":
+        if (!value.trim()) error = "Full Name is required.";
+        break;
+      case "password":
+        if (!value) error = "Password is required.";
+        else if (value.length < 6) error = "Password must be at least 6 characters.";
+        break;
+      case "email":
+        if (!value) error = "Email is required.";
+        else if (!/\S+@\S+\.\S+/.test(value)) error = "Email format is invalid.";
+        break;
+      case "contactNo":
+        if (!value) error = "Contact Number is required.";
+        else if (!/^\d{10}$/.test(value)) error = "Contact Number must be 10 digits.";
+        break;
+      case "address":
+        if (!value.trim()) error = "Address is required.";
+        break;
+      case "dob":
+        if (!value) error = "Date of Birth is required.";
+        break;
+      case "gender":
+        if (!value) error = "Gender is required.";
+        break;
+      case "height":
+        if (!value) error = "Height is required.";
+        else if (!/^\d+(\.\d+)?$/.test(value)) error = "Height must be a valid number.";
+        break;
+      case "weight":
+        if (!value) error = "Weight is required.";
+        else if (!/^\d+(\.\d+)?$/.test(value)) error = "Weight must be a valid number.";
+        break;
+      case "plan_id":
+        if (!value) error = "Membership Plan is required.";
+        break;
+      case "bloodGroup":
+        if (!value) error = "Blood Group is required.";
+        break;
+      case "fitnessGoal":
+        if (!value) error = "Fitness Goal is required.";
+        break;
+      case "currentFitnessLevel":
+        if (!value) error = "Current Fitness Level is required.";
+        break;
+      case "healthIssues":
+        if (!value) error = "Please specify if there are any health issues.";
+        break;
+      default:
+        break;
     }
 
-    setErrors(newErrors);
-    console.log("Errors:::", newErrors);
-    return Object.keys(newErrors).length === 0;
+    return error;
   };
 
   const handleSubmit = async (event) => {
@@ -281,9 +306,9 @@ const Signup = () => {
                     <option value="" disabled>
                       Select Gender
                     </option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
                   </select>
                   {errors.gender && (
                     <span className="error">{errors.gender}</span>
@@ -348,7 +373,7 @@ const Signup = () => {
 
               <div className="form-group">
                 <label>Current Fitness Level</label>
-                <div className="input-field">
+                <div className="input-field1">
                   <select
                     name="currentFitnessLevel"
                     value={formData.currentFitnessLevel}
@@ -367,7 +392,7 @@ const Signup = () => {
                 </div>{" "}
               </div>
 
-              <div className="form-group">
+              <div className="form-group1">
                 <label>Fitness Goal</label>
                 <input
                   type="text"
@@ -381,10 +406,10 @@ const Signup = () => {
                 )}
               </div>
 
-              <div className="form-group">
+              <div className="form-group1">
                 <label>Any Health Issues</label>
 
-                <input
+                <input sx={{width:"500px",}}
                   type="text"
                   name="healthIssues"
                   value={formData.healthIssues}
@@ -398,24 +423,24 @@ const Signup = () => {
 
               <div className="form-group">
                 <label>Membership Type</label>
-                <div className="input-field">
+                <div className="input-field1">
                   <select
-                      name="membershipType"
-                      value={formData.membershipType}
+                      name="plan_id"
+                      value={formData.plan_id}
                       onChange={handleChange}
                       required
                   >
                     <option value="" disabled>
-                      Select Membership Type
+                      Select Membership Plan
                     </option>
-                    {membershipTypes.map((type) => (
+                    {plans.map((type) => (
                         <option key={type.plan_id} value={type.plan_id}>
                           {type.plan_name} {/* Assuming 'type.id' is the ID and 'type.name' is the name */}
                         </option>
                     ))}
                   </select>
-                  {errors.membershipType && (
-                      <span className="error">{errors.membershipType}</span>
+                  {errors.plan_id && (
+                      <span className="error">{errors.plan_id}</span>
                   )}
                 </div>
               </div>
