@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AdminSideBar from "./AdminSideBar.jsx";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { Edit as EditIcon, Trash as DeleteIcon } from "lucide-react";
+import { Search, MoreVertical, Plus } from "lucide-react";
 import "./Admin.css";
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Box, IconButton, Grid, MenuItem, Select, InputLabel, FormControl
 } from "@mui/material";
@@ -16,6 +16,7 @@ const ManageMembers = () => {
     const [errors, setErrors] = useState({});
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
 
     const [newMember, setNewMember] = useState({
         username: "",  fullname: "", email: "", contactNo: "", address: "", age: "", gender: "", height: "", weight: "",
@@ -133,45 +134,6 @@ const ManageMembers = () => {
         }
     };
 
-    // // Handle form input change
-    // const handleInputChange = (e) => {
-    //     const { name, value } = e.target;
-    //     // Calculate age when DOB is changed
-    //     if (name === "dob") {
-    //         const birthDate = new Date(value);
-    //         const today = new Date();
-    //         const age = today.getFullYear() - birthDate.getFullYear();
-    //         const monthDiff = today.getMonth() - birthDate.getMonth();
-    //
-    //         // Adjust age if the birthday hasn't occurred yet this year
-    //         const adjustedAge =
-    //             monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    //                 ? age - 1
-    //                 : age;
-    //
-    //         setNewMember((prev) => ({
-    //             ...prev,
-    //             dob: value,
-    //             age: adjustedAge > 0 ? adjustedAge : "",
-    //         }));
-    //         setSelectedMember((prev) => ({
-    //             ...prev,
-    //             dob: value,
-    //             age: adjustedAge > 0 ? adjustedAge : "",
-    //         }));
-    //     } else {
-    //         setNewMember((prev) => ({
-    //             ...prev,
-    //             [name]: value,
-    //         }));
-    //         setSelectedMember((prev) => ({
-    //             ...prev,
-    //             [name]: value,
-    //         }));
-    //     }
-    // };
-
-
     // Handle form input change with real-time validation
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -193,7 +155,9 @@ const ManageMembers = () => {
                 case "bloodGroup":
                 case "fitnessGoal":
                 case "plan_id":
-                    if (value.trim() !== "") delete newErrors[name];
+                    if (value && typeof value === 'string' && value.trim() !== "") {
+                        delete newErrors[name];
+                    }
                     break;
                 case "contactNo":
                     if (/^\d{10}$/.test(value)) delete newErrors[name];
@@ -271,34 +235,37 @@ const ManageMembers = () => {
 
         <div style={{ display: "flex", height: "100vh" }}>
             <AdminSideBar style={{ flexShrink: 0, width: 250 }} />
-            <div style={{ flexGrow: 1, padding: "20px", height: "100vh", overflowY: "auto" }}>
+            <div style={{ flexGrow: 1, padding: "20px", height: "100vh", width:"1300px" ,overflowY: "auto" , marginLeft: "-45px", marginTop: "10px" }}>
                 {/* <TopBar /> */}
                 <Typography variant="h4" gutterBottom>
                     GYM MEMBERS
                 </Typography>
 
-                <Box
-                    className="box ButtonCover"
-                    style={{
-                        display: "flex",
-                        justifyContent: "flex-end", // Align the button to the right inside the box
-                        alignItems: "center",
-                        padding: "10px", // Optional: Add padding for better spacing
-                    }}
-                >
-                    {/* Add Member Button */}
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => setOpenDialog(true)}
-                        style={{
-                            marginRight: "20px", // Reset margin since the box handles spacing
-                            backgroundColor: "#870000",
-                        }}
-                    >
-                        Add Member
-                    </Button>
-                </Box>
+                <div className="bg-white rounded-xl shadow-sm p-4 mb-4 ">
+                    <div className="flex items-center">
+                        {/* Search Input */}
+                        <div className="relative flex-1">
+                            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search members..."
+                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+
+                        {/* Filters */}
+                        <div className="ml-4 flex space-x-2">
+                                {/* Add Member Button */}
+                            <button className="bg-red-900 text-white w-40  rounded-lg flex items-center shadow-md hover:bg-red-800 transition"
+                                    onClick={() => setOpenDialog(true)}>
+                                <Plus className="w-5 h-5 mr-2" />
+                                Add Member
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
 
 
@@ -306,56 +273,47 @@ const ManageMembers = () => {
                 {error && <Typography color="error">{error}</Typography>}
 
                 {!loading && !error && (
-                    <div style={{ width: "100%", overflowX: "auto" }}>
+                    <div className="bg-white rounded-xl shadow-sm overflow-x-auto" >
                         <TableContainer
                             component={Paper} className="table-container"
                             sx={{height: "calc(100vh - 230px)",
-                                width:"calc(100vw - 375px)",
+                                width:"calc(100vw - 305px)",
+                                marginLeft: "13px",
                                 scrollbarWidth: "none", // Hide scrollbar for Firefox
                                 "&::-webkit-scrollbar": {
                                     display: "none", // Hide scrollbar for Webkit-based browsers (Chrome, Edge, etc.)
                                 },}}
                         >
-                            <Table>
+                            <Table className="w-full border-collapse">
                                 <TableHead style={{ position: "sticky", top: 0,zIndex: 10 }}>
-                                    <TableRow className="table-header"
-                                              sx={{
-                                                  backgroundColor: "#870000"//Dark background for headers
-                                              }}
-                                    >
+                                    <TableRow className="bg-red-200 text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
 
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center"}}>ID</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Name</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Username</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center"}}>Email</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Phone</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Address</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>DOB</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Age</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Gender</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Height</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Weight</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Blood Group</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Fitness Level</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Fitness Goal</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Plan</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Schedule</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Health Issues</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Registered Date</TableCell>
-                                        <TableCell sx={{ color: "#ffffff", fontWeight: "bold", textAlign: "center" }}>Status</TableCell>
+                                        <th className="px-6 py-3 text-center">ID</th>
+                                        <th className="px-6 py-3 text-center">Name</th>
+                                        <th className="px-6 py-3 text-center">Username</th>
+                                        <th className="px-6 py-3 text-center">Email</th>
+                                        <th className="px-6 py-3 text-center">Phone</th>
+                                        <th className="px-6 py-3 text-center">Address</th>
+                                        <th className="px-6 py-3 text-center">DOB</th>
+                                        <th className="px-6 py-3 text-center">Age</th>
+                                        <th className="px-6 py-3 text-center">Gender</th>
+                                        <th className="px-6 py-3 text-center">Height</th>
+                                        <th className="px-6 py-3 text-center">Weight</th>
+                                        <th className="px-6 py-3 text-center">Blood Group</th>
+                                        <th className="px-6 py-3 text-center">Fitness Level</th>
+                                        <th className="px-6 py-3 text-center">Fitness Goal</th>
+                                        <th className="px-6 py-3 text-center">Plan</th>
+                                        <th className="px-6 py-3 text-center">Schedule</th>
+                                        <th className="px-6 py-3 text-center">Health Issues</th>
+                                        <th className="px-6 py-3 text-center">Registered Date</th>
+                                        <th className="px-6 py-3 text-center">Status</th>
 
-                                        <TableCell
-                                            sx={{
-                                                color: "#ffffff", // White text for headers
-                                                fontWeight: "bold",
-                                                textAlign: "center", // Center-align text
-                                            }}
-                                        >
+                                        <th className="px-6 py-3 text-center">
                                             Actions
-                                        </TableCell>
+                                        </th>
                                     </TableRow>
                                 </TableHead>
-                                <TableBody>
+                                <TableBody className="divide-y divide-gray-200">
                                     {members.map((member, index) => (
                                         <TableRow
                                             key={member.member_id} className="table-row"
@@ -386,7 +344,14 @@ const ManageMembers = () => {
                                             <TableCell>{member.schedule_id}</TableCell>
                                             <TableCell>{member.health_issues}</TableCell>
                                             <TableCell>{(new Date(member.registered_date).toLocaleDateString())}</TableCell>
-                                            <TableCell>{member.status == 1 ? "ACTIVE" : "EXPIRED"}</TableCell>
+                                            <TableCell><span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                                    member.status == 1
+                                                        ? "bg-green-100 text-green-800"
+                                                        : "bg-red-100 text-red-800"
+                                                }`}
+                                            >{member.status == 1 ? "ACTIVE" : "EXPIRED"}
+                                            </span>
+                                            </TableCell>
                                             <TableCell className="table-cell-actions"
                                                        sx={{
                                                            display: "flex",

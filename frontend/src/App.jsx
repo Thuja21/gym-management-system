@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import "./App.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 import Login from "./pages/Login/Login";
 import Signup from "./pages/Signup/Signup";
 import Home from "./pages/Home/Home";
@@ -21,6 +23,7 @@ import Announcement from "./pages/Admin/Announcement.jsx";
 import {Dashboard} from "@mui/icons-material";
 import TopBar from "./components/TopBar.jsx";
 import AdminSideBar from "./pages/Admin/AdminSideBar.jsx";
+import AdminDashboard1 from "./pages/Admin/AdminDashboard1.jsx";
 
 
 
@@ -35,6 +38,7 @@ function App() {
         <Route path="/memberDashboard" element={<MemberDashboard />} />
         <Route path="/customerDashboard" element={<CustomerDashboard />} />
         <Route path="/adminDashboard" element={<AdminDashboard />} />
+        <Route path="/adminDashboard1" element={<AdminDashboard1 />} />
         <Route path="/dashboard" element={<AdminDashboard />} />
         <Route path="/members" element={<ManageMembers />} />
         <Route path="/trainers" element={<ManageTrainers />} />

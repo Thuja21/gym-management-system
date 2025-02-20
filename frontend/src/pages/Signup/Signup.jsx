@@ -399,7 +399,6 @@ const Signup = () => {
                   name="fitnessGoal"
                   value={formData.fitnessGoal}
                   onChange={handleChange}
-                  placeholder="E.g., Lose weight, Build muscle"
                 />
                 {errors.fitnessGoal && (
                   <span className="error">{errors.fitnessGoal}</span>
@@ -414,7 +413,6 @@ const Signup = () => {
                   name="healthIssues"
                   value={formData.healthIssues}
                   onChange={handleChange}
-                  placeholder="E.g., E.g., Asthma, Back pain, None"
                 />
                 {errors.healthIssues && (
                   <span className="error">{errors.healthIssues}</span>

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./login.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import {FaLock, FaUser} from "react-icons/fa";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -70,36 +71,44 @@ const Login = () => {
         )}{" "}
         {/* Display error message */}
         <form onSubmit={handleLogin}>
-          <div className="input-group">
-            <label htmlFor="username">User Name</label>
-            <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
-              required
-            />
-          </div>
-          <div className="input-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-            />
-          </div>
-          <div className="options">
-            <label className="remember-me">
-              <input type="checkbox" />
-              Remember me
+          <div className="mb-3">
+            <label htmlFor="username" className="form-label">
+              User Name
             </label>
-            <a href="#" className="forgot-password">
-              Forgot Password?
-            </a>
+            <div className="input-group">
+                            <span className="input-group-text">
+                                <FaUser />
+                            </span>
+              <input
+                  type="text"
+                  id="username"
+                  className="form-control"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
+                  required
+              />
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="password" className="form-label" >
+              Password
+            </label>
+            <div className="input-group">
+                            <span className="input-group-text">
+                                <FaLock />
+                            </span>
+              <input
+                  type="password"
+                  id="password"
+                  className="form-control"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+              />
+            </div>
           </div>
           <button type="submit" className="login-button">
             Login

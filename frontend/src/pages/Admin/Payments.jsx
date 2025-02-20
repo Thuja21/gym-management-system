@@ -1,6 +1,7 @@
 // MemberDashboard.jsx
 import React from "react";
 import AdminSideBar from "./AdminSideBar.jsx";
+import {Search} from "lucide-react";
 
 
 const Payments = () => {
@@ -13,3 +14,5 @@ const Payments = () => {
 };
 
 export default Payments;
+
+

@@ -1,12 +1,23 @@
+body {
+    margin: 0;
+    display: flex;
+    place-items: center;
+    min-width: 320px;
+    min-height: 100vh;
+    background-color: #ffffff;
+    overflow: hidden; /* Prevents overflow */
+
+}
+
 /*///////// Admin dashboard /////////*/
 .dashboard-container {
-    /*background-color: #0a0a0a;*/
+    background-color: #121111;
     min-height: 100vh;
     width: 100vw;
     padding: 20px;
     font-weight: bold;
 
-    background: url("../../assets/images/loginbg1.jpg") no-repeat center center/cover;
+    /*background: url("../../assets/images/loginbg1.jpg") no-repeat center center/cover;*/
 }
 
 .divider-bar {
@@ -32,8 +43,8 @@
 }
 
 .dashboard-image {
-    width: auto;
-    height: auto;
+    width: 500px;
+    height: 500px;
     margin: -93px 0 0 -500px;
     position: absolute;
     padding: 0;
@@ -50,22 +61,28 @@
 
 .box1 {
     margin: 35px 0 6px 245px;
+    background: linear-gradient(to right, #343b55, #1d2140);
+
+
 }
 
 .box2 {
     margin: -123px 0 6px 565px;
+    background: linear-gradient(to right, #343b55, #1d2140);
 }
 
 .box3 {
     margin: -125px 0 6px 880px;
+    background: linear-gradient(to right, #343b55, #1d2140);
 }
 
 .box4 {
     margin: -125px 0 6px 1195px;
+    background: linear-gradient(to right, #343b55, #1d2140);
 }
 
 .large-box {
-    background-color: #1a1b23;
+    background: linear-gradient(to right, #343b55, #1d2140);
     border: none;
     border-radius: 8px;
 }
@@ -74,12 +91,14 @@
     width: 490px;
     height: 340px;
     margin: 21px 0 6px 246px;
+    background: linear-gradient(to right, #343b55, #1d2140);
 }
 
 .large-box2 {
     width: 725px;
     height: 340px;
     margin: -344px 0 6px 760px;
+    background: linear-gradient(to right, #343b55, #1d2140);
 }
 
 /*///////// Admin sidebar /////////*/
@@ -119,11 +138,11 @@
     overflowX: "auto";
 }
 
-.table-header {
-    background-color: #1a1b23;
-    color: #ffffff;
-    font-weight: bold;
-}
+/*.table-header {*/
+/*    background-color: #1a1b23;*/
+/*    color: #ffffff;*/
+/*    font-weight: bold;*/
+/*}*/
 
 .table-row:nth-of-type(odd) {
     background-color: #f5f5f5;
@@ -144,9 +163,10 @@
     background-color: #ffffff;
     border: 0.01rem solid #575757;
     border-radius: 5px;
-    width: 1140px;
-    height: 25px;
+    width: 1159px;
+    height: 50px;
     margin-top: 50px;
+    margin-bottom: 10px;
 }
 
 

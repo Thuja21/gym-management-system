@@ -10,7 +10,9 @@ const TopBar = ({ userName, title, onSearch }) => {
         <AppBar
             position="fixed"
             sx={{
-                backgroundColor: "#000000",
+                // backgroundColor: "#000000",
+                // backgroundColor: "#1e1e1e",
+                backgroundColor: "#1a1b23",
                 boxShadow: "none",
                 padding: "0 16px",
             }}
@@ -61,7 +63,16 @@ const TopBar = ({ userName, title, onSearch }) => {
                 <Typography variant="subtitle1" component="div" sx={{ color: "#ffffff" }}>
                     {userName}
                 </Typography>
-                <Box className="divider-bar2" />
+                <Box sx={{
+                    position: "fixed",
+                    width: "100vw",
+                    height: "4px",
+                    backgroundColor:"#1a1c23",
+                    border: "none",
+                    marginTop: "64px",
+                    marginLeft: "-39px",
+
+                }} />
             </Toolbar>
 
         </AppBar>
