@@ -143,6 +143,11 @@ const ManageMembers = () => {
             [name]: value,
         }));
 
+        setSelectedMember((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+
         // Validate the current field and remove error if corrected
         setErrors((prevErrors) => {
             const newErrors = { ...prevErrors };
@@ -325,7 +330,6 @@ const ManageMembers = () => {
 
                                             }}
                                         >
-
                                             <TableCell>{member.member_id}</TableCell>
                                             <TableCell>{member.full_name}</TableCell>
                                             <TableCell>{member.user_name}</TableCell>

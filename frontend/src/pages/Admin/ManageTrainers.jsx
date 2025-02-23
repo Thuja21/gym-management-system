@@ -1,27 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AdminSideBar from "./AdminSideBar.jsx";
 import "./Admin.css";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    Typography,
-    Button,
-    Box,
-    IconButton,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    Grid,
-    TextField,
-    FormControl,
-    InputLabel,
-    Select, MenuItem, DialogActions,
-} from "@mui/material";
+import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Button, Dialog, DialogTitle, DialogContent, Grid, TextField, DialogActions,} from "@mui/material";
 import { Search, MoreVertical, Plus } from "lucide-react";
 import { Edit as EditIcon, Trash as DeleteIcon } from "lucide-react";
 import axios from "axios";
@@ -88,13 +68,13 @@ const ManageTrainers = () => {
     const handleDelete = async (trainerId) => {
         if (window.confirm("Are you sure you want to delete this trainer?")) {
             try {
-                const response = await fetch(`http://localhost:8800/api/members/delete/${trainerId}`, {
+                const response = await fetch(`http://localhost:8800/api/trainers/delete/${trainerId}`, {
                     method: "DELETE", // Use appropriate method for your backend
                 });
                 if (!response.ok) {
                     throw new Error("Failed to delete trainer.");
                 }
-                setTrainer((prevTrainer) => prevTrainer.filter((trainer) => trainer.trainer_id !== trainerId));
+                setTrainers((prevTrainer) => prevTrainer.filter((trainer) => trainer.trainer_id !== trainerId));
                 alert("Trainer deleted successfully!");
             } catch (err) {
                 setError(err.message);
@@ -132,6 +112,11 @@ const ManageTrainers = () => {
         const { name, value } = e.target;
 
         setNewTrainer((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+
+        setSelectedTrainer((prev) => ({
             ...prev,
             [name]: value,
         }));
@@ -189,7 +174,7 @@ const ManageTrainers = () => {
         console.log("Updated trainer Data:", selectedTrainer);
 
         try {
-            const response = await fetch(`http://localhost:8800/api/trainers/edit/${selectedtrainer.trainer_id}`, {
+            const response = await fetch(`http://localhost:8800/api/trainers/edit/${selectedTrainer.trainer_id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -293,20 +278,20 @@ const ManageTrainers = () => {
                                         }}
                                     >
 
-                                        <td className="px-6 py-4 text-center">{trainer.trainer_id}</td>
-                                        <td className="px-6 py-4">{trainer.full_name}</td>
-                                        <td className="px-6 py-4">{trainer.user_name}</td>
-                                        <td className="px-6 py-4">{trainer.email}</td>
-                                        <td className="px-6 py-4">{trainer.contact_no}</td>
-                                        <td className="px-6 py-4">{trainer.address}</td>
-                                        <td className="px-6 py-4">{new Date(trainer.dob).toLocaleDateString()}</td>
-                                        <td className="px-6 py-4">{trainer.age}</td>
-                                        <td className="px-6 py-4">{trainer.specialization}</td>
-                                        <TableCell>{(new Date(trainer.registered_date).toLocaleDateString())}</TableCell>
-                                        <td className="px-6 py-4 flex justify-center space-x-2">
+                                        <td className="px-6 py-1 text-center">{trainer.trainer_id}</td>
+                                        <td className="px-6 py-1">{trainer.full_name}</td>
+                                        <td className="px-6 py-1">{trainer.user_name}</td>
+                                        <td className="px-6 py-1">{trainer.email}</td>
+                                        <td className="px-6 py-1">{trainer.contact_no}</td>
+                                        <td className="px-6 py-1">{trainer.address}</td>
+                                        <td className="px-6 py-1">{new Date(trainer.dob).toLocaleDateString()}</td>
+                                        <td className="px-6 py-1">{trainer.age}</td>
+                                        <td className="px-6 py-1">{trainer.specialization}</td>
+                                        <td>{(new Date(trainer.registered_date).toLocaleDateString())}</td>
+                                        <td className="px-6 py-1 flex justify-center space-x-2">
                                             {/* Edit Button */}
                                             <button
-                                                className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-md"
+                                                className=" hover:bg-blue-600 text-white p-2 rounded-md" style={{ backgroundColor: "#E94E4E"}}
                                                 onClick={() => handleEdit(trainer.trainer_id)}
                                             >
                                                 <EditIcon className="w-5 h-5" />
@@ -320,6 +305,7 @@ const ManageTrainers = () => {
                                                 <DeleteIcon className="w-5 h-5" />
                                             </button>
                                         </td>
+
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -398,7 +384,7 @@ const ManageTrainers = () => {
                     <Grid container spacing={2}>
                         {/* Left Column */}
                         <Grid item xs={6}>
-                            {["user_name", "email", "dob" , "address"].map((field) => (
+                            {["user_name", "email"].map((field) => (
                                 <TextField
                                     key={field}
                                     margin="dense"
@@ -408,10 +394,35 @@ const ManageTrainers = () => {
                                     name={field}
                                     value={selectedTrainer[field] || ""}
                                     onChange={handleInputChange}
-                                    type={field === "dob" ? "date" : "text"}
-                                    InputLabelProps={field === "dob" ? { shrink: true } : {}}
+                                    type= "text"
                                 />
                             ))}
+                            <TextField
+                                margin="dense"
+                                label="Select DoB"
+                                type="date"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                fullWidth
+                                variant="outlined"
+                                name="dob"
+                                value={
+                                    selectedTrainer.dob
+                                        ? new Date(selectedTrainer.dob).toISOString().slice(0, 10)
+                                        : ""
+                                }
+                                onChange={handleInputChange}
+                            />
+                            <TextField
+                                margin="dense"
+                                label="Address"
+                                fullWidth
+                                variant="outlined"
+                                name="address"
+                                value={selectedTrainer.address || ""}
+                                onChange={handleInputChange}
+                            />
                         </Grid>
 
                         {/* Right Column */}

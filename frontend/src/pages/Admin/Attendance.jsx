@@ -14,12 +14,10 @@ const MOCK_MEMBERS = [
 function Attendance() {
     const [searchTerm, setSearchTerm] = useState('');
     const [attendanceRecords, setAttendanceRecords] = useState([]);
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [selectedMember, setSelectedMember] = useState({
         id: '', name: '', membershipId: '', checkIn: '', checkOut: '', date: new Date().toISOString().split('T')[0], // Sets today's date
     });
-
-
-
 
     const handleSearch = () => {
         const member = MOCK_MEMBERS.find(m =>
@@ -68,6 +66,12 @@ function Attendance() {
         }
     };
 
+    // Check if selected date is today
+    const isToday = selectedDate === new Date().toISOString().split('T')[0];
+
+    // Filter attendance records by selected date
+    const filteredRecords = attendanceRecords.filter(record => record.date === selectedDate);
+
     return (
         <div style={{ display: "flex", height: "100vh", width:"103vw", marginTop: "40px" , marginLeft: "-43px"}}>
 
@@ -99,6 +103,14 @@ function Attendance() {
                 <div className="card mt-4">
                     <div className="card-body p-4">
                         <div className="mb-4 flex items-center space-x-2" style={{paddingBottom: "20px"}}>
+                            <div  >
+                                <input
+                                    type="date"
+                                    className="form-control"
+                                    value={selectedDate}
+                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                />
+                            </div>
                             <div className="relative flex-grow">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input
@@ -119,6 +131,7 @@ function Attendance() {
                         </div>
 
                         {/* Member Details */}
+                        {isToday && (
                         <div className="row g-3" >
                             <div className="col-md-4 d-flex align-items-center" > {/* Aligned label and input */}
                                 <label htmlFor="memberId" className="form-label me-2" style={{ whiteSpace: "nowrap" }}> {/* Added margin to label */}
@@ -127,7 +140,7 @@ function Attendance() {
                                 <input
                                     type="text"
                                     className="form-control"
-                                    style={{width:"250px"}}
+                                    style={{width:"250px" , backgroundColor: "#efefef"}}
                                     id="memberId"
                                     value={selectedMember.membershipId}
                                     onChange={(e) => setSelectedMember({ ...selectedMember, membershipId: e.target.value })}
@@ -152,11 +165,11 @@ function Attendance() {
                                     Date:
                                 </label>
                                 <input
-                                    type="date"
+                                    type="text"
                                     className="form-control"
                                     id="date"
                                     value={selectedMember.date}
-                                    onChange={(e) => setSelectedMember({ ...selectedMember, date: e.target.value })}
+                                    readOnly
                                 />
                             </div>
 
@@ -170,7 +183,7 @@ function Attendance() {
                                     id="name"
                                     value={selectedMember.name}
                                     onChange={(e) => setSelectedMember({ ...selectedMember, name: e.target.value })}
-                                    style={{ marginLeft: "37px", width: "250px" }}
+                                    style={{ marginLeft: "37px", width: "250px" , backgroundColor: "#efefef"}}
                                 />
                             </div>
 
@@ -194,16 +207,14 @@ function Attendance() {
                                     Check Out
                                 </button>
                             </div>
-
                         </div>
+                        )}
                     </div>
                 </div>
 
 
-
-
-
                 {/* Attendance Table */}
+                {/*<div className="bg-white rounded-xl shadow-sm overflow-x-auto" >*/}
                 <div className="overflow-x-auto mt-6" style={{overflow: "hidden"}}>
                     <table className="min-w-full divide-y">
                         <thead className="bg-red-200 text-black">
@@ -228,6 +239,7 @@ function Attendance() {
                         </tbody>
                     </table>
                 </div>
+                {/*</div>*/}
             </div>
         </div>
     );

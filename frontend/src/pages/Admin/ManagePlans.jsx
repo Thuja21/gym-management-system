@@ -81,7 +81,8 @@ const ManagePlans = () => {
                 </div>
 
                 {/* Plans Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 h-[400px] " style={{paddingLeft: "20px", marginRight: "20px"}}>
+                <div className="bg-white rounded-xl shadow-sm p-3 " style={{height: "78%" , marginTop: "-55px"}} >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 h-[400px] " style={{paddingLeft: "20px", marginRight: "20px", marginTop:"35px" ,paddingTop: "20px"}}>
                     {plans.map((plan, index) => (
                         <div
                             key={index}
@@ -116,6 +117,7 @@ const ManagePlans = () => {
                                     </div>
                         </div>
                     ))}
+                </div>
                 </div>
             </div>
 

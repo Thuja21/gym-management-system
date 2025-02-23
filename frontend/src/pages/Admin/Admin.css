@@ -144,6 +144,9 @@ body {
 /*    font-weight: bold;*/
 /*}*/
 
+.table-row{
+    height: 80px;
+}
 .table-row:nth-of-type(odd) {
     background-color: #f5f5f5;
 }

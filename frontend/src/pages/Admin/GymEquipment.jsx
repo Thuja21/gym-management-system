@@ -1,7 +1,6 @@
-// MemberDashboard.jsx
 import React, {useState} from "react";
 import AdminSideBar from "./AdminSideBar.jsx";
-import {Plus, Search} from "lucide-react";
+import {Plus, Search, Edit as EditIcon, Trash as DeleteIcon } from "lucide-react";
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography} from "@mui/material";
 
 
@@ -12,6 +11,8 @@ const ManageEquipments = () => {
     const [newTrainer, setNewTrainer] = useState("");
     const [error, setError] = useState(null);
     const [errors, setErrors] = useState({});
+
+
 
     // Handle form input change with real-time validation
     const handleInputChange = (e) => {
