@@ -21,6 +21,7 @@ const routeConfig = [
 const AdminSideBar = () => {
     const location = useLocation();
     const currentTitle = routeConfig.find((r) => r.path === location.pathname)?.title || "Dashboard";
+    const IconComponent= routeConfig.find((r) => r.path === location.pathname)?.icon["HomeOutlined"]; // Default icon
 
     const [isCollapsed] = useState(false);
     const styles = {
@@ -53,7 +54,7 @@ const AdminSideBar = () => {
 
     return (
         <>
-            <TopBar userName="Admin" title={currentTitle} />
+            <TopBar userName="Admin" title={currentTitle} icon={IconComponent} />
             <Box sx={{ display: "flex" }}>
                 <Drawer variant="permanent" open sx={{
                     width: isCollapsed ? 80 : 240, transition: "width 0.3s",

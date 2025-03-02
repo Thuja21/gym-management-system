@@ -160,6 +160,14 @@ body {
     justify-content: center;
     align-items: center;
     gap: 10px;
+    margin-top: 20px;
+}
+
+.table-cell-actions1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
 }
 
 .ButtonCover{

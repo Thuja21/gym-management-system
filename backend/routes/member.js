@@ -1,5 +1,5 @@
 import express from "express";
-import { viewAllMembers, addMember, editMember, deleteMember, getAllMembershipTypes } from "../controllers/member.js";
+import { viewAllMembers, addMember, editMember, deleteMember, getAllMembershipTypes} from "../controllers/member.js";
 
 const router = express.Router();
 
@@ -14,5 +14,6 @@ router.put("/edit/:id", editMember);
 
 // Delete a member by ID
 router.delete("/delete/:id", deleteMember);
+
 
 export default router;

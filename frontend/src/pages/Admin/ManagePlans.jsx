@@ -1,10 +1,11 @@
 // "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Sidebar from "../../pages/Admin/AdminSideBar.jsx";
 import {Check, Plus, Search} from "lucide-react";
 import AdminSideBar from "../../pages/Admin/AdminSideBar.jsx";
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography} from "@mui/material";
+import axios from "axios";
 
 const ManagePlans = () => {
     const styles = {
@@ -18,31 +19,24 @@ const ManagePlans = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [error, setError] = useState(null);
     const [errors, setErrors] = useState({});
+    const [plans, setPlans] = useState([]); // State to store membership types
 
     const menuItems = [
         { title: "Manage Plans", to: "/plans", icon: <Check />, color: "#f44336" },
     ];
 
-    const plans = [
-        {
-            name: "Monthly Plan",
-            price: "Rs 4000",
-            duration: "month",
-            features: ["Limited gym access", "Locker facility", "One personal training session"],
-        },
-        {
-            name: "Quarterly Plan",
-            price: "Rs 10000",
-            duration: "3 months",
-            features: ["Full gym access", "Locker facility", "Two personal training sessions", "Free access to group workouts",],
-        },
-        {
-            name: "Yearly Plan",
-            price: "Rs 35000",
-            duration: "year",
-            features: ["Full gym access", "Locker facility", "Five personal training sessions", "Nutrition Consultation",],
-        },
-    ];
+    useEffect(() => {
+        const fetchPlans = async () => {
+            try {
+                const response = await axios.get("http://localhost:8800/api/plans/all");
+                setPlans(response.data); // Store membership plans in the state
+            } catch (error) {
+                console.error("Error fetching membership plans:", error);
+            }
+        };
+        fetchPlans();
+    }, []);
+
 
     return (
         <div style={{ display: "flex", height: "100vh" ,paddingRight: "30px", marginTop: "10px" }}>
@@ -82,42 +76,44 @@ const ManagePlans = () => {
 
                 {/* Plans Grid */}
                 <div className="bg-white rounded-xl shadow-sm p-3 " style={{height: "78%" , marginTop: "-55px"}} >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 h-[400px] " style={{paddingLeft: "20px", marginRight: "20px", marginTop:"35px" ,paddingTop: "20px"}}>
-                    {plans.map((plan, index) => (
-                        <div
-                            key={index}
-                            className="bg-white rounded-xl shadow-lg overflow-hidden transition transform hover:scale-105 border-2 border-transparent hover:border-red-700 hover: p-6 flex flex-col justify-between"
-                        >
-                            {/* Plan Name & Pricing */}
-                            <div>
-                                <h3 className="text-xl font-semibold text-gray-800">{plan.name}</h3>
-                                <p className="text-gray-500 text-sm">{plan.description}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 h-[400px] " style={{paddingLeft: "20px", marginRight: "20px", marginTop:"35px" ,paddingTop: "20px"}}>
+                        {plans.map((plan, index) => (
+                            <div
+                                key={index}
+                                className="bg-white rounded-xl shadow-lg overflow-hidden transition transform hover:scale-105 border-2 border-transparent hover:border-red-700 hover: p-6 flex flex-col justify-between"
+                            >
+                                {/* Plan Name & Pricing */}
+                                <div>
+                                    <h3 className="text-xl font-semibold text-gray-800">{plan.plan_name}</h3>
+                                    {/*<p className="text-gray-500 text-sm">{plan.features}</p>*/}
 
-                                <div className="mt-3">
-                                    <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
-                                    <span className="text-gray-500 text-lg">/{plan.duration}</span>
+                                    <div className="mt-3">
+                                        <span className="text-3xl font-bold text-gray-900">{plan.plan_price}</span>
+                                        <span className="text-gray-500 text-lg">/{plan.plan_duration}</span>
+                                    </div>
+
+                                    <ul className="space-y-3 mt-4">
+                                        {plan.features
+                                            .split(", ")
+                                            .map((feature, i) => (
+                                                <li key={i} className="flex items-center">
+                                                    <Check className="w-5 h-5 text-green-500 mr-2" />
+                                                    <span className="text-gray-700">{feature}</span>
+                                                </li>
+                                            ))}
+                                    </ul>
+
                                 </div>
-
-                                {/* Features List */}
-                                <ul className="space-y-3 mt-4">
-                                    {plan.features.map((feature, i) => (
-                                        <li key={i} className="flex items-center">
-                                            <Check className="w-5 h-5 text-green-500 mr-2" />
-                                            <span className="text-gray-700">{feature}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
 
                                 {/* Edit Button */}
                                 <div className="mt-auto pt-6">
-                                <button className="w-full bg-red-900 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:bg-red-800 transition">
-                                    Edit Plan
-                                </button>
-                                    </div>
-                        </div>
-                    ))}
-                </div>
+                                    <button className="w-full bg-red-900 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:bg-red-800 transition">
+                                        Edit Plan
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 

@@ -356,7 +356,7 @@ const ManageMembers = () => {
                                             >{member.status == 1 ? "ACTIVE" : "EXPIRED"}
                                             </span>
                                             </TableCell>
-                                            <TableCell className="table-cell-actions"
+                                            <TableCell className="table-cell-actions1"
                                                        sx={{
                                                            display: "flex",
                                                            justifyContent: "center",

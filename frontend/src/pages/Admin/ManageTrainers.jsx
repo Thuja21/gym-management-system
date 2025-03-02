@@ -1,7 +1,24 @@
 import React, { useEffect, useState } from "react";
 import AdminSideBar from "./AdminSideBar.jsx";
 import "./Admin.css";
-import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Button, Dialog, DialogTitle, DialogContent, Grid, TextField, DialogActions,} from "@mui/material";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Typography,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    Grid,
+    TextField,
+    DialogActions,
+    IconButton,
+} from "@mui/material";
 import { Search, MoreVertical, Plus } from "lucide-react";
 import { Edit as EditIcon, Trash as DeleteIcon } from "lucide-react";
 import axios from "axios";
@@ -279,7 +296,7 @@ const ManageTrainers = () => {
                                     >
 
                                         <td className="px-6 py-1 text-center">{trainer.trainer_id}</td>
-                                        <td className="px-6 py-1">{trainer.full_name}</td>
+                                        <td className="px-6 py-1" style={{paddingTop: "10px"}}>{trainer.full_name}</td>
                                         <td className="px-6 py-1">{trainer.user_name}</td>
                                         <td className="px-6 py-1">{trainer.email}</td>
                                         <td className="px-6 py-1">{trainer.contact_no}</td>
@@ -288,22 +305,65 @@ const ManageTrainers = () => {
                                         <td className="px-6 py-1">{trainer.age}</td>
                                         <td className="px-6 py-1">{trainer.specialization}</td>
                                         <td>{(new Date(trainer.registered_date).toLocaleDateString())}</td>
-                                        <td className="px-6 py-1 flex justify-center space-x-2">
+                                        {/*<td className="px-6 py-1 flex justify-center space-x-2">*/}
+                                        {/*    /!* Edit Button *!/*/}
+                                        {/*    <button*/}
+                                        {/*        className=" hover:bg-blue-600 text-white p-2 rounded-md" style={{ backgroundColor: "#E94E4E"}}*/}
+                                        {/*        onClick={() => handleEdit(trainer.trainer_id)}*/}
+                                        {/*    >*/}
+                                        {/*        <EditIcon  />*/}
+                                        {/*    </button>*/}
+
+                                        {/*    /!* Delete Button *!/*/}
+                                        {/*    <button*/}
+                                        {/*        className="bg-red-900 hover:bg-red-600 text-white p-2 rounded-md"*/}
+                                        {/*        onClick={() => handleDelete(trainer.trainer_id)}*/}
+                                        {/*    >*/}
+                                        {/*        <DeleteIcon  />*/}
+                                        {/*    </button>*/}
+                                        {/*</td>*/}
+                                        <td className="table-cell-actions"
+                                                   sx={{
+                                                       display: "flex",
+                                                       justifyContent: "center",
+                                                       gap: "20px", // Space between the two buttons
+                                                   }}
+                                        >
                                             {/* Edit Button */}
-                                            <button
-                                                className=" hover:bg-blue-600 text-white p-2 rounded-md" style={{ backgroundColor: "#E94E4E"}}
+                                            <IconButton
+                                                sx={{
+                                                    backgroundColor: "#4A90E2", // Blue background
+                                                    color: "#ffffff", // White icon color
+                                                    borderRadius: "4px", // Slightly rounded corners for a square-like shape
+                                                    width: "40px", // Set fixed width
+                                                    height: "40px", // Set fixed height
+                                                    padding: "8px", // Add padding for better spacing
+                                                    "&:hover": {
+                                                        backgroundColor: "#357ABD", // Darker blue on hover
+                                                    },
+                                                }}
                                                 onClick={() => handleEdit(trainer.trainer_id)}
                                             >
-                                                <EditIcon className="w-5 h-5" />
-                                            </button>
+                                                <EditIcon />
+                                            </IconButton>
 
                                             {/* Delete Button */}
-                                            <button
-                                                className="bg-red-900 hover:bg-red-600 text-white p-2 rounded-md"
+                                            <IconButton
+                                                sx={{
+                                                    backgroundColor: "#E94E4E", // Red background
+                                                    color: "#ffffff", // White icon color
+                                                    borderRadius: "4px", // Slightly rounded corners for a square-like shape
+                                                    width: "40px", // Set fixed width
+                                                    height: "40px", // Set fixed height
+                                                    padding: "8px", // Add padding for better spacing
+                                                    "&:hover": {
+                                                        backgroundColor: "#C33C3C", // Darker red on hover
+                                                    },
+                                                }}
                                                 onClick={() => handleDelete(trainer.trainer_id)}
                                             >
-                                                <DeleteIcon className="w-5 h-5" />
-                                            </button>
+                                                <DeleteIcon />
+                                            </IconButton>
                                         </td>
 
                                     </TableRow>

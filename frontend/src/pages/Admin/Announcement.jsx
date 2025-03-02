@@ -1,288 +1,198 @@
+import React, { useState, useEffect } from "react";
+import { Bell, Plus, Trash2, Calendar, Search ,Megaphone} from "lucide-react";
 import AdminSideBar from "./AdminSideBar.jsx";
-import React, { useState } from 'react';
-import { format } from 'date-fns';
-import { FiPlus, FiEdit2, FiTrash2, FiX, FiMessageSquare } from 'react-icons/fi';
-import { Dialog, Transition } from '@headlessui/react';
+import { Typography } from "@mui/material";
 
-const INITIAL_ANNOUNCEMENTS = [
-    {
-        id: 1,
-        title: 'New Yoga Classes Starting',
-        content: 'Join our new yoga classes every Monday and Wednesday at 8 AM.',
-        priority: 'high',
-        date: '2023-10-15',
-    },
-    {
-        id: 2,
-        title: 'Holiday Hours',
-        content: 'The gym will have modified hours during the upcoming holiday season.',
-        priority: 'medium',
-        date: '2023-10-14',
-    },
-    {
-        id: 3,
-        title: 'Equipment Maintenance',
-        content: 'Regular maintenance will be performed on cardio equipment this weekend.',
-        priority: 'low',
-        date: '2023-10-13',
-    },
-];
-
-function Announcement() {
-    const [announcements, setAnnouncements] = useState(INITIAL_ANNOUNCEMENTS);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingAnnouncement, setEditingAnnouncement] = useState(null);
-    const [formData, setFormData] = useState({
-        title: '',
-        content: '',
-        priority: 'medium',
-        date: format(new Date(), 'yyyy-MM-dd'),
+function Announcements() {
+    const [announcements, setAnnouncements] = useState([]);
+    const [showForm, setShowForm] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [newAnnouncement, setNewAnnouncement] = useState({
+        title: "",
+        content: "",
     });
 
-    const handleOpenModal = (announcement = null) => {
-        if (announcement) {
-            setEditingAnnouncement(announcement);
-            setFormData(announcement);
-        } else {
-            setEditingAnnouncement(null);
-            setFormData({
-                title: '',
-                content: '',
-                priority: 'medium',
-                date: format(new Date(), 'yyyy-MM-dd'),
-            });
-        }
-        setIsModalOpen(true);
-    };
+    // Fetch announcements when the component loads
+    useEffect(() => {
+        const fetchAnnouncements = async () => {
+            try {
+                const response = await fetch("http://localhost:8800/api/announcements/all"); // Update with your backend URL
+                if (!response.ok) {
+                    throw new Error("Failed to fetch announcements.");
+                }
+                const data = await response.json();
+                console.log(data);
+                setAnnouncements(data); // Update announcements state with the fetched data
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setEditingAnnouncement(null);
-    };
+        fetchAnnouncements();
+    }, []); // Empty dependency array to fetch data only once on mount
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (editingAnnouncement) {
-            setAnnouncements(announcements.map(a =>
-                a.id === editingAnnouncement.id ? { ...formData, id: a.id } : a
-            ));
-        } else {
+    const handleAddAnnouncement = () => {
+        if (newAnnouncement.title && newAnnouncement.content) {
             setAnnouncements([
-                { ...formData, id: Date.now() },
                 ...announcements,
+                {
+                    id: Date.now(),
+                    title: newAnnouncement.title,
+                    content: newAnnouncement.content,
+                    date: new Date().toLocaleDateString(),
+                },
             ]);
+            setNewAnnouncement({ title: "", content: "" });
+            setShowForm(false);
         }
-        handleCloseModal();
     };
 
     const handleDelete = (id) => {
-        if (window.confirm('Are you sure you want to delete this announcement?')) {
-            setAnnouncements(announcements.filter(a => a.id !== id));
-        }
+        setAnnouncements(announcements.filter((a) => a.id !== id));
     };
 
-    const getPriorityColor = (priority) => {
-        switch (priority) {
-            case 'high': return 'bg-red-100 text-red-800';
-            case 'medium': return 'bg-yellow-100 text-yellow-800';
-            case 'low': return 'bg-green-100 text-green-800';
-            default: return 'bg-gray-100 text-gray-800';
-        }
-    };
+    const filteredAnnouncements = announcements.filter((announcement) => {
+        const title = announcement.title || ''; // Default to empty string if title is undefined
+        const content = announcement.content || ''; // Default to empty string if content is undefined
+        return title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            content.toLowerCase().includes(searchTerm.toLowerCase());
+    });
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <AdminSideBar/>
-            <div className="max-w-6xl mx-auto px-4 py-8">
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                    {/* Header */}
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-800">Announcements</h1>
-                            <p className="text-gray-600 mt-1">Manage gym announcements and updates</p>
-                        </div>
-                        <button
-                            onClick={() => handleOpenModal()}
-                            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                        >
-                            <FiPlus className="mr-2" />
-                            New Announcement
-                        </button>
-                    </div>
+        <div style={{ display: "flex", height: "100vh", paddingRight: "30px" }}>
+            <AdminSideBar style={{ flexShrink: 0, width: 250 }} />
+            <div style={{ flexGrow: 1, padding: "20px", height: "100vh", width: "1300px", overflowY: "auto",scrollbarWidth: "none" ,marginLeft: "-45px", marginTop: "10px" }}>
+                <Typography variant="h4" gutterBottom>
+                    Announcements
+                </Typography>
 
-                    {/* Announcements List */}
-                    <div className="space-y-4">
-                        {announcements.map((announcement) => (
-                            <div
-                                key={announcement.id}
-                                className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow"
+                {loading && <p>Loading announcements...</p>} {/* Show loading message */}
+                {error && <p>Error: {error}</p>} {/* Show error message */}
+
+                <div className="bg-white rounded-xl shadow-sm p-3 mb-4" style={{ marginRight: "-5px" }}>
+                    <div className="flex items-center">
+                        <div className="relative flex-1">
+                            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search announcements..."
+                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="ml-4 flex space-x-2">
+                            <button
+                                className="bg-red-900 text-white px-4 py-2 rounded-lg flex items-center shadow-md hover:bg-red-800 transition"
+                                onClick={() => setShowForm(true)}
                             >
-                                <div className="flex justify-between items-start">
-                                    <div className="flex-1">
-                                        <div className="flex items-center space-x-2">
-                                            <h2 className="text-xl font-semibold text-gray-800">
-                                                {announcement.title}
-                                            </h2>
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(announcement.priority)}`}>
-                        {announcement.priority.charAt(0).toUpperCase() + announcement.priority.slice(1)}
-                      </span>
-                                        </div>
-                                        <p className="text-gray-600 mt-2">{announcement.content}</p>
-                                        <p className="text-sm text-gray-500 mt-2">
-                                            Posted on {format(new Date(announcement.date), 'MMMM d, yyyy')}
-                                        </p>
-                                    </div>
-                                    <div className="flex space-x-2 ml-4">
-                                        <button
-                                            onClick={() => handleOpenModal(announcement)}
-                                            className="p-2 text-gray-600 hover:text-blue-600 rounded-full hover:bg-blue-100 transition-colors"
-                                        >
-                                            <FiEdit2 className="w-5 h-5" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(announcement.id)}
-                                            className="p-2 text-gray-600 hover:text-red-600 rounded-full hover:bg-red-100 transition-colors"
-                                        >
-                                            <FiTrash2 className="w-5 h-5" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                                <Plus className="w-5 h-5 mr-2" />
+                                New Announcement
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Modal */}
-            <Transition show={isModalOpen} as={React.Fragment}>
-                <Dialog
-                    as="div"
-                    className="fixed inset-0 z-10 overflow-y-auto"
-                    onClose={handleCloseModal}
-                >
-                    <div className="min-h-screen px-4 text-center">
-                        <Transition.Child
-                            as={React.Fragment}
-                            enter="ease-out duration-300"
-                            enterFrom="opacity-0"
-                            enterTo="opacity-100"
-                            leave="ease-in duration-200"
-                            leaveFrom="opacity-100"
-                            leaveTo="opacity-0"
-                        >
-                            <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
-                        </Transition.Child>
-
-                        <span
-                            className="inline-block h-screen align-middle"
-                            aria-hidden="true"
-                        >
-              &#8203;
-            </span>
-
-                        <Transition.Child
-                            as={React.Fragment}
-                            enter="ease-out duration-300"
-                            enterFrom="opacity-0 scale-95"
-                            enterTo="opacity-100 scale-100"
-                            leave="ease-in duration-200"
-                            leaveFrom="opacity-100 scale-100"
-                            leaveTo="opacity-0 scale-95"
-                        >
-                            <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
-                                <div className="flex justify-between items-center mb-4">
-                                    <Dialog.Title
-                                        as="h3"
-                                        className="text-lg font-medium leading-6 text-gray-900"
-                                    >
-                                        {editingAnnouncement ? 'Edit Announcement' : 'New Announcement'}
-                                    </Dialog.Title>
-                                    <button
-                                        onClick={handleCloseModal}
-                                        className="p-1 rounded-full hover:bg-gray-200 transition-colors"
-                                    >
-                                        <FiX className="w-5 h-5" />
-                                    </button>
+                <div className="bg-white rounded-xl shadow-sm" style={{ marginTop: "-10px", marginRight: "-5px", height: "100%" }}>
+                    <div className="space-y-4 p-3">
+                        {filteredAnnouncements.length > 0 ? (
+                            filteredAnnouncements.map((announcement) => (
+                                <div
+                                    key={announcement.id}
+                                    className="p-2 border border-gray-100 rounded-lg hover:border-gray-200 transition-all hover:shadow-md"
+                                >
+                                    <div className="w-full p-3 rounded-2xl flex justify-between items-center bg-gradient-to-r from-gray-100 via-blue-100 to-red-100">
+                                        <div className="space-y-2">
+                                            <h3 className="text-left flex items-center gap-2 leading-tight text-blue-900" style={{ fontSize: "20px", fontWeight: "bold", fontFamily: "sans-serif" }}>
+                                                📢 {announcement.announcement_title}
+                                            </h3>
+                                            <p className="leading-relaxed text-md text-gray-700" >
+                                                {announcement.announcement_content}
+                                            </p>
+                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                <Calendar className="h-4 w-4 text-indigo-500" />
+                                                <span>{new Date(announcement.posted_date ).toLocaleDateString()}</span>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDelete(announcement.id)}
+                                            className="text-gray-500 hover:text-red-500 transition-colors p-2 hover:bg-red-200 rounded-full"
+                                        >
+                                            <Trash2 className="h-6 w-6" />
+                                        </button>
+                                    </div>
                                 </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-12">
+                                <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                                <h3 className="text-lg font-medium text-gray-900 mb-1">No announcements yet</h3>
+                                <p className="text-gray-500">Create one to get started!</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
-                                <form onSubmit={handleSubmit} className="space-y-4">
+                {showForm && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-xl p-6 w-full max-w-2xl">
+                            <h2 className="text-2xl font-bold mb-4">New Announcement</h2>
+                            <form onSubmit={(e) => { e.preventDefault(); handleAddAnnouncement(); }}>
+                                <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
                                             Title
                                         </label>
                                         <input
                                             type="text"
-                                            required
-                                            value={formData.title}
-                                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            id="title"
+                                            value={newAnnouncement.title}
+                                            onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                            placeholder="Enter announcement title"
                                         />
                                     </div>
-
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
                                             Content
                                         </label>
                                         <textarea
-                                            required
-                                            value={formData.content}
-                                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                                            id="content"
+                                            value={newAnnouncement.content}
+                                            onChange={(e) => setNewAnnouncement({ ...newAnnouncement, content: e.target.value })}
                                             rows={4}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                            placeholder="Enter announcement content"
                                         />
                                     </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Priority
-                                        </label>
-                                        <select
-                                            value={formData.priority}
-                                            onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        >
-                                            <option value="low">Low</option>
-                                            <option value="medium">Medium</option>
-                                            <option value="high">High</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Date
-                                        </label>
-                                        <input
-                                            type="date"
-                                            required
-                                            value={formData.date}
-                                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
-                                    </div>
-
-                                    <div className="mt-6 flex justify-end space-x-3">
+                                    <div className="flex justify-end gap-3 mt-6">
                                         <button
                                             type="button"
-                                            onClick={handleCloseModal}
-                                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                                            onClick={() => setShowForm(false)}
+                                            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             type="submit"
-                                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                            className="px-4 py-2 bg-red-900 text-white rounded-lg hover:bg-red-800 transition-colors"
                                         >
-                                            {editingAnnouncement ? 'Update' : 'Create'}
+                                            Add Announcement
                                         </button>
                                     </div>
-                                </form>
-                            </div>
-                        </Transition.Child>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </Dialog>
-            </Transition>
+                )}
+            </div>
         </div>
     );
 }
 
-export default Announcement;
+export default Announcements;

@@ -6,6 +6,9 @@ import trainersRoutes from "./routes/trainer.js";
 import equipmentsRoutes from "./routes/equipment.js";
 import supplementsRoutes from "./routes/supplement.js";
 import plansRoutes from "./routes/plan.js";
+import announcementRoutes from "./routes/announcement.js";
+import planPaymentRoutes from "./routes/planPayment.js";
+import attendanceRoutes from "./routes/attendance.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { db } from "./config/connectDatabase.js";
@@ -19,7 +22,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5174",
+    origin: "http://localhost:5173",
   })
 );
 app.use(cookieParser());
@@ -30,6 +33,9 @@ app.use("/api/trainers" , trainersRoutes);
 app.use("/api/equipments", equipmentsRoutes);
 app.use("/api/supplements", supplementsRoutes);
 app.use("/api/plans", plansRoutes);
+app.use("/api/announcements", announcementRoutes)
+app.use("/api/planpayments", planPaymentRoutes)
+app.use("/api/attendance", attendanceRoutes)
 
 
 
