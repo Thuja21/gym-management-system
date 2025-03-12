@@ -1,5 +1,3 @@
-// "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-
 import React, {useEffect, useState} from "react";
 import Sidebar from "../../pages/Admin/AdminSideBar.jsx";
 import {Check, Plus, Search} from "lucide-react";
@@ -17,9 +15,20 @@ const ManagePlans = () => {
     };
     const [searchTerm, setSearchTerm] = useState("");
     const [openDialog, setOpenDialog] = useState(false);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [newPlan, setNewPlan] = useState("");
     const [errors, setErrors] = useState({});
     const [plans, setPlans] = useState([]); // State to store membership types
+    const [selectedPlan, setSelectedPlan] = useState(null); // State for the selected plan for editing
+    const [updatedPlan, setUpdatedPlan] = useState({
+        plan_name: "",
+        plan_price: "",
+        plan_duration: "",
+        features: ""
+    });
+
 
     const menuItems = [
         { title: "Manage Plans", to: "/plans", icon: <Check />, color: "#f44336" },
@@ -37,6 +46,58 @@ const ManagePlans = () => {
         fetchPlans();
     }, []);
 
+    // Handle Add Plan dialog submission
+    const handleAddPlan = async () => {
+            try {
+                const response = await fetch("http://localhost:8800/api/plans/add", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(newPlan),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to add new plan.");
+                }
+                alert("Plan added successfully!");
+                setLoading(true);
+                setOpenDialog(false); // Close the dialog
+            } catch (err) {
+                setError(err.message);
+            }
+    };
+
+    // Handle form input change with real-time validation
+    const handleInputChange = (e) => {
+        const {name, value} = e.target;
+
+        setNewPlan((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+
+        // setSelectedTrainer((prev) => ({
+        //     ...prev,
+        //     [name]: value,
+        // }));
+    }
+
+        const handleSaveChanges = (planId) => {
+        axios.put(`http://localhost:8800/api/plans/${planId}`, updatedPlan)
+            .then((response) => {
+                // After successful update, update the plans state
+                setPlans((prevPlans) =>
+                    prevPlans.map((plan) =>
+                        plan.plan_id === planId ? { ...plan, ...updatedPlan } : plan
+                    )
+                );
+                setEditDialogOpen(false); // Close the dialog
+            })
+            .catch((error) => {
+                console.error("Error updating plan:", error);
+            });
+    };
 
     return (
         <div style={{ display: "flex", height: "100vh" ,paddingRight: "30px", marginTop: "10px" }}>
@@ -65,9 +126,9 @@ const ManagePlans = () => {
                         {/* Filters */}
                         <div className="ml-4 flex space-x-2">
                             {/* Add Plan Button */}
-                            <button className="bg-red-900 text-white w-40  rounded-lg flex items-center shadow-md hover:bg-red-800 transition"
+                            <button className="bg-red-900 text-white w-40  rounded-lg flex items-center shadow-md hover:bg-red-800 transition h-[40px] "
                                     onClick={() => setOpenDialog(true)}>
-                                <Plus className="w-5 h-5 mr-2" />
+                                <Plus className="w-5 h-5 mr-2 ml-2" />
                                 Add Plan
                             </button>
                         </div>
@@ -75,8 +136,8 @@ const ManagePlans = () => {
                 </div>
 
                 {/* Plans Grid */}
-                <div className="bg-white rounded-xl shadow-sm p-3 " style={{height: "78%" , marginTop: "-55px"}} >
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 h-[400px] " style={{paddingLeft: "20px", marginRight: "20px", marginTop:"35px" ,paddingTop: "20px"}}>
+                <div className="bg-white rounded-xl shadow-sm p-3 " style={{ marginTop: "-55px"}} >
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-16 " style={{paddingLeft: "20px", marginRight: "20px", marginTop:"35px" ,paddingTop: "20px"}}>
                         {plans.map((plan, index) => (
                             <div
                                 key={index}
@@ -102,14 +163,26 @@ const ManagePlans = () => {
                                                 </li>
                                             ))}
                                     </ul>
-
                                 </div>
 
                                 {/* Edit Button */}
                                 <div className="mt-auto pt-6">
-                                    <button className="w-full bg-red-900 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:bg-red-800 transition">
+                                    <button
+                                        className="w-full bg-red-900 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:bg-red-800 transition"
+                                        onClick={() => {
+                                            setSelectedPlan(plan);
+                                            setUpdatedPlan({
+                                                plan_name: plan.plan_name,
+                                                plan_price: plan.plan_price,
+                                                plan_duration: plan.plan_duration,
+                                                features: plan.features
+                                            });
+                                            setOpenDialog(true);
+                                        }}
+                                    >
                                         Edit Plan
                                     </button>
+
                                 </div>
                             </div>
                         ))}
@@ -117,14 +190,14 @@ const ManagePlans = () => {
                 </div>
             </div>
 
-
+            {/*Add plan*/}
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="md">
                 <DialogTitle>Add New Plan</DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2}>
                         {/* Left Column */}
                         <Grid item xs={6}>
-                            {["username", "fullname", "contactNo", "dob", "specialization"].map((field) => (
+                            {["plan_name", "plan_price"].map((field) => (
                                 <TextField
                                     key={field}
                                     margin="dense"
@@ -132,18 +205,15 @@ const ManagePlans = () => {
                                     fullWidth
                                     variant="outlined"
                                     name={field}
-
-                                    error={!!errors[field]}
-                                    helperText={errors[field]}
-                                    type={field === "dob" ? "date" : "text"}
-                                    InputLabelProps={field === "dob" ? { shrink: true } : {}}
+                                    value={newPlan[field]}
+                                    onChange={handleInputChange}
                                 />
                             ))}
                         </Grid>
 
                         {/* Right Column */}
                         <Grid item xs={6}>
-                            {["password", "email", "address", "age"].map((field) => (
+                            {["plan_duration", "features"].map((field) => (
                                 <TextField
                                     key={field}
                                     margin="dense"
@@ -151,9 +221,8 @@ const ManagePlans = () => {
                                     fullWidth
                                     variant="outlined"
                                     name={field}
-
-                                    error={!!errors[field]}
-                                    helperText={errors[field]}
+                                    value={newPlan[field]}
+                                    onChange={handleInputChange}
                                 />
                             ))}
                         </Grid>
@@ -163,12 +232,59 @@ const ManagePlans = () => {
                     <Button onClick={() => setOpenDialog(false)} color="primary">
                         Cancel
                     </Button>
-                    <Button >
+                    <Button onClick={handleAddPlan} color="primary">
                         Add Plan
                     </Button>
                 </DialogActions>
             </Dialog>
 
+            {/*/!*edit plan*!/*/}
+            {/*<Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="md">*/}
+            {/*    <DialogTitle>Add New Plan</DialogTitle>*/}
+            {/*    <DialogContent>*/}
+            {/*        <Grid container spacing={2}>*/}
+            {/*            /!* Left Column *!/*/}
+            {/*            <Grid item xs={6}>*/}
+            {/*                {["plan_name", "plan_price"].map((field) => (*/}
+            {/*                    <TextField*/}
+            {/*                        key={field}*/}
+            {/*                        margin="dense"*/}
+            {/*                        label={field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())}*/}
+            {/*                        fullWidth*/}
+            {/*                        variant="outlined"*/}
+            {/*                        name={field}*/}
+            {/*                        value={newPlan[field]}*/}
+            {/*                        onChange={handleInputChange}*/}
+            {/*                    />*/}
+            {/*                ))}*/}
+            {/*            </Grid>*/}
+
+            {/*            /!* Right Column *!/*/}
+            {/*            <Grid item xs={6}>*/}
+            {/*                {["plan_duration", "features"].map((field) => (*/}
+            {/*                    <TextField*/}
+            {/*                        key={field}*/}
+            {/*                        margin="dense"*/}
+            {/*                        label={field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())}*/}
+            {/*                        fullWidth*/}
+            {/*                        variant="outlined"*/}
+            {/*                        name={field}*/}
+            {/*                        value={newPlan[field]}*/}
+            {/*                        onChange={handleInputChange}*/}
+            {/*                    />*/}
+            {/*                ))}*/}
+            {/*            </Grid>*/}
+            {/*        </Grid>*/}
+            {/*    </DialogContent>*/}
+            {/*    <DialogActions>*/}
+            {/*        <Button onClick={() => setOpenDialog(false)} color="primary">*/}
+            {/*            Cancel*/}
+            {/*        </Button>*/}
+            {/*        <Button >*/}
+            {/*            Add Plan*/}
+            {/*        </Button>*/}
+            {/*    </DialogActions>*/}
+            {/*</Dialog>*/}
         </div>
     );
 };

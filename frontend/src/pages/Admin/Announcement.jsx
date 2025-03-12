@@ -12,6 +12,7 @@ function Announcements() {
     const [newAnnouncement, setNewAnnouncement] = useState({
         title: "",
         content: "",
+        date: "",
     });
 
     // Fetch announcements when the component loads
@@ -30,37 +31,30 @@ function Announcements() {
             } finally {
                 setLoading(false);
             }
-        };
-
-        fetchAnnouncements();
+        };fetchAnnouncements();
     }, []); // Empty dependency array to fetch data only once on mount
 
-    const handleAddAnnouncement = () => {
-        if (newAnnouncement.title && newAnnouncement.content) {
-            setAnnouncements([
-                ...announcements,
-                {
-                    id: Date.now(),
-                    title: newAnnouncement.title,
-                    content: newAnnouncement.content,
-                    date: new Date().toLocaleDateString(),
-                },
-            ]);
-            setNewAnnouncement({ title: "", content: "" });
-            setShowForm(false);
-        }
-    };
+    // Handle Add Trainer dialog submission
+    const handleAddAnnouncement = async () => {
+            try {
+                const response = await fetch("http://localhost:8800/api/announcements/add", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(newAnnouncement),
+                });
 
-    const handleDelete = (id) => {
-        setAnnouncements(announcements.filter((a) => a.id !== id));
+                if (!response.ok) {
+                    throw new Error("Failed to add new announcement.");
+                }
+                alert("Announcement added successfully!");
+                setLoading(true);
+                setShowForm(false); // Close the dialog
+            } catch (err) {
+                setError(err.message);
+            }
     };
-
-    const filteredAnnouncements = announcements.filter((announcement) => {
-        const title = announcement.title || ''; // Default to empty string if title is undefined
-        const content = announcement.content || ''; // Default to empty string if content is undefined
-        return title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            content.toLowerCase().includes(searchTerm.toLowerCase());
-    });
 
     return (
         <div style={{ display: "flex", height: "100vh", paddingRight: "30px" }}>
@@ -100,16 +94,16 @@ function Announcements() {
 
                 <div className="bg-white rounded-xl shadow-sm" style={{ marginTop: "-10px", marginRight: "-5px", height: "100%" }}>
                     <div className="space-y-4 p-3">
-                        {filteredAnnouncements.length > 0 ? (
-                            filteredAnnouncements.map((announcement) => (
+                        {announcements.length > 0 ? (
+                            announcements.map((announcement) => (
                                 <div
                                     key={announcement.id}
                                     className="p-2 border border-gray-100 rounded-lg hover:border-gray-200 transition-all hover:shadow-md"
                                 >
-                                    <div className="w-full p-3 rounded-2xl flex justify-between items-center bg-gradient-to-r from-gray-100 via-blue-100 to-red-100">
+                                    <div className="w-full p-3 rounded-2xl flex justify-between items-center bg-gradient-to-r from-gray-100 via-gray-300 to-blue-50" >
                                         <div className="space-y-2">
-                                            <h3 className="text-left flex items-center gap-2 leading-tight text-blue-900" style={{ fontSize: "20px", fontWeight: "bold", fontFamily: "sans-serif" }}>
-                                                📢 {announcement.announcement_title}
+                                            <h3 className="text-left flex items-center gap-2 leading-tight text-blue-900" style={{ fontSize: "20px", fontWeight: "bold" , fontFamily: "Montserrat"}}>
+                                                 {announcement.announcement_title}
                                             </h3>
                                             <p className="leading-relaxed text-md text-gray-700" >
                                                 {announcement.announcement_content}

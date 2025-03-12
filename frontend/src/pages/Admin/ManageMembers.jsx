@@ -263,9 +263,9 @@ const ManageMembers = () => {
                         {/* Filters */}
                         <div className="ml-4 flex space-x-2">
                                 {/* Add Member Button */}
-                            <button className="bg-red-900 text-white w-40  rounded-lg flex items-center shadow-md hover:bg-red-800 transition"
+                            <button className="bg-red-900 text-white w-40  rounded-lg flex items-center shadow-md hover:bg-red-800 transition h-[40px] "
                                     onClick={() => setOpenDialog(true)}>
-                                <Plus className="w-5 h-5 mr-2" />
+                                <Plus className="w-5 h-5 mr-2 ml-3" />
                                 Add Member
                             </button>
                         </div>

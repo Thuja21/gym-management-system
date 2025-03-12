@@ -191,6 +191,7 @@ function Attendance() {
                                         type="text"
                                         className="form-control"
                                         value={selectedMember.checkIn }
+                                        style={{ marginLeft: "10px"}}
                                         disabled
                                     />
                                 </div>
@@ -233,11 +234,11 @@ function Attendance() {
                                     />
                                 </div>
 
-                                <div className="col-md-4 d-flex justify-content-end align-items-center">
-                                    <button onClick={handleCheckIn} className="btn btn-success me-2" style={{ width: "155px" }}>
+                                <div className="col-md-4 d-flex justify-content-end align-items-center" >
+                                    <button onClick={handleCheckIn} className="btn btn-success me-2" style={{ width: "140px", marginBottom:"-10px"}}>
                                         Check In
                                     </button>
-                                    <button onClick={handleCheckOut} className="btn btn-danger" style={{ width: "155px" }}>
+                                    <button onClick={handleCheckOut} className="btn btn-danger" style={{ width: "140px", marginBottom:"-10px" }}>
                                         Check Out
                                     </button>
                                 </div>

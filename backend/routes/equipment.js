@@ -1,7 +1,20 @@
 import express from "express";
-import {viewAllEquipments} from "../controllers/equipment.js";
+import {addEquipment, deleteEquipment, editEquipment, viewAllEquipments} from "../controllers/equipment.js";
 const router = express.Router();
 
 router.get('/all' , viewAllEquipments);
 
 export default router;
+
+router.post("/add", addEquipment);
+
+// Edit an existing member by ID
+router.put("/edit/:id", editEquipment);
+
+
+// Delete a member by ID
+router.delete("/delete/:id", deleteEquipment);
+
+
+
+

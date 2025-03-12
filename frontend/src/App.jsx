@@ -20,11 +20,11 @@ import Payments from "./pages/Admin/Payments.jsx";
 import Report from "./pages/Admin/Report.jsx";
 import ViewSchedules from "./pages/Admin/ViewSchedules.jsx";
 import Announcement from "./pages/Admin/Announcement.jsx";
-import {Dashboard} from "@mui/icons-material";
-import TopBar from "./components/TopBar.jsx";
-import AdminSideBar from "./pages/Admin/AdminSideBar.jsx";
-import AdminDashboard1 from "./pages/Admin/AdminDashboard1.jsx";
-
+import Supplements from "./pages/Home/Supplements.jsx";
+import Membership from "./pages/Home/Membership.jsx";
+import About from "./pages/Home/About.jsx";
+import Contact from "./pages/Home/Contact.jsx";
+import Trainers from "./pages/Home/Trainers.jsx";
 
 
 
@@ -38,22 +38,23 @@ function App() {
         <Route path="/memberDashboard" element={<MemberDashboard />} />
         <Route path="/customerDashboard" element={<CustomerDashboard />} />
         <Route path="/adminDashboard" element={<AdminDashboard />} />
-        <Route path="/adminDashboard1" element={<AdminDashboard1 />} />
         <Route path="/dashboard" element={<AdminDashboard />} />
         <Route path="/members" element={<ManageMembers />} />
-        <Route path="/trainers" element={<ManageTrainers />} />
+        <Route path="/managetrainers" element={<ManageTrainers />} />
         <Route path="/announcements" element={<Announcement />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/plans" element={<ManagePlans />} />
         <Route path="/equipments" element={<GymEquipments />} />
-        <Route path="/supplements" element={<ManageSupplements />} />
+        <Route path="/managesupplements" element={<ManageSupplements />} />
         <Route path="/schedules" element={<ViewSchedules />} />
         <Route path="/payments" element={<Payments />} />
         <Route path="/report" element={<Report />} />
-        <Route path="/top" element={<TopBar />} />
-        <Route path="/side" element={<AdminSideBar />} />
-
-
+        <Route path="/home" element={<Home />} />
+        <Route path="/supplements" element={<Supplements />} />
+        <Route path="/membership" element={<Membership />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/trainers" element={<Trainers />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
     </Router>
   );
