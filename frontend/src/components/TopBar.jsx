@@ -10,8 +10,6 @@ const TopBar = ({ userName, title, onSearch }) => {
         <AppBar
             position="fixed"
             sx={{
-                // backgroundColor: "#000000",
-                // backgroundColor: "#1e1e1e",
                 backgroundColor: "#1a1b23",
                 boxShadow: "none",
                 padding: "0 16px",

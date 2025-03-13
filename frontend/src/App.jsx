@@ -25,6 +25,9 @@ import Membership from "./pages/Home/Membership.jsx";
 import About from "./pages/Home/About.jsx";
 import Contact from "./pages/Home/Contact.jsx";
 import Trainers from "./pages/Home/Trainers.jsx";
+import TrainerDashboard from "./pages/Trainer/TrainerDashboard.jsx";
+import ViewMembers from "./pages/Trainer/ViewMembers.jsx"
+
 
 
 
@@ -55,6 +58,9 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/trainers" element={<Trainers />} />
         <Route path="/contact" element={<Contact />} />
+
+        <Route path="/trainerDashboard" element={<TrainerDashboard />} />
+        <Route path="/members1" element={<ViewMembers />} />
       </Routes>
     </Router>
   );
