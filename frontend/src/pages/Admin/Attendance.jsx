@@ -12,7 +12,6 @@ function Attendance() {
     const [selectedMember, setSelectedMember] = useState({
         id: '', name: '', membershipId: '', checkIn: '', checkOut: '', date: new Date().toISOString().split('T')[0],
     });
-    const [filteredMembers, setFilteredMembers] = useState([]); // State to store filtered members (search results)
 
     const handleDateChange = (e) => {
         setSelectedDate(e.target.value);
@@ -60,17 +59,17 @@ function Attendance() {
         const foundMember = members.find((member) =>
             member.member_id.toString().includes(searchTerm) ||
             member.full_name.toLowerCase().includes(searchTerm.toLowerCase())
-            // (member.check_in_time && member.checkin.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            // (member.check_out_time && member.checkout.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            // (member.date && member.date.toString().includes(searchTerm))
         );
 
         if (foundMember) {
+            const filteredRecord = attendanceRecords.filter(record =>
+                foundMember.member_id === record.member_id)[0];
+
             setSelectedMember({
                 id: foundMember.member_id,
                 name: foundMember.full_name,
-                checkIn: selectedMember.check_in_time || "Not Check-in ",
-                checkOut: selectedMember.check_out_time || "Not Checked Out",
+                checkIn: filteredRecord?.check_in_time || "Not Check-in ",
+                checkOut: filteredRecord?.check_out_time || "Not Checked Out",
                 date: new Date().toISOString().split('T')[0],
             });
         } else {
@@ -90,18 +89,18 @@ function Attendance() {
         if (selectedMember.id) {
             const checkInData = {
                 member_id: selectedMember.id,
-                checkIn:  new Date().toLocaleTimeString('en-GB', { hour12: false }),
-                checkOut: null,  // Initially null since the member hasn't checked out yet
-                date: new Date().toISOString().split('T')[0], // Store date in YYYY-MM-DD format
-                attended: true, // Mark as attended
+                attendance_date: new Date().toISOString().split('T')[0],
+                check_in_time:  new Date().toLocaleTimeString('en-GB', { hour12: false }),
+                check_out_time: null,
+                attended: true,
             };
-
+            console.log(selectedMember);
             try {
                 const response = await axios.post("http://localhost:8800/api/attendance/checkin", checkInData);
 
                 alert(response.data.message); // Show success message
-                setAttendanceRecords(prev => [...prev, { ...checkInData, date: new Date().toISOString().split('T')[0] }]);
-                setSelectedMember(prev => ({ ...prev, checkIn: checkInData.checkIn }));
+                setAttendanceRecords(prev => [...prev, { ...checkInData, attendance_id: response.data.attendance_id, full_name: selectedMember.name }]);
+                setSelectedMember(prev => ({ ...prev, checkIn: checkInData.check_in_time}));
 
             } catch (error) {
                 console.error("Check-in failed", error);
@@ -112,23 +111,50 @@ function Attendance() {
         }
     };
 
+    const handleCheckOut = async () => {
+        if (selectedMember.id) {
+            const currentTime = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            console.log(selectedMember);
 
+            const filteredRecord = attendanceRecords.filter(record =>
+                new Date(record.attendance_date).toLocaleDateString() === new Date(selectedDate).toLocaleDateString() &&
+                record.member_id === selectedMember.id)[0];
 
-    const handleCheckOut = () => {
-        if (selectedMember.name && selectedMember.membershipId) {
-            const currentTime = new Date().toLocaleTimeString();
-            setAttendanceRecords(prev =>
-                prev.map(r => r.id === selectedMember.id ? { ...r, checkOut: currentTime } : r)
-            );
-            setSelectedMember(prev => ({ ...prev, checkOut: currentTime }));
+            console.log(filteredRecord);
+
+            try {
+                // Send the check-out data to the server
+                const response = await axios.post(`http://localhost:8800/api/attendance/checkout/${selectedMember.id}`, filteredRecord);
+
+                // Show success message
+                alert(response.data.message);
+
+                // Update the attendance record in the state
+                setAttendanceRecords((prevRecords) => {
+                    return prevRecords.map((record) =>
+                        record.member_id === selectedMember.id && new Date(record.attendance_date).toLocaleDateString() === new Date(selectedDate).toLocaleDateString()
+                            ? { ...record, check_out_time: currentTime } // Update the check-out time
+                            : record
+                    );
+                });
+
+                // Update selected member with the new check-out time
+                setSelectedMember((prev) => ({ ...prev, checkOut: currentTime }));
+
+            } catch (error) {
+                console.error("Check-out failed", error);
+                alert(error.response?.data?.message || "Check-out failed. Please try again.");
+            }
+        } else {
+            alert("Please select a valid member before checking out.");
         }
     };
 
+
+
+
     // Check if selected date is today
     const isToday = selectedDate === new Date().toISOString().split('T')[0];
-
-    // Filter attendance records by selected date
-    const filteredRecords = attendanceRecords.filter(record => record.date === selectedDate);
 
     return (
         <div style={{ display: "flex", height: "100vh", width: "103vw", marginTop: "40px", marginLeft: "-43px" }}>
@@ -266,7 +292,7 @@ function Attendance() {
                                 <td className="px-6 py-4">{record.full_name}</td>
                                 <td className="px-6 py-4">{record.checkIn || record.check_in_time}</td>
                                 <td className="px-6 py-4">{record.check_out_time || 'Not Checked Out'}</td>
-                                <td className="px-6 py-4">{record.attendance_date}</td>
+                                <td className="px-6 py-4">{new Date(record.attendance_date).toLocaleDateString()}</td>
                             </tr>
                         ))}
                         </tbody>

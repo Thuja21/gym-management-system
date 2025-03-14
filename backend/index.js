@@ -11,8 +11,6 @@ import planPaymentRoutes from "./routes/planPayment.js";
 import attendanceRoutes from "./routes/attendance.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { db } from "./config/connectDatabase.js";
-import cron from "node-cron";
 
 //middlewares
 app.use((req, res, next) => {
@@ -22,7 +20,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "http://localhost:5174",
   })
 );
 app.use(cookieParser());
