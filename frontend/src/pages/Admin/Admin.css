@@ -30,7 +30,7 @@ body {
 
 .gradient-bar {
     width: 1242px;
-    height: 90px;
+    height: 96px;
     background: linear-gradient(
             to right,
             rgba(61, 4, 4, 1.8),
@@ -38,7 +38,7 @@ body {
             rgba(255, 0, 0, 0.7)
     );
     border: none;
-    margin: 29px 0 8px 245px;
+    margin: 34px 0 8px 145px;
     border-radius: 8px;
 }
 

@@ -28,72 +28,145 @@ export const viewAllEquipments =(req,res)=> {
     } )
 }
 
+// export const addEquipment = async (req, res) => {
+//
+//     db.beginTransaction((err) => {
+//         const equipmentInsertQuery =
+//             "INSERT INTO equipments(equipment_name, category, brand, quantity, purchase_date, price, status) VALUES (?) ";
+//
+//         const updateValues = [
+//             req.body.equipment_name,
+//             req.body.category,
+//             req.body.brand,
+//             req.body.quantity,
+//             req.body.purchase_date,
+//             req.body.price,
+//             req.body.status,
+//         ]
+//
+//         db.query(equipmentInsertQuery, [updateValues], (err, data) => {
+//             if (err) {
+//                 return db.rollback(() => {
+//                     res.status(500).json(err);
+//                 });
+//             }
+//         })
+//         db.commit((err) => {
+//             if (err) {
+//                 return db.rollback(() => {
+//                     res.status(500).json(err);
+//                 });
+//             }
+//             res.status(200).json("Plan has been created.");
+//         });
+//     })
+// }
 
-export const addEquipment = (req, res) => {
-    const q = "SELECT * FROM users WHERE user_name = ?";
+export const addEquipment = async (req, res) => {
+    const { equipment_name, category, brand, quantity, purchase_date, unit_price, status } = req.body;
 
-    db.query(q, [req.body.username], (err, data) => {
-        if (err) return res.status(500).json(err);
-        if (data.length) return res.status(409).json("Trainer already exists!");
+    try {
+        db.beginTransaction(async (err) => {
+            if (err) {
+                return res.status(500).json({ error: "Transaction error!" });
+            }
 
-        // Hash the password
-        const salt = bcrypt.genSaltSync(10);
-        const hashedPassword = bcrypt.hashSync(req.body.password, salt);
+            // Check if the equipment already exists
+            const [existingEquipment] = await db.promise().query(
+                "SELECT * FROM equipments WHERE equipment_name = ?",
+                [equipment_name]
+            );
 
-        // Start transaction
-        db.beginTransaction((err) => {
-            if (err) return res.status(500).json(err);
+            let equipmentId;
 
-            // Insert into users table
-            const userInsertQuery =
-                "INSERT INTO users (`user_name`,`full_name`,`password`, `email`,  `contact_no`, `user_type` , `address` ) VALUES (?)";
-            const userValues = [
-                req.body.username,
-                req.body.fullname,
-                hashedPassword,
-                req.body.email,
-                req.body.contactNo,
-                "TRAINER",
-                req.body.address,
-            ];
+            if (existingEquipment.length > 0) {
+                // Equipment exists → Update quantity & category
+                equipmentId = existingEquipment[0].equipment_id;
 
-            db.query(userInsertQuery, [userValues], (err, result) => {
-                if (err) {
+                await db.promise().query(
+                    `UPDATE equipments 
+                     SET category = ?, brand = ?, quantity = quantity + ?, status = ? 
+                     WHERE equipment_id = ?`,
+                    [category, brand, quantity, status, equipmentId]
+                );
+            } else {
+                // Equipment doesn't exist → Insert new row
+                const [insertResult] = await db.promise().query(
+                    `INSERT INTO equipments (equipment_name, category, brand, quantity, status) 
+                     VALUES (?, ?, ?, ?, ?)`,
+                    [equipment_name, category, brand, quantity, status]
+                );
+
+                equipmentId = insertResult.insertId;
+            }
+
+            // Insert into purchase history table
+            await db.promise().query(
+                `INSERT INTO equipment_purchases (equipment_id, purchase_date, unit_price, quantity) 
+                 VALUES (?, ?, ?, ?)`,
+                [equipmentId, purchase_date, unit_price, quantity]
+            );
+
+            db.commit((commitErr) => {
+                if (commitErr) {
                     return db.rollback(() => {
-                        res.status(500).json(err);
+                        res.status(500).json({ error: "Transaction commit failed!" });
                     });
                 }
-
-
-                console.log("##33",req.body);
-
-                const subTableInsertQuery =
-                    "INSERT INTO trainers (`user_id`, `dob`, `age`, `specialization`,`registered_date` ) VALUES (?)";
-                const subTableValues = [result.insertId,req.body.dob, req.body.age, req.body.specialization, new Date()];
-
-                db.query(subTableInsertQuery, [subTableValues], (err, result) => {
-                    if (err) {
-                        return db.rollback(() => {
-                            res.status(500).json(err);
-                        });
-                    }
-
-                    // Commit the transaction if both queries succeed
-                    db.commit((err) => {
-                        if (err) {
-                            return db.rollback(() => {
-                                res.status(500).json(err);
-                            });
-                        }
-
-                        // Send success response
-                        res.status(200).json("Trainer has been created.");
-                    });
-                });
+                res.status(200).json({ message: "Equipment added/updated successfully!", equipment_id: equipmentId });
             });
         });
-    });
-}
+    } catch (error) {
+        db.rollback(() => {
+            console.error("Database error:", error);
+            res.status(500).json({ error: "Database error!" });
+        });
+    }
+};
+
+
+// export const addEquipment = async (req, res) => {
+//     const { equipment_name, category, brand, quantity, purchase_date, unit_price, status } = req.body;
+//
+//     // Validate input
+//     if (!equipment_name || !category || !brand || !quantity || !purchase_date || !unit_price || !status) {
+//         return res.status(400).json({ error: "All fields are required!" });
+//     }
+//
+//     try {
+//         // Check if the equipment already exists
+//         const [existingEquipment] = await db.query(
+//             "SELECT * FROM equipments WHERE equipment_name = ?",
+//             [equipment_name]
+//         );
+//
+//         if (existingEquipment.length > 0) {
+//             // Equipment exists → Update existing row
+//             const existing = existingEquipment[0];
+//
+//             await db.query(
+//                 `UPDATE equipments
+//                  SET category = ?, brand = ?, quantity = quantity + ?, purchase_date = ?, unit_price = ?, status = ?
+//                  WHERE equipment_id = ?`,
+//                 [category, brand, quantity, purchase_date, unit_price, status, existing.equipment_id]
+//             );
+//
+//             return res.json({ message: "Equipment updated successfully!", equipment_id: existing.equipment_id });
+//         } else {
+//             // Equipment doesn't exist → Insert a new record
+//             const [insertResult] = await db.query(
+//                 `INSERT INTO equipments (equipment_name, category, brand, quantity, purchase_date, unit_price, status)
+//                  VALUES (?, ?, ?, ?, ?, ?, ?)`,
+//                 [equipment_name, category, brand, quantity, purchase_date, unit_price, status]
+//             );
+//
+//             return res.json({ message: "New equipment added!", equipment_id: insertResult.insertId });
+//         }
+//     } catch (error) {
+//         console.error("Database error:", error);
+//         return res.status(500).json({ error: "Database error!" });
+//     }
+// };
 
 export const deleteEquipment = (req, res) => {
     console.log("Trainer ID received:", req.params.id); // Debugging

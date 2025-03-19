@@ -39,39 +39,33 @@ const ManageEquipments = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
 
-        setNewTrainer((prev) => ({
+        setNewEquipment((prev) => ({
             ...prev,
             [name]: value,
         }));
+    };
 
-        // Validate the current field and remove error if corrected
-        setErrors((prevErrors) => {
-            const newErrors = { ...prevErrors };
-            switch (name) {
-                case "username":
-                case "fullname":
-                case "address":
-                case "dob":
-                case "specialization":
-                    if (value.trim() !== "") delete newErrors[name];
-                    break;
-                case "contactNo":
-                    if (/^\d{10}$/.test(value)) delete newErrors[name];
-                    else newErrors[name] = "Valid contact number is required (10 digits)";
-                    break;
-                case "email":
-                    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) delete newErrors[name];
-                    else newErrors[name] = "Valid email is required";
-                    break;
-                case "password":
-                    if (value.length >= 6) delete newErrors[name];
-                    else newErrors[name] = "Password must be at least 6 characters";
-                    break;
-                default:
-                    break;
+
+    // Handle Add Equipment dialog submission
+    const handleAddEquipment = async () => {
+        try {
+            const response = await fetch("http://localhost:8800/api/equipments/add", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newEquipment),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to add new equipment.");
             }
-            return newErrors;
-        });
+            alert("Equipment added successfully!");
+
+            setOpenDialog(false); // Close the dialog
+        } catch (err) {
+            setError(err.message);
+        }
     };
 
     // Handle Edit button click
@@ -180,7 +174,7 @@ const ManageEquipments = () => {
                                     <th className="px-6 py-3 text-center">Brand</th>
                                     <th className="px-6 py-3 text-center">Quantity</th>
                                     <th className="px-6 py-3 text-center">Purchased Date</th>
-                                    <th className="px-6 py-3 text-center">Price</th>
+                                    <th className="px-6 py-3 text-center">Unit Price</th>
                                     <th className="px-6 py-3 text-center">Usage Status</th>
                                     <th className="px-6 py-3 text-center">Actions</th>
                                 </TableRow>
@@ -274,7 +268,7 @@ const ManageEquipments = () => {
 
                         {/* Right Column (3 fields) */}
                         <Grid item xs={6}>
-                            {["purchase_date", "price", "status"].map((field) => (
+                            {["purchase_date", "unit_price", "status"].map((field) => (
                                 <TextField
                                     key={field}
                                     margin="dense"
@@ -310,7 +304,7 @@ const ManageEquipments = () => {
                     <Button onClick={() => setOpenDialog(false)} color="primary">
                         Cancel
                     </Button>
-                    <Button color="primary">
+                    <Button onClick={handleAddEquipment} color="primary">
                         Add Equipment
                     </Button>
                 </DialogActions>

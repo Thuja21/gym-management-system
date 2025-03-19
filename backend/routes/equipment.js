@@ -4,7 +4,6 @@ const router = express.Router();
 
 router.get('/all' , viewAllEquipments);
 
-export default router;
 
 router.post("/add", addEquipment);
 
@@ -15,6 +14,6 @@ router.put("/edit/:id", editEquipment);
 // Delete a member by ID
 router.delete("/delete/:id", deleteEquipment);
 
-
+export default router;
 
 

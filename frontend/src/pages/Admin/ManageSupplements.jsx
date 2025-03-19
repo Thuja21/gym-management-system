@@ -111,6 +111,7 @@ const ManageSupplements = () => {
                                         <th className="px-6 py-3">Price</th>
                                         <th className="px-6 py-3">Expiry Date</th>
                                         <th className="px-6 py-3">Stock Quantity</th>
+                                        <th className="px-6 py-3">Actions</th>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody className="divide-y divide-gray-200">

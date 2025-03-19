@@ -118,3 +118,24 @@ export const logout = (req, res) => {
     .status(200)
     .json("User has been logged out.");
 };
+
+
+export const totalRegistration = (req, res) => {
+  const query = `
+    SELECT COUNT(*) AS total_registrations
+    FROM gym_members
+    WHERE MONTH(registered_date) = MONTH(CURRENT_DATE)
+      AND YEAR(registered_date) = YEAR(CURRENT_DATE)
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Database Error:", err);
+      return res.status(500).json({ error: "Error fetching total registrations" });
+    }
+
+    // If results exist, send the count; otherwise, send 0
+    res.status(200).json({ total_registrations: results[0].total_registrations || 0 });
+  });
+};
+

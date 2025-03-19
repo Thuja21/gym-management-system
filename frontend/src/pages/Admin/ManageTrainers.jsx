@@ -249,8 +249,6 @@ const ManageTrainers = () => {
                 </div>
             </div>
 
-
-
             {loading && <Typography>Loading trainers...</Typography>}
             {error && <Typography color="error">{error}</Typography>}
 
@@ -294,7 +292,6 @@ const ManageTrainers = () => {
 
                                         }}
                                     >
-
                                         <td className="px-6 py-1 text-center">{trainer.trainer_id}</td>
                                         <td className="px-6 py-1" style={{paddingTop: "10px"}}>{trainer.full_name}</td>
                                         <td className="px-6 py-1">{trainer.user_name}</td>
@@ -305,23 +302,6 @@ const ManageTrainers = () => {
                                         <td className="px-6 py-1">{trainer.age}</td>
                                         <td className="px-6 py-1">{trainer.specialization}</td>
                                         <td>{(new Date(trainer.registered_date).toLocaleDateString())}</td>
-                                        {/*<td className="px-6 py-1 flex justify-center space-x-2">*/}
-                                        {/*    /!* Edit Button *!/*/}
-                                        {/*    <button*/}
-                                        {/*        className=" hover:bg-blue-600 text-white p-2 rounded-md" style={{ backgroundColor: "#E94E4E"}}*/}
-                                        {/*        onClick={() => handleEdit(trainer.trainer_id)}*/}
-                                        {/*    >*/}
-                                        {/*        <EditIcon  />*/}
-                                        {/*    </button>*/}
-
-                                        {/*    /!* Delete Button *!/*/}
-                                        {/*    <button*/}
-                                        {/*        className="bg-red-900 hover:bg-red-600 text-white p-2 rounded-md"*/}
-                                        {/*        onClick={() => handleDelete(trainer.trainer_id)}*/}
-                                        {/*    >*/}
-                                        {/*        <DeleteIcon  />*/}
-                                        {/*    </button>*/}
-                                        {/*</td>*/}
                                         <td className="table-cell-actions"
                                                    sx={{
                                                        display: "flex",

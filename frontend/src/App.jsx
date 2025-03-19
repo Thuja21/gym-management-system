@@ -24,9 +24,11 @@ import Supplements from "./pages/Home/Supplements.jsx";
 import Membership from "./pages/Home/Membership.jsx";
 import About from "./pages/Home/About.jsx";
 import Contact from "./pages/Home/Contact.jsx";
+import Classes  from "./pages/Home/Classes.jsx";
 import Trainers from "./pages/Home/Trainers.jsx";
 import TrainerDashboard from "./pages/Trainer/TrainerDashboard.jsx";
 import ViewMembers from "./pages/Trainer/ViewMembers.jsx"
+import ProfilePage from "./pages/Admin/Profile.jsx";
 
 
 
@@ -52,12 +54,15 @@ function App() {
         <Route path="/schedules" element={<ViewSchedules />} />
         <Route path="/payments" element={<Payments />} />
         <Route path="/report" element={<Report />} />
+        <Route path="/profile" element={<ProfilePage />} />
+
         <Route path="/home" element={<Home />} />
         <Route path="/supplements" element={<Supplements />} />
         <Route path="/membership" element={<Membership />} />
         <Route path="/about" element={<About />} />
         <Route path="/trainers" element={<Trainers />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/classes" element={<Classes />} />
 
         <Route path="/trainerDashboard" element={<TrainerDashboard />} />
         <Route path="/members1" element={<ViewMembers />} />

@@ -56,6 +56,25 @@ function Announcements() {
             }
     };
 
+    // Handle Delete button click
+    const handleDelete = async (announcementId) => {
+        if (window.confirm("Are you sure you want to delete this announcement?")) {
+            try {
+                const response = await fetch(`http://localhost:8800/api/announcements/delete/${announcementId}`, {
+                    method: "DELETE", // Use appropriate method for your backend
+                });
+                if (!response.ok) {
+                    throw new Error("Failed to delete announcement.");
+                }
+                setAnnouncements((prevAnnouncement) => prevAnnouncement.filter((announcement) => announcement.announcement_id !== announcementId));
+                alert("Announcement deleted successfully!");
+            } catch (err) {
+                setError(err.message);
+            }
+        }
+    };
+
+
     return (
         <div style={{ display: "flex", height: "100vh", paddingRight: "30px" }}>
             <AdminSideBar style={{ flexShrink: 0, width: 250 }} />
@@ -97,7 +116,7 @@ function Announcements() {
                         {announcements.length > 0 ? (
                             announcements.map((announcement) => (
                                 <div
-                                    key={announcement.id}
+                                    key={announcement.announcement_id}
                                     className="p-2 border border-gray-100 rounded-lg hover:border-gray-200 transition-all hover:shadow-md"
                                 >
                                     <div className="w-full p-3 rounded-2xl flex justify-between items-center bg-gradient-to-r from-gray-100 via-gray-300 to-blue-50" >
@@ -114,10 +133,10 @@ function Announcements() {
                                             </div>
                                         </div>
                                         <button
-                                            onClick={() => handleDelete(announcement.id)}
+                                            onClick={() => handleDelete(announcement.announcement_id)}
                                             className="text-gray-500 hover:text-red-500 transition-colors p-2 hover:bg-red-200 rounded-full"
                                         >
-                                            <Trash2 className="h-6 w-6" />
+                                            <Trash2 className="h-6 w-6 " />
                                         </button>
                                     </div>
                                 </div>
