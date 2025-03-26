@@ -9,6 +9,8 @@ import plansRoutes from "./routes/plan.js";
 import announcementRoutes from "./routes/announcement.js";
 import planPaymentRoutes from "./routes/planPayment.js";
 import attendanceRoutes from "./routes/attendance.js";
+import dashboardRoutes from "./routes/dashboard.js";
+import scheduleRoutes from "./routes/schedule.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -34,6 +36,8 @@ app.use("/api/plans", plansRoutes);
 app.use("/api/announcements", announcementRoutes)
 app.use("/api/planpayments", planPaymentRoutes)
 app.use("/api/attendance", attendanceRoutes)
+app.use("/api/dash", dashboardRoutes)
+app.use("/api/schedules", scheduleRoutes)
 
 
 

@@ -157,7 +157,7 @@ function Attendance() {
     const isToday = selectedDate === new Date().toISOString().split('T')[0];
 
     return (
-        <div style={{ display: "flex", height: "100vh", width: "103vw", marginTop: "40px", marginLeft: "-43px" }}>
+        <div className="bg-gray-100" style={{ display: "flex", height: "100vh", width: "103vw", marginTop: "40px", marginLeft: "-43px" }}>
 
             <AdminSideBar style={{ flexShrink: 0, width: 250 }} />
             <div style={{ flexGrow: 1, padding: "20px", height: "100vh", overflowY: "auto" }}>

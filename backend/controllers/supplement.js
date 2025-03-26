@@ -11,41 +11,26 @@ export const viewAllSupplements = (req, res) => {
 
 
 export const addSupplement = async (req, res) => {
-    const q = "SELECT * FROM plans WHERE plan_name= ?";
+    const q = "INSERT INTO supplements (supplement_name, description, price, quantity_in_stock, expiry_date, category, image_url, size, brand) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    db.query(q, [req.body.plan_name], (err, data) => {
+    const values = [
+        req.body.supplement_name,
+        req.body.description,
+        req.body.price,
+        req.body.quantity_in_stock,
+        req.body.expiry_date,
+        req.body.category,
+        req.body.image_url,
+        req.body.size,
+        req.body.brand
+    ];
+
+    db.query(q, values, (err, result) => {
         if (err) return res.status(500).json(err);
-        if (data.length) return res.status(409).json("Plan already exists!");
-    })
+        res.status(200).json("Supplement has been added.");
+    });
+};
 
-    db.beginTransaction((err) => {
-        const planInsertQuery =
-            "INSERT INTO plans(plan_name, plan_duration, plan_price, features) VALUES (?) ";
-
-        const updateValues = [
-            req.body.plan_name ,
-            req.body.plan_duration,
-            req.body.plan_price ,
-            req.body.features ,
-        ]
-
-        db.query(planInsertQuery, [updateValues], (err, data) => {
-            if (err) {
-                return db.rollback(() => {
-                    res.status(500).json(err);
-                });
-            }
-        })
-        db.commit((err) => {
-            if (err) {
-                return db.rollback(() => {
-                    res.status(500).json(err);
-                });
-            }
-            res.status(200).json("Plan has been created.");
-        });
-    })
-}
 
 export const editSupplement = async (req, res) => {
     const planId = req.params.id;
@@ -74,27 +59,21 @@ export const editSupplement = async (req, res) => {
 };
 
 export const deleteSupplement = (req, res) => {
-    const planId = req.params.id;
-    console.log("Updating plan ID:", planId);
+    const supplementId = req.params.id;
+    console.log("Updating supplement ID:", supplementId);
 
-    // Check if the plan ID is provided
-    if (!planId) {
-        return res.status(400).json({ message: "Plan ID is required" });
-    }
+    const deleteQuery = "DELETE FROM supplements WHERE supplement_id = ?";
 
-    // Delete query
-    const deleteQuery = "DELETE FROM plans WHERE plan_id = ?";
-
-    db.query(deleteQuery, [planId], (err, result) => {
+    db.query(deleteQuery, [supplementId], (err, result) => {
         if (err) {
-            console.error("Error deleting plan:", err);
+            console.error("Error deleting supplement:", err);
             return res.status(500).json({ message: "Internal server error" });
         }
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ message: "Plan not found" });
+            return res.status(404).json({ message: "Supplement not found" });
         }
 
-        res.status(200).json({ message: "Plan deleted successfully!" });
+        res.status(200).json({ message: "Supplement deleted successfully!" });
     });
 };

@@ -6,21 +6,8 @@ import TopBar from "../../components/TopBar.jsx";
 
 const routeConfig = [
     { title: "Dashboard", path: "/trainerDashboard", icon: "HomeOutlined", color: "#4caf50" },
-    { title: "Clients", path: "/members1", icon: "PeopleOutlined", color: "#2196f3" },
-    { title: "Workouts", path: "/dashboard/workouts", icon: "FitnessCenterOutlined", color: "#ff9800" },
-    { title: "Schedule", path: "/dashboard/schedule", icon: "EventOutlined", color: "#9c27b0" },
-    { title: "Profile", path: "/dashboard/profile", icon: "AccountCircleOutlined", color: "#f44336" },
-    { title: "Messages", path: "/dashboard/messages", icon: "MessageOutlined", color: "#3f51b5" },
-    // { title: "Manage Members", path: "/members", icon: "PeopleOutlined", color: "#2196f3" },
-    // { title: "Manage Trainers", path: "/managetrainers", icon: "SportsOutlined", color: "#ff9800" },
-    // { title: "Attendance", path: "/attendance", icon: "AccessTimeOutlined", color: "#9c27b0" },
-    // { title: "Manage Plans", path: "/plans", icon: "AssignmentOutlined", color: "#f44336" },
-    // { title: "Announcements", path: "/announcements", icon: "CampaignOutlined", color: "#3f51b5" },
-    // { title: "Gym Equipments", path: "/equipments", icon: "FitnessCenterOutlined", color: "#00bcd4" },
-    // { title: "Manage Supplements", path: "/managesupplements", icon: "LocalPharmacyOutlined", color: "#8bc34a" },
-    // { title: "View Schedules", path: "/schedules", icon: "EventOutlined", color: "#ffc107" },
-    // { title: "Payments", path: "/payments", icon: "PaymentOutlined", color: "#e91e63" },
-    // { title: "Report", path: "/report", icon: "AssessmentOutlined", color: "#009688" },
+    { title: "Schedule", path: "/schedule", icon: "EventOutlined", color: "#9c27b0" },
+    { title: "View Members", path: "/members1", icon: "PeopleOutlined", color: "#2196f3" },
 ];
 
 

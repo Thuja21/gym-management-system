@@ -28,7 +28,9 @@ import Classes  from "./pages/Home/Classes.jsx";
 import Trainers from "./pages/Home/Trainers.jsx";
 import TrainerDashboard from "./pages/Trainer/TrainerDashboard.jsx";
 import ViewMembers from "./pages/Trainer/ViewMembers.jsx"
+import ViewMembers1 from "./pages/Trainer/ViewMembers1.jsx"
 import ProfilePage from "./pages/Admin/Profile.jsx";
+import Schedule from "./pages/Trainer/Schedule.jsx";
 
 
 
@@ -66,6 +68,8 @@ function App() {
 
         <Route path="/trainerDashboard" element={<TrainerDashboard />} />
         <Route path="/members1" element={<ViewMembers />} />
+        <Route path="/members2" element={<ViewMembers1 />} />
+        <Route path="/schedule" element={<Schedule />} />
       </Routes>
     </Router>
   );

@@ -111,8 +111,6 @@ const ViewMember = () => {
                                         <th className="px-6 py-3 text-center">Blood Group</th>
                                         <th className="px-6 py-3 text-center">Fitness Level</th>
                                         <th className="px-6 py-3 text-center">Fitness Goal</th>
-                                        <th className="px-6 py-3 text-center">Plan</th>
-                                        <th className="px-6 py-3 text-center">Schedule</th>
                                         <th className="px-6 py-3 text-center">Health Issues</th>
                                         <th className="px-6 py-3 text-center">Status</th>
                                     </TableRow>
@@ -138,8 +136,6 @@ const ViewMember = () => {
                                             <TableCell>{member.blood_group}</TableCell>
                                             <TableCell>{member.current_fitness_level}</TableCell>
                                             <TableCell>{member.fitness_goal}</TableCell>
-                                            <TableCell>{member.plan_name}</TableCell>
-                                            <TableCell>{member.schedule_id}</TableCell>
                                             <TableCell>{member.health_issues}</TableCell>
                                             <TableCell><span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                                 member.status == 1

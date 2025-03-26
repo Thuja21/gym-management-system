@@ -17,9 +17,13 @@ import {Box} from "@mui/material";
 
 function AdminDashboard() {
     const [totalRegistrations, setTotalRegistrations] = useState(0);
+    const [totalActiveMembers, setTotalActiveMembers] = useState(0);
+    const [RecentNotices, setRecentNotices] = useState([]);
+    const [RecentSessions, setRecentSessions] = useState([]);
+
 
     useEffect(() => {
-        axios.get("http://localhost:8800/api/auth/totalRegistration")
+        axios.get("http://localhost:8800/api/dash/totalRegistration")
             .then(response => {
                 console.log("API Response:", response.data);  // ✅ Debugging API response
                 setTotalRegistrations(response.data.total_registrations);
@@ -28,19 +32,42 @@ function AdminDashboard() {
             .catch(error => {
                 console.error("Error fetching total registrations:", error);
             });
+
+        // Fetch total active members
+        axios.get("http://localhost:8800/api/dash/totalActiveMember")
+            .then(response => {
+                console.log("API Response (Active Members):", response.data);
+                setTotalActiveMembers(response.data.total_active_members);
+            })
+            .catch(error => {
+                console.error("Error fetching total active members:", error);
+            });
+
+        // Fetch recent 3 notices
+        axios.get("http://localhost:8800/api/dash/recentNotices")
+            .then(response => {
+                console.log("API Response (Recent Notices):", response.data);
+                setRecentNotices(response.data); // assuming you're using a state like setRecentNotices
+            })
+            .catch(error => {
+                console.error("Error fetching recent notices:", error);
+            });
+
+        axios.get("http://localhost:8800/api/dash/recentSessions")
+            .then(response => {
+                console.log("API Response (Recent Sessions):", response.data);
+                setRecentSessions(response.data); // assuming you're using a state like setRecentSessions
+            })
+            .catch(error => {
+                console.error("Error fetching recent sessions:", error);
+            });
     }, []);
 
                 const stats = [
-        { title: 'Active Members', value: '486', icon: Users, trend: '+12% from last month', color: 'from-violet-500 to-violet-600', lightColor: 'bg-violet-50', textColor: 'text-violet-600' },
-        { title: 'Monthly Revenue', value: '$24,890', icon: DollarSign, trend: '+8.2% from last month', color: 'from-blue-500 to-blue-600', lightColor: 'bg-blue-50', textColor: 'text-blue-600' },
+        { title: 'Active Members', value: totalActiveMembers, icon: Users, trend: '+12% from last month', color: 'from-violet-500 to-violet-600', lightColor: 'bg-violet-50', textColor: 'text-violet-600' },
+        { title: 'Monthly Revenue', value: 'Rs.24,890', icon: DollarSign, trend: '+8.2% from last month', color: 'from-blue-500 to-blue-600', lightColor: 'bg-blue-50', textColor: 'text-blue-600' },
         { title: 'Class Attendance', value: '89%', icon: Calendar, trend: '+4% from last week', color: 'from-emerald-500 to-emerald-600', lightColor: 'bg-emerald-50', textColor: 'text-emerald-600' },
         { title: 'New Registrations', value: totalRegistrations, icon: Activity, trend: '+6 from this month',  color: 'from-pink-500 to-pink-600', lightColor: 'bg-pink-50', textColor: 'text-pink-600'},
-    ];
-
-    const recentNotices = [
-        { id: 1, title: 'New Year Fitness Challenge Starting Soon', date: '2024-03-15', priority: 'high' },
-        { id: 2, title: 'Maintenance: Pool Area This Weekend', date: '2024-03-16', priority: 'medium' },
-        { id: 3, title: 'Updated Class Schedule for Spring', date: '2024-03-14', priority: 'low' },
     ];
 
     const upcomingClasses = [
@@ -114,18 +141,23 @@ function AdminDashboard() {
                         </div>
                         <div className="p-6">
                             <div className="space-y-4">
-                                {recentNotices.map((notice) => (
-                                    <div key={notice.id} className="flex items-center space-x-4 p-3 rounded-lg bg-gray-50">
-                                        <div className={`w-2 h-2 rounded-full ${
-                                            notice.priority === 'high' ? 'bg-red-500' :
-                                                notice.priority === 'medium' ? 'bg-yellow-500' : 'bg-emerald-500'
-                                        }`} />
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium text-gray-900">{notice.title}</p>
-                                            <p className="text-sm text-gray-500">{notice.date}</p>
+                                {RecentNotices.map((notice, index) => {
+                                    const colors = ['bg-red-500', 'bg-yellow-500', 'bg-emerald-500']; // Define 3 colors
+                                    const circleColor = colors[index % 3]; // Assign colors based on row index
+
+                                    return (
+                                        <div key={notice.announcement_id} className="flex items-center space-x-4 p-3 rounded-lg bg-gray-50">
+                                            <div className={`w-2 h-2 rounded-full ${circleColor}`} />
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-gray-900">{notice.announcement_title}</p>
+                                                <p className="text-sm text-gray-500">
+                                                    {new Date(notice.posted_date).toLocaleDateString('en-GB')}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
+
                             </div>
                         </div>
                     </div>
@@ -140,19 +172,26 @@ function AdminDashboard() {
                         </div>
                         <div className="p-6">
                             <div className="space-y-4">
-                                {upcomingClasses.map((class_) => (
-                                    <div key={class_.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                                {RecentSessions.map((session) => (
+                                    <div key={session.schedule_id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
                                         <div className="flex items-center space-x-4">
                                             <div className="flex-shrink-0">
                                                 <Calendar className="h-5 w-5 text-indigo-600" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-medium text-gray-900">{class_.name}</p>
-                                                <p className="text-sm text-gray-500">{class_.trainer} • {class_.time}</p>
+                                                <p className="text-sm font-medium text-gray-900">{session.title}</p>
                                             </div>
                                         </div>
                                         <div className="text-sm font-medium text-indigo-600">
-                                            {class_.attendees} attendees
+                                            <p className="text-sm font-medium">
+                                                {new Date(`1970-01-01T${session.schedule_time_slot}`)
+                                                    .toLocaleTimeString("en-US", {
+                                                        hour: "numeric",
+                                                        minute: "2-digit",
+                                                        hour12: true,
+                                                    })
+                                                    .replace(":", ".")}
+                                            </p>
                                         </div>
                                     </div>
                                 ))}

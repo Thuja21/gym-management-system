@@ -238,7 +238,7 @@ const ManageMembers = () => {
 
     return (
 
-        <div style={{ display: "flex", height: "100vh" }}>
+        <div className="bg-gray-100" style={{ display: "flex", height: "100vh" }}>
             <AdminSideBar style={{ flexShrink: 0, width: 250 }} />
             <div style={{ flexGrow: 1, padding: "20px", height: "100vh", width:"1300px" ,overflowY: "auto" , marginLeft: "-45px", marginTop: "10px" }}>
                 {/* <TopBar /> */}

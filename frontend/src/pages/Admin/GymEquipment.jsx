@@ -113,8 +113,26 @@ const ManageEquipments = () => {
         }
     };
 
+    // Handle Delete button click
+    const handleDelete = async (equipmentId) => {
+        if (window.confirm("Are you sure you want to delete this equipment?")) {
+            try {
+                const response = await fetch(`http://localhost:8800/api/equipments/delete/${equipmentId}`, {
+                    method: "DELETE", // Use appropriate method for your backend
+                });
+                if (!response.ok) {
+                    throw new Error("Failed to delete equipment.");
+                }
+                setEquipments((prevEquipments) => prevEquipments.filter((equipment) => equipment.equipment_id !== equipmentId));
+                alert("Equipment deleted successfully!");
+            } catch (err) {
+                setError(err.message);
+            }
+        }
+    };
+
     return (
-        <div  style={{ display: "flex", height: "100vh" ,paddingRight: "30px" }}>
+        <div  className="bg-gray-100" style={{ display: "flex", height: "100vh" ,paddingRight: "30px" }}>
             <AdminSideBar/>
             <div style={{ flexGrow: 1, padding: "20px", height: "100vh",  width:"1300px" ,overflowY: "auto" , marginLeft: "-45px", marginTop: "10px" }}>
                 {/* <TopBar /> */}

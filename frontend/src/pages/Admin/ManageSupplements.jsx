@@ -51,8 +51,28 @@ const ManageSupplements = () => {
         }));
     };
 
+
+
+    // Handle Delete button click
+    const handleDelete = async (supplementId) => {
+        if (window.confirm("Are you sure you want to delete this supplement?")) {
+            try {
+                const response = await fetch(`http://localhost:8800/api/supplements/delete/${supplementId}`, {
+                    method: "DELETE", // Use appropriate method for your backend
+                });
+                if (!response.ok) {
+                    throw new Error("Failed to delete supplement.");
+                }
+                setSupplements((prevSupplements) => prevSupplements.filter((supplement) => supplement.supplement_id !== supplementId));
+                alert("Supplement deleted successfully!");
+            } catch (err) {
+                setError(err.message);
+            }
+        }
+    };
+
     return (
-        <div  style={{ display: "flex", height: "100vh" ,paddingRight: "30px" }}>
+        <div  className="bg-gray-100" style={{ display: "flex", height: "100vh" ,paddingRight: "30px" }}>
             <AdminSideBar/>
             <div style={{ flexGrow: 1, padding: "20px", height: "100vh",  width:"1300px" ,overflowY: "auto" , marginLeft: "-45px", marginTop: "10px" }}>
                 {/* <TopBar /> */}
@@ -102,12 +122,14 @@ const ManageSupplements = () => {
                         >
                             <Table className="w-full border-collapse">
                                 <TableHead style={{ position: "sticky", top: 0,zIndex: 10 }}>
-                                    <TableRow className="bg-red-200 text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
+                                    <TableRow className="bg-red-200 text-blue-950 text-xs font-medium uppercase tracking-wider text-center">
                                         <th className="px-6 py-3 text-center">ID</th>
                                         <th className="px-6 py-3">Image</th>
                                         <th className="px-6 py-3">Supplement Name</th>
-                                        <th className="px-6 py-3">Description</th>
+                                        <th className="px-20 py-3">Description</th>
                                         <th className="px-6 py-3">Category</th>
+                                        <th className="px-6 py-3">Brand</th>
+                                        <th className="px-6 py-3">Size</th>
                                         <th className="px-6 py-3">Price</th>
                                         <th className="px-6 py-3">Expiry Date</th>
                                         <th className="px-6 py-3">Stock Quantity</th>
@@ -117,7 +139,7 @@ const ManageSupplements = () => {
                                 <TableBody className="divide-y divide-gray-200">
                                     {supplements.map((supplement, index) => (
                                         <TableRow
-                                            key={supplement.supplement_id} className="table-row"
+                                            key={supplement.supplement_id} className="table-row text-[14px]"
                                             sx={{
                                                 backgroundColor: index % 2 === 0 ? "#f5f5f5" : "#ffffff", // Alternate row colors
                                                 "&:hover": {
@@ -125,16 +147,21 @@ const ManageSupplements = () => {
                                                 },
                                             }}
                                         >
-                                            <td className="px-6 py-1 text-center">{supplement.supplement_id}</td>
-                                            <td className="px-6 py-1">{supplement.supplement_name}</td>
-                                            <td className="px-6 py-1">{supplement.description}</td>
-                                            <td className="px-6 py-1 text-center">${supplement.price}</td>
-                                            <td className="px-6 py-1 text-center">{supplement.quantity_in_stock}</td>
-                                            <td className="px-6 py-1">{supplement.expiry_date ? new Date(supplement.expiry_date).toLocaleDateString() : "N/A"}</td>
-                                            <td className="px-6 py-1">{supplement.category}</td>
+                                            <td className="px-6 py-1 text-center ">{supplement.supplement_id}</td>
                                             <td className="px-6 py-1 text-center">
                                                 <img src={supplement.image_url} alt={supplement.supplement_name} className="h-12 w-12 object-cover rounded-md" />
                                             </td>
+                                            <td className="px-6 py-1 text-center">{supplement.supplement_name}</td>
+                                            <td className="px-6 py-1 text-center">
+                                                {supplement.description ? supplement.description.split(" ").slice(0, 5).join(" ") + "..." : "N/A"}
+                                            </td>
+                                            <td className="px-6 py-1 text-center">{supplement.category}</td>
+                                            <td className="px-6 py-1 text-center">{supplement.brand}</td>
+                                            <td className="px-6 py-1 text-center">{supplement.size}</td>
+                                            <td className="px-6 py-1 text-center">${supplement.price}</td>
+                                            <td className="px-6 py-1 text-center">{supplement.expiry_date ? new Date(supplement.expiry_date).toLocaleDateString() : "N/A"}</td>
+                                            <td className="px-6 py-1 text-center">{supplement.quantity_in_stock}</td>
+
 
                                             {/* Actions */}
                                             <td className="table-cell-actions"

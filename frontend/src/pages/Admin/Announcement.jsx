@@ -76,7 +76,7 @@ function Announcements() {
 
 
     return (
-        <div style={{ display: "flex", height: "100vh", paddingRight: "30px" }}>
+        <div className="bg-gray-100"  style={{ display: "flex", height: "100vh", paddingRight: "30px" }}>
             <AdminSideBar style={{ flexShrink: 0, width: 250 }} />
             <div style={{ flexGrow: 1, padding: "20px", height: "100vh", width: "1300px", overflowY: "auto",scrollbarWidth: "none" ,marginLeft: "-45px", marginTop: "10px" }}>
                 <Typography variant="h4" gutterBottom>
