@@ -1,106 +1,64 @@
 import React from "react";
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { FaShoppingCart, FaStar, FaCheck, FaTimes, FaMinus, FaPlus, FaFire } from 'react-icons/fa'
+import { Star, ShoppingCart } from 'lucide-react';
 import Navbar from "../../components/Member/Navbar.jsx"
 
 const Supplements = () => {
-    const [category, setCategory] = useState('all')
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState("all"); // Default: Show all
     const [selectedProduct, setSelectedProduct] = useState(null)
+    const [selectedSupplement, setSelectedSupplement] = useState(null)
     const [quantity, setQuantity] = useState(1)
+    const [supplements, setSupplements] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [sortBy, setSortBy] = useState("default");
 
-    const categories = [
-        { id: 'top-sellers', name: 'Top Sellers' },
-        { id: 'energy-drinks', name: 'Energy Drinks' },
-        { id: 'protein', name: 'Protein' },
-        { id: 'all', name: 'All Products' },
-    ]
+    // Fetch supplements from backend
+    useEffect(() => {
+        const fetchSupplements = async () => {
+            try {
+                const response = await fetch("http://localhost:8800/api/supplements/all"); // Update with your backend URL
+                if (!response.ok) {
+                    throw new Error("Failed to fetch supplements.");
+                }
+                const data = await response.json();
+                setSupplements(data);
 
-    const supplements = [
-        {
-            id: 1,
-            name: "Premium Whey Protein",
-            category: "protein",
-            isTopSeller: true,
-            image: "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-            price: 2499,
-            rating: 5,
-            description: "High-quality whey protein with 24g protein per serving. Perfect for muscle recovery and growth.",
-            features: [
-                "24g protein per serving",
-                "Low in carbs and fat",
-                "Mixes instantly",
-                "Great taste"
-            ],
-            variants: ["Chocolate", "Vanilla", "Strawberry"],
-            size: "1 kg",
-            servings: 30
-        },
-        {
-            id: 2,
-            name: "Power Energy Drink",
-            category: "energy-drinks",
-            isTopSeller: true,
-            image: "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-            price: 149,
-            rating: 5,
-            description: "Sugar-free energy drink packed with B-vitamins and electrolytes for sustained energy.",
-            features: [
-                "Zero sugar",
-                "Natural caffeine",
-                "B-vitamin complex",
-                "Electrolytes"
-            ],
-            variants: ["Original", "Tropical", "Berry Blast"],
-            size: "500ml",
-            servings: 1
-        },
-        {
-            id: 3,
-            name: "BCAA Energy Drink",
-            category: "energy-drinks",
-            isTopSeller: false,
-            image: "https://images.unsplash.com/photo-1622543925917-763c34d1a86e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-            price: 179,
-            rating: 4,
-            description: "BCAA-enriched energy drink for improved recovery and sustained energy during workouts.",
-            features: [
-                "5g BCAAs per serving",
-                "Natural caffeine",
-                "Zero sugar",
-                "Electrolytes"
-            ],
-            variants: ["Lemon Lime", "Orange Mango", "Grape"],
-            size: "500ml",
-            servings: 1
-        },
-        {
-            id: 4,
-            name: "Mass Gainer Pro",
-            category: "protein",
-            isTopSeller: true,
-            image: "https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-            price: 2999,
-            rating: 5,
-            description: "High-calorie mass gainer with premium proteins and complex carbs for muscle gain.",
-            features: [
-                "1250 calories per serving",
-                "50g protein per serving",
-                "Complex carbohydrates",
-                "Added vitamins and minerals"
-            ],
-            variants: ["Chocolate", "Vanilla", "Cookies & Cream"],
-            size: "3 kg",
-            servings: 20
-        }
-    ]
+                // Extract unique categories
+                const uniqueCategories = [
+                    ...new Set(data.map((item) => item.category))
+                ].map((category) => ({
+                    id: category.toLowerCase().replace(/\s+/g, "-"),
+                    name: category,
+                }));
 
-    const filteredSupplements = category === 'all'
-        ? supplements
-        : category === 'top-sellers'
-            ? supplements.filter(supp => supp.isTopSeller)
-            : supplements.filter(supp => supp.category === category)
+                setCategories([{ id: "all", name: "All" }, ...uniqueCategories]);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSupplements();
+    }, [loading]);
+
+
+// Filter supplements based on selected category
+    const filteredSupplements =
+        selectedCategory === "all"
+            ? supplements
+            : supplements.filter((supp) => supp.category.toLowerCase().replace(/\s+/g, "-") === selectedCategory);
+
+    const sortedSupplements = [...filteredSupplements].sort((a, b) => {
+        if (sortBy === "price-asc") return a.price - b.price;
+        if (sortBy === "price-desc") return b.price - a.price;
+        if (sortBy === "name") return a.supplement_name.localeCompare(b.supplement_name);
+        return 0;
+    });
 
     const handleQuantityChange = (action) => {
         if (action === 'increase') {
@@ -110,7 +68,7 @@ const Supplements = () => {
         }
     }
 
-    const ProductModal = ({ product }) => (
+    const ProductModal = ({ supplement }) => (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 " >
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -122,7 +80,7 @@ const Supplements = () => {
                     <div className="flex justify-end">
                         <button
                             onClick={() => {
-                                setSelectedProduct(null)
+                                setSelectedSupplement(null)
                                 setQuantity(1)
                             }}
                             className="text-gray-500 hover:text-gray-700"
@@ -134,48 +92,25 @@ const Supplements = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <img
-                                src={product.image}
-                                alt={product.name}
+                                src={
+                                    supplement.image_url && supplement.image_url.startsWith('http')
+                                        ? supplement.image_url  // External URL
+                                        : `http://localhost:8800${supplement.image_url || ''}` // Local image path or fallback
+                                }
+                                alt={supplement.supplement_name}
                                 className="w-full h-80 object-cover rounded-lg"
                             />
                         </div>
-
                         <div>
                             <div className="flex items-center gap-2 mb-2">
-                                <h2 className="text-2xl font-bold">{product.name}</h2>
+                                <h2 className="text-2xl font-bold">{supplement.supplement_name}</h2>
                             </div>
-                            <div className="flex items-center mb-4">
-                                <div className="flex text-yellow-400 mr-2">
-                                    {[...Array(product.rating)].map((_, i) => (
-                                        <FaStar key={i} />
-                                    ))}
-                                </div>
-                                <span className="text-gray-600">({product.rating}/5)</span>
-                            </div>
-
                             <div className="text-3xl font-bold text-[#FF4500] mb-4">
-                                ₹{product.price.toLocaleString()}
+                                Rs.{supplement.price}
                             </div>
-
-                            <p className="text-gray-600 mb-4">{product.description}</p>
-
+                            <p className="text-gray-600 mb-4">{supplement.description}</p>
                             <div className="mb-4">
-                                <h3 className="font-semibold mb-2">Size: {product.size}</h3>
-                                <p className="text-gray-600">Servings: {product.servings}</p>
-                            </div>
-
-                            <div className="mb-6">
-                                <h3 className="font-semibold mb-2">Available Flavors:</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {product.variants.map((variant, i) => (
-                                        <span
-                                            key={i}
-                                            className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
-                                        >
-                      {variant}
-                    </span>
-                                    ))}
-                                </div>
+                                <h3 className="font-semibold mb-2">Size: {supplement.size}</h3>
                             </div>
 
                             <div className="mb-6">
@@ -209,18 +144,6 @@ const Supplements = () => {
                             </div>
                         </div>
                     </div>
-
-                    <div className="mt-8">
-                        <h3 className="text-xl font-bold mb-4">Product Features</h3>
-                        <ul className="space-y-2">
-                            {product.features.map((feature, i) => (
-                                <li key={i} className="flex items-center text-gray-600">
-                                    <FaCheck className="text-[#FF4500] mr-2" />
-                                    <span>{feature}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
                 </div>
             </motion.div>
         </div>
@@ -251,19 +174,26 @@ const Supplements = () => {
             <section className="py-8 bg-[#F8F8F8]">
                 <div className="container mx-auto px-4 md:px-6">
                     <div className="flex flex-wrap justify-center gap-4">
-                        {categories.map(cat => (
+                        {categories.map((cat) => (
                             <button
                                 key={cat.id}
-                                onClick={() => setCategory(cat.id)}
+                                onClick={() => setSelectedCategory(cat.id)}
                                 className={`px-6 py-2 rounded-full font-medium transition-colors ${
-                                    category === cat.id
-                                        ? 'bg-[#FF4500] text-white'
-                                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                                    selectedCategory === cat.id
+                                        ? "bg-[#FF4500] text-white"
+                                        : "bg-white text-gray-700 hover:bg-gray-100"
                                 }`}
                             >
                                 {cat.name}
                             </button>
                         ))}
+
+                        <select className="p-2 rounded bg-white border ml-[100px]" onChange={(e) => setSortBy(e.target.value)}>
+                            <option value="default">Sort By</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="name">Name: A to Z</option>
+                        </select>
                     </div>
                 </div>
             </section>
@@ -272,45 +202,58 @@ const Supplements = () => {
             <section className="py-16 bg-[#F8F8F8]">
                 <div className="container mx-auto px-4 md:px-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {filteredSupplements.map((supplement, index) => (
+                        {sortedSupplements.map((supplement, index) => (
                             <motion.div
-                                key={supplement.id}
-                                className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer"
+                                key={supplement.supplement_id}
+                                className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer flex flex-col h-full"
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: index * 0.1 }}
                                 viewport={{ once: true }}
                                 onClick={() => {
-                                    setSelectedProduct(supplement)
-                                    setQuantity(1)
+                                    setSelectedSupplement(supplement);
+                                    setQuantity(1);
                                 }}
                             >
+                                {/* Image Section */}
                                 <div className="relative">
                                     <img
-                                        src={supplement.image}
-                                        alt={supplement.name}
-                                        className="w-full h-64 object-cover"
+                                        src={
+                                            supplement.image_url && supplement.image_url.startsWith('http')
+                                                ? supplement.image_url  // External URL
+                                                : `http://localhost:8800${supplement.image_url || ''}` // Local image path or fallback
+                                        }
+                                        alt={supplement.supplement_name}
+                                        className="w-full h-44 object-contain"
                                     />
                                 </div>
-                                <div className="p-6">
-                                    <h3 className="text-xl font-bold mb-2">{supplement.name}</h3>
-                                    <div className="text-2xl font-bold text-[#FF4500] mb-4">
-                                        Rs.{supplement.price.toLocaleString()}
+
+                                {/* Text Content */}
+                                <div className="p-4 text-left flex flex-col flex-1">
+                                    <div className="text-sm text-gray-500 mb-1">{supplement.category}</div>
+                                    <h3 className="text-lg font-semibold mb-2">{supplement.supplement_name}</h3>
+                                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{supplement.description}</p>
+
+                                    {/* Price & Button - Always at Bottom */}
+                                    <div className="flex items-center justify-between mt-auto">
+                                        <span className="text-xl font-bold">Rs.{supplement.price}</span>
+                                        <button className="flex items-center bg-[#FF4500] text-white font-semibold py-2 px-6 rounded-md hover:bg-opacity-90 transition duration-300">
+                                            <ShoppingCart className="w-4 h-4 mr-2" />
+                                            Add to Cart
+                                        </button>
                                     </div>
-                                    <button className="w-full bg-[#FF4500] text-white font-semibold py-2 px-6 rounded-md hover:bg-opacity-90 transition duration-300">
-                                        Buy Now
-                                    </button>
                                 </div>
                             </motion.div>
                         ))}
                     </div>
+
                 </div>
             </section>
 
             {/* Product Modal */}
             <AnimatePresence>
-                {selectedProduct && (
-                    <ProductModal product={selectedProduct} />
+                {selectedSupplement && (
+                    <ProductModal supplement={selectedSupplement} />
                 )}
             </AnimatePresence>
 

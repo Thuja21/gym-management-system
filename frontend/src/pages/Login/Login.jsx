@@ -7,6 +7,7 @@ import {FaLock, FaUser} from "react-icons/fa";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [user, setUser] = useState(null); // ✅ Defined useState for setUser
   const [errorMessage, setErrorMessage] = useState(""); // For error messages
   const navigate = useNavigate();
 
@@ -22,27 +23,29 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8800/api/auth/login",
-        { username, password }
+          "http://localhost:8800/api/auth/login",
+          { username, password }
       );
 
       // Check if login is successful
       if (response.status === 200) {
         const userType = response.data.user_type; // Assuming 'userType' is sent from the backend
         localStorage.setItem("userType", userType); // Store user type in localStorage
+        localStorage.setItem("user", JSON.stringify(response.data)); // Store user data
+        setUser(response.data); // Update React state
         // Redirect based on user type
         switch (userType) {
           case "CUSTOMER":
             navigate("/customerDashboard");
             break;
           case "MEMBER":
-            navigate("/memberDashboard");
+            navigate("/home"); // Redirect to Home
             break;
           case "TRAINER":
-            navigate("/TrainerDashboard");
+            navigate("/trainerDashboard");
             break;
           case "ADMIN":
-            navigate("/admin-dashboard");
+            navigate("/adminDashboard");
             break;
           default:
             setErrorMessage("Unknown user type.");
@@ -63,68 +66,68 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h2>Login</h2>
-        {errorMessage && (
-          <div className="error-message">{errorMessage}</div>
-        )}{" "}
-        {/* Display error message */}
-        <form onSubmit={handleLogin}>
-          <div className="mb-3">
-            <label htmlFor="username" className="form-label">
-              User Name
-            </label>
-            <div className="input-group">
+      <div className="login-container">
+        <div className="login-box">
+          <h2>Login</h2>
+          {errorMessage && (
+              <div className="error-message">{errorMessage}</div>
+          )}{" "}
+          {/* Display error message */}
+          <form onSubmit={handleLogin}>
+            <div className="mb-3">
+              <label htmlFor="username" className="form-label">
+                User Name
+              </label>
+              <div className="input-group">
                             <span className="input-group-text">
                                 <FaUser />
                             </span>
-              <input
-                  type="text"
-                  id="username"
-                  className="form-control"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter your username"
-                  required
-              />
+                <input
+                    type="text"
+                    id="username"
+                    className="form-control"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter your username"
+                    required
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label" >
-              Password
-            </label>
-            <div className="input-group">
+            <div className="mb-3">
+              <label htmlFor="password" className="form-label" >
+                Password
+              </label>
+              <div className="input-group">
                             <span className="input-group-text">
                                 <FaLock />
                             </span>
-              <input
-                  type="password"
-                  id="password"
-                  className="form-control"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-              />
+                <input
+                    type="password"
+                    id="password"
+                    className="form-control"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                />
+              </div>
             </div>
-          </div>
-          <button
-              type="submit"
-              className="bg-[#870000] text-white px-4 py-2 w-full rounded-md text-lg cursor-pointer transition duration-300 hover:bg-[#6e0404] mt-7"
-          >
-            Login
-          </button>
-        </form>
-        <p className="signup-text">
-          Don’t have an account?{" "}
-          <a href="#" onClick={handleSignupRedirect}>
-            Signup
-          </a>
-        </p>
+            <button
+                type="submit"
+                className="bg-[#870000] text-white px-4 py-2 w-full rounded-md text-lg cursor-pointer transition duration-300 hover:bg-[#6e0404] mt-7"
+            >
+              Login
+            </button>
+          </form>
+          <p className="signup-text">
+            Don’t have an account?{" "}
+            <a href="#" onClick={handleSignupRedirect}>
+              Signup
+            </a>
+          </p>
+        </div>
       </div>
-    </div>
   );
 };
 

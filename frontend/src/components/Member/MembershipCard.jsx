@@ -2,13 +2,14 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FaCheck } from "react-icons/fa";
+import {Check} from "lucide-react";
 
 const MembershipCard = ({
                             title,
                             price,
                             period,
                             features,
-                            popular = false,
+                            popular = true,
                             delay = 0,
                         }) => {
     return (
@@ -33,8 +34,8 @@ const MembershipCard = ({
                     <span className="text-gray-500">/{period}</span>
                 </div>
                 <ul className="space-y-3 mb-6">
-                    {features.map((feature, index) => (
-                        <li key={index} className="flex items-center">
+                    {(features || "").split(", ").map((feature, i) => (
+                        <li key={i} className="flex items-center">
                             <FaCheck className="text-[#FF4500] mr-2" />
                             <span>{feature}</span>
                         </li>

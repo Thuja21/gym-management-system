@@ -1,10 +1,11 @@
-import React from "react";
+import React, {useState} from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
 import Navbar from "../../components/Member/Navbar.jsx";
 
 const Trainers = () => {
+
     const trainers = [
         {
             id: 1,
@@ -18,7 +19,7 @@ const Trainers = () => {
                 "HIIT Training Specialist",
                 "Nutrition Coach",
             ],
-            bio: "Alex has been transforming lives through fitness for over a decade. With a background in competitive sports and specialized training in high-intensity workouts, Alex helps clients push their limits and achieve remarkable results. Known for challenging yet effective sessions that keep clients coming back for more.",
+            // bio: "Alex has been transforming lives through fitness for over a decade. With a background in competitive sports and specialized training in high-intensity workouts, Alex helps clients push their limits and achieve remarkable results. Known for challenging yet effective sessions that keep clients coming back for more.",
         },
         {
             id: 2,
@@ -32,7 +33,7 @@ const Trainers = () => {
                 "Meditation Coach",
                 "Prenatal Yoga Specialist",
             ],
-            bio: "Sarah discovered yoga during a stressful period in her corporate career and it transformed her life. She left the corporate world to pursue her passion for helping others find balance through yoga. Her classes focus on mindful movement, proper alignment, and connecting breath with movement for a holistic practice.",
+            // bio: "Sarah discovered yoga during a stressful period in her corporate career and it transformed her life. She left the corporate world to pursue her passion for helping others find balance through yoga. Her classes focus on mindful movement, proper alignment, and connecting breath with movement for a holistic practice.",
         },
         {
             id: 3,
@@ -46,7 +47,7 @@ const Trainers = () => {
                 "USA Weightlifting Coach",
                 "Functional Movement Specialist",
             ],
-            bio: "Mike specializes in helping clients build strength, improve performance, and transform their physiques. With a background in competitive powerlifting and a deep understanding of biomechanics, he creates personalized programs that deliver results while minimizing injury risk. His approach combines traditional strength training with modern functional movement principles.",
+            // bio: "Mike specializes in helping clients build strength, improve performance, and transform their physiques. With a background in competitive powerlifting and a deep understanding of biomechanics, he creates personalized programs that deliver results while minimizing injury risk. His approach combines traditional strength training with modern functional movement principles.",
         },
         {
             id: 4,
@@ -60,7 +61,7 @@ const Trainers = () => {
                 "Rehabilitation Specialist",
                 "Pre/Post Natal Pilates",
             ],
-            bio: "Emma's journey with Pilates began after a dance injury led her to discover its rehabilitative benefits. Now, she's passionate about helping clients improve core strength, flexibility, and posture through precise, controlled movements. Her sessions emphasize proper technique and mind-body connection for maximum benefit.",
+            // bio: "Emma's journey with Pilates began after a dance injury led her to discover its rehabilitative benefits. Now, she's passionate about helping clients improve core strength, flexibility, and posture through precise, controlled movements. Her sessions emphasize proper technique and mind-body connection for maximum benefit.",
         },
         {
             id: 5,
@@ -74,7 +75,7 @@ const Trainers = () => {
                 "Indoor Cycling Specialist",
                 "Sports Nutrition Advisor",
             ],
-            bio: "David brings energy and enthusiasm to every cycling class. A former competitive cyclist, he combines technical expertise with motivational coaching to help riders of all levels improve their performance. His classes feature carefully curated playlists and challenging interval training to maximize cardiovascular benefits.",
+            // bio: "David brings energy and enthusiasm to every cycling class. A former competitive cyclist, he combines technical expertise with motivational coaching to help riders of all levels improve their performance. His classes feature carefully curated playlists and challenging interval training to maximize cardiovascular benefits.",
         },
         {
             id: 6,
@@ -88,7 +89,7 @@ const Trainers = () => {
                 "Dance Fitness Specialist",
                 "Group Exercise Instructor",
             ],
-            bio: "Maria brings the joy of dance to fitness. With a background in professional dance and a passion for helping people enjoy their workouts, her classes are known for being fun, energetic, and effective. She specializes in making dance accessible to everyone, regardless of previous experience.",
+            // bio: "Maria brings the joy of dance to fitness. With a background in professional dance and a passion for helping people enjoy their workouts, her classes are known for being fun, energetic, and effective. She specializes in making dance accessible to everyone, regardless of previous experience.",
         },
     ];
 
@@ -120,7 +121,7 @@ const Trainers = () => {
             {/* Trainers Grid */}
             <section className="py-16 bg-[#F8F8F8]">
                 <div className="container mx-auto px-4 md:px-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
                         {trainers.map((trainer, index) => (
                             <motion.div
                                 key={trainer.id}
@@ -133,7 +134,7 @@ const Trainers = () => {
                                 <img
                                     src={trainer.image}
                                     alt={trainer.name}
-                                    className="w-full h-80 object-cover"
+                                    className="w-full h-50 object-cover"
                                 />
                                 <div className="p-6">
                                     <h3 className="text-xl font-bold mb-1">{trainer.name}</h3>
@@ -503,209 +504,6 @@ const Trainers = () => {
                                 >
                                     Inquire Now
                                 </Link>
-                            </div>
-                        </motion.div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Testimonials */}
-            <section className="py-16 bg-white">
-                <div className="container mx-auto px-4 md:px-6">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                            What Our Clients Say
-                        </h2>
-                        <p className="text-gray-600 max-w-2xl mx-auto">
-                            Real results and experiences from members who have trained with
-                            our expert team.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <motion.div
-                            className="bg-light rounded-lg p-6"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                            viewport={{ once: true }}
-                        >
-                            <div className="flex items-center mb-4">
-                                <img
-                                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80"
-                                    alt="Client"
-                                    className="w-16 h-16 rounded-full object-cover mr-4"
-                                />
-                                <div>
-                                    <h4 className="font-bold">Emily Rodriguez</h4>
-                                    <p className="text-gray-500">Training with Sarah Chen</p>
-                                </div>
-                            </div>
-                            <p className="text-gray-600 italic mb-4">
-                                "Sarah completely transformed my approach to fitness. Her yoga
-                                classes have improved not just my flexibility, but my overall
-                                well-being and stress levels. I've never felt better!"
-                            </p>
-                            <div className="flex text-yellow-400">
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                            </div>
-                        </motion.div>
-
-                        <motion.div
-                            className="bg-light rounded-lg p-6"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.1 }}
-                            viewport={{ once: true }}
-                        >
-                            <div className="flex items-center mb-4">
-                                <img
-                                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80"
-                                    alt="Client"
-                                    className="w-16 h-16 rounded-full object-cover mr-4"
-                                />
-                                <div>
-                                    <h4 className="font-bold">James Wilson</h4>
-                                    <p className="text-gray-500">Training with Mike Williams</p>
-                                </div>
-                            </div>
-                            <p className="text-gray-600 italic mb-4">
-                                "I've been working with Mike for 6 months and have added 50
-                                pounds to my deadlift while dropping 15 pounds of body fat. His
-                                knowledge of strength training and nutrition is incredible."
-                            </p>
-                            <div className="flex text-yellow-400">
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                            </div>
-                        </motion.div>
-
-                        <motion.div
-                            className="bg-light rounded-lg p-6"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                            viewport={{ once: true }}
-                        >
-                            <div className="flex items-center mb-4">
-                                <img
-                                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=688&q=80"
-                                    alt="Client"
-                                    className="w-16 h-16 rounded-full object-cover mr-4"
-                                />
-                                <div>
-                                    <h4 className="font-bold">Lisa Thompson</h4>
-                                    <p className="text-gray-500">Training with Alex Johnson</p>
-                                </div>
-                            </div>
-                            <p className="text-gray-600 italic mb-4">
-                                "Alex's HIIT classes have completely changed my cardio
-                                endurance. I've lost 25 pounds in 4 months and have energy I
-                                never thought possible. The workouts are tough but so worth it!"
-                            </p>
-                            <div className="flex text-yellow-400">
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
                             </div>
                         </motion.div>
                     </div>

@@ -1,11 +1,12 @@
 import express from "express";
-import {viewAllSupplements, editSupplement, addSupplement, deleteSupplement } from "../controllers/supplement.js";
-import {addPlan, deletePlan, editPlan} from "../controllers/plan.js";
+import { viewAllSupplements, editSupplement, deleteSupplement } from "../controllers/supplement.js";
 const router = express.Router();
 
+// Routes for supplements
 router.get("/all", viewAllSupplements);
-router.put("/edit/:id", editSupplement);
-router.post("/add", addSupplement);
+// router.post("/"/upload", upload.single("image"", addSupplement); // Using router.post
+router.put("/edit/:id", editSupplement); // Using router.put
 router.delete("/delete/:id", deleteSupplement);
+
 
 export default router;

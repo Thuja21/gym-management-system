@@ -1,52 +1,26 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import MembershipCard from "../../components/Member/MembershipCard.jsx";
 import Navbar from "../../components/Member/Navbar.jsx";
+import axios from "axios";
 
 const Membership = () => {
-    const membershipPlans = [
-        {
-            title: "Monthly",
-            price: "39.99",
-            period: "month",
-            features: [
-                "Limited access to gym facilities",
-                "Basic equipment usage",
-                "Locker facility",
-                "2 group classes per month",
-                "Fitness assessment",
-            ],
-            popular: false,
-        },
-        {
-            title: "Quarterly",
-            price: "99.99",
-            period: "quarter",
-            features: [
-                "Full access to gym facilities",
-                "All equipment usage",
-                "Locker facility",
-                "Two personal training sessions",
-                "Free access to group workouts",
-            ],
-            popular: true,
-        },
-        {
-            title: "Annual",
-            price: "349.99",
-            period: "year",
-            features: [
-                "Full access to gym facilities",
-                "All premium features included",
-                "personal training sessions per month",
-                "Exclusive access to special events",
-                "Nutrition Consultation",
-            ],
-            popular: false,
-        },
 
-];
+    // const [error, setError] = useState({});
+    const [plans, setPlans] = useState([]); // State to store membership types
+
+    useEffect(() => {
+        const fetchPlans = async () => {
+            try {
+                const response = await axios.get("http://localhost:8800/api/plans/all");
+                setPlans(response.data); // Store membership plans in the state
+            } catch (error) {
+                console.error("Error fetching membership plans:", error);
+            }
+        };
+        fetchPlans();
+    }, []);
 
     return (
         <div style={{width:'100vw'}}>
@@ -75,14 +49,14 @@ const Membership = () => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {membershipPlans.map((plan, index) => (
+                        {plans.map((plan, index) => (
                             <MembershipCard
                                 key={index}
-                                title={plan.title}
-                                price={plan.price}
-                                period={plan.period}
+                                title={plan.plan_name}
+                                price={plan.plan_price}
+                                period={plan.plan_duration}
                                 features={plan.features}
-                                popular={plan.popular}
+                                popular={!!plan.popular}
                                 delay={index * 0.1}
                             />
                         ))}
@@ -167,7 +141,7 @@ const Membership = () => {
             <section className="py-20 bg-[#0A0A0A] text-white" >
                 <div className="container mx-auto px-4 md:px-6 text-center" >
                     <h2 className="text-3xl md:text-4xl font-bold mb-6" >Ready to Start Your Fitness Journey?</h2>
-                    <p className="text-xl mb-8 max-w-2xl mx-auto">Join FitnessHub today and take the first step towards a healthier, stronger you.</p>
+                    <p className="text-xl mb-8 max-w-2xl mx-auto">Join JK Fitness today and take the first step towards a healthier, stronger you.</p>
                     <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
                         <Link to="/contact" className="bg-white text-[#FF4500] font-semibold py-3 px-8 rounded-md hover:bg-gray-100 transition duration-300">Join Now</Link>
                         <Link to="/contact" className="bg-transparent border-2 border-white text-white font-semibold py-3 px-8 rounded-md hover:bg-white hover:text-[#FF4500] transition duration-300">Schedule a Tour</Link>

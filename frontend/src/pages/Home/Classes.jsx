@@ -2,6 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import Navbar from "../../components/Member/Navbar.jsx";
 
 const Classes = () => {
     const [filter, setFilter] = useState("all");
@@ -128,6 +129,7 @@ const Classes = () => {
 
     return (
         <div>
+            <Navbar/>
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 bg-dark text-white">
                 <div

@@ -1,14 +1,40 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import Hero from "../../components/Member/Hero.jsx";
 import Navbar from "../../components/Member/Navbar.jsx";
 import Footer from "../../components/Member/Footer.jsx";
-import { FaDumbbell, FaUsers, FaHeartbeat, FaAppleAlt } from "react-icons/fa";
+import TrainerCard from "../../components/Member/TrainerCard";
+import {FaDumbbell, FaUsers, FaHeartbeat, FaAppleAlt, FaFacebook, FaInstagram, FaTwitter} from "react-icons/fa";
 import FeatureCard from "../../components/Member/FeatureCard.jsx";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import "./Home.css";
 
 const Home = () => {
+
+    const [trainers, setTrainers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+
+    // Fetch members from backend
+    useEffect(() => {
+        const fetchTrainers = async () => {
+            try {
+                const response = await fetch("http://localhost:8800/api/trainers/all"); // Update with your backend URL
+                if (!response.ok) {
+                    throw new Error("Failed to fetch trainers.");
+                }
+                const data = await response.json();
+                setTrainers(data);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTrainers();
+    }, [loading]);
+
     const features = [
         {
             icon: FaDumbbell,
@@ -112,6 +138,55 @@ const Home = () => {
                         </div>
                     </div>
                 </section>
+
+                {/* Trainers Section */}
+                <section className="py-16 bg-white">
+                    <div className="container mx-auto px-4 md:px-6">
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                                Meet Our Trainers
+                            </h2>
+                            <p className="text-gray-600 max-w-2xl mx-auto">
+                                Our certified trainers are here to guide and motivate you on your
+                                fitness journey.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {trainers.map((trainer, index) => (
+                                <TrainerCard
+                                    key={trainer.trainer_id}
+                                    // image={trainer.image}
+                                    name={trainer.full_name}
+                                    specialty={trainer.specialization}
+                                    delay={index * 0.1}
+                                />
+                            ))}
+
+                            <motion.div
+                                className="bg-primary rounded-lg shadow-lg overflow-hidden flex flex-col justify-center items-center text-white p-6"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.2 }}
+                                viewport={{ once: true }}
+                            >
+                                <h3 className="text-2xl font-bold mb-4">Join Our Team</h3>
+                                <p className="text-center mb-6">
+                                    Are you a certified trainer looking to share your expertise?
+                                    We're always looking for passionate fitness professionals to
+                                    join our team.
+                                </p>
+                                <Link
+                                    to="/contact"
+                                    className="bg-white text-primary font-semibold py-3 px-6 rounded-md hover:bg-gray-100 transition duration-300"
+                                >
+                                    Join Now
+                                </Link>
+                            </motion.div>
+                        </div>
+                    </div>
+                </section>
+
             </div>
             <Footer />
         </div>
