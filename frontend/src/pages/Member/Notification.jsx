@@ -6,9 +6,7 @@ import Footer from "../../components/Member/Footer.jsx";
 export default function Notifications() {
 
     const [notifications, setNotifications] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [userType, setUserType] = useState(null);
 
     const getTimeAgo = (timestamp) => {
         const now = new Date();
@@ -36,11 +34,13 @@ export default function Notifications() {
                 const res = await fetch("http://localhost:8800/api/announcements/all"); // Update with your backend URL
                 let data = await res.json();
 
-                // Convert timestamp to "time ago" format
-                data = data.map((notif) => ({
-                    ...notif,
-                    timeAgo: getTimeAgo(notif.created_at),
-                }));
+                // Sort by newest first and format time
+                data = data
+                    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                    .map((notif) => ({
+                        ...notif,
+                        timeAgo: getTimeAgo(notif.created_at),
+                    }));
 
                 setNotifications(data);
             } catch (err) {
@@ -50,13 +50,26 @@ export default function Notifications() {
         fetchNotifications();
     }, []);
 
-    // Array of available icons
+
+    const getIndexFromString = (str, arrLength) => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return Math.abs(hash) % arrLength;
+    };
+
+    const getIconAndColor = (notification) => {
+        const index = getIndexFromString(notification.announcement_id.toString(), icons.length);
+        const icon = icons[index];
+        const bgColor = bgColors[index % bgColors.length];
+        const iconColor = iconColors[bgColor];
+
+        return { icon, bgColor, iconColor };
+    };
+
     const icons = [Bell, Calendar, CreditCard, Award];
-
-    // Array of background colors for icons
     const bgColors = ['bg-blue-100', 'bg-green-100', 'bg-red-100', 'bg-yellow-100', 'bg-purple-100'];
-
-    // Array of corresponding darker icon colors for each background color
     const iconColors = {
         'bg-blue-100': 'text-blue-800',
         'bg-green-100': 'text-green-800',
@@ -65,49 +78,52 @@ export default function Notifications() {
         'bg-purple-100': 'text-purple-800',
     };
 
-    // Function to get a random color from an array
-    const getRandomColor = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
     return (
         <div className="min-h-screen bg-gray-50" style={{ width: '100vw' }}>
             <Navbar />
-            <div className="max-w-6xl mx-auto px-4 py-8">
-                <div className="flex items-center justify-between mb-6 mt-16">
-                    <h1 className="text-2xl font-bold">Notifications</h1>
-                    <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                        Mark all as read
-                    </button>
+            <div className="max-w-[1370px] mx-auto px-4 py-8">
+                <div className="flex items-center justify-between mb-1 mt-16">
+                    <h1 className="text-3xl font-bold" style={{ fontFamily: "Segoe UI" }}>Notifications</h1>
                 </div>
 
-                <div className="space-y-4">
+                <div className="flex items-center justify-between mb-[-15px] border-b pb-2">
+                    <div className="flex space-x-6 ml-auto">
+                        <button className="text-blue-600 hover:text-blue-700 text-[17px] font-medium">
+                            clear all
+                        </button>
+                    </div>
+                </div>
+
+
+                {/* Notifications List */}
+                <div className="space-y-4 mt-8">
                     {notifications.map((notification) => {
-                        // Randomly pick an icon from the icons array
-                        const Icon = icons[Math.floor(Math.random() * icons.length)];
-
-                        // Randomly pick a background color from the bgColors array
-                        const bgColor = getRandomColor(bgColors);
-
-                        // Get the corresponding icon color (darker shade) from the iconColors object
-                        const iconColor = iconColors[bgColor];
+                        const { icon: Icon, bgColor, iconColor } = getIconAndColor(notification);
 
                         return (
-                            <div key={notification.announcement_id} className="bg-white rounded-lg shadow-md p-4 flex items-start">
+                            <div
+                                key={notification.announcement_id}
+                                className="bg-white rounded-lg shadow-md p-4 flex items-start border-l-4 border-blue-500"
+                            >
                                 <div className={`${bgColor} p-3 rounded-full mr-4`}>
                                     <Icon className={`h-6 w-6 ${iconColor}`} />
                                 </div>
 
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between">
-                                        <h3 className="font-medium ">{notification.announcement_title}</h3>
+                                        <h3 className="font-medium" style={{ fontFamily: "Segoe UI" }}>{notification.announcement_title}</h3>
                                         <span className="text-sm text-gray-500">{notification.timeAgo}</span>
                                     </div>
-                                    <p className="text-gray-600 mt-3 text-left ">{notification.announcement_content}</p>
+                                    <p className="text-gray-600 mt-3 text-left">
+                                        {notification.announcement_content}
+                                    </p>
                                 </div>
                             </div>
                         );
                     })}
                 </div>
             </div>
+            {/*<Footer />*/}
         </div>
     );
 }

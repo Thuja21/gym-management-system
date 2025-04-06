@@ -140,7 +140,7 @@ const Classes = () => {
                     }}
                 ></div>
                 <div className="container mx-auto px-4 md:px-6 relative z-10">
-                    <div className="max-w-3xl">
+                    <div className="max-w-3xl text-left">
                         <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Classes</h1>
                         <p className="text-xl text-gray-300">
                             Discover our wide range of fitness classes designed to help you
@@ -493,53 +493,53 @@ const Classes = () => {
                 </div>
             </section>
 
-            {/* Class Policies */}
-            <section className="py-16 bg-light">
-                <div className="container mx-auto px-4 md:px-6">
-                    <div className="max-w-3xl mx-auto">
-                        <h2 className="text-3xl font-bold mb-6">Class Policies</h2>
+            {/*/!* Class Policies *!/*/}
+            {/*<section className="py-16 bg-light">*/}
+            {/*    <div className="container mx-auto px-4 md:px-6">*/}
+            {/*        <div className="max-w-3xl mx-auto">*/}
+            {/*            <h2 className="text-3xl font-bold mb-6">Class Policies</h2>*/}
 
-                        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-                            <h3 className="text-xl font-bold mb-3">Reservations</h3>
-                            <p className="text-gray-600 mb-4">
-                                Members can reserve a spot in any class up to 7 days in advance
-                                through our mobile app or website. We recommend booking early as
-                                classes fill up quickly.
-                            </p>
-                        </div>
+            {/*            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">*/}
+            {/*                <h3 className="text-xl font-bold mb-3">Reservations</h3>*/}
+            {/*                <p className="text-gray-600 mb-4">*/}
+            {/*                    Members can reserve a spot in any class up to 7 days in advance*/}
+            {/*                    through our mobile app or website. We recommend booking early as*/}
+            {/*                    classes fill up quickly.*/}
+            {/*                </p>*/}
+            {/*            </div>*/}
 
-                        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-                            <h3 className="text-xl font-bold mb-3">Cancellations</h3>
-                            <p className="text-gray-600 mb-4">
-                                If you need to cancel your reservation, please do so at least 2
-                                hours before the class starts to avoid a late cancellation fee.
-                                This allows other members to take your spot.
-                            </p>
-                        </div>
+            {/*            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">*/}
+            {/*                <h3 className="text-xl font-bold mb-3">Cancellations</h3>*/}
+            {/*                <p className="text-gray-600 mb-4">*/}
+            {/*                    If you need to cancel your reservation, please do so at least 2*/}
+            {/*                    hours before the class starts to avoid a late cancellation fee.*/}
+            {/*                    This allows other members to take your spot.*/}
+            {/*                </p>*/}
+            {/*            </div>*/}
 
-                        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-                            <h3 className="text-xl font-bold mb-3">What to Bring</h3>
-                            <p className="text-gray-600 mb-4">
-                                Please bring a water bottle, towel, and appropriate workout
-                                attire. For yoga and pilates classes, mats are provided, but
-                                you're welcome to bring your own.
-                            </p>
-                        </div>
+            {/*            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">*/}
+            {/*                <h3 className="text-xl font-bold mb-3">What to Bring</h3>*/}
+            {/*                <p className="text-gray-600 mb-4">*/}
+            {/*                    Please bring a water bottle, towel, and appropriate workout*/}
+            {/*                    attire. For yoga and pilates classes, mats are provided, but*/}
+            {/*                    you're welcome to bring your own.*/}
+            {/*                </p>*/}
+            {/*            </div>*/}
 
-                        <div className="bg-white rounded-lg shadow-lg p-6">
-                            <h3 className="text-xl font-bold mb-3">Late Arrivals</h3>
-                            <p className="text-gray-600 mb-4">
-                                For your safety and to minimize disruption, members who arrive
-                                more than 10 minutes late may not be permitted to join the
-                                class. Please arrive at least 5 minutes early to set up.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            {/*            <div className="bg-white rounded-lg shadow-lg p-6">*/}
+            {/*                <h3 className="text-xl font-bold mb-3">Late Arrivals</h3>*/}
+            {/*                <p className="text-gray-600 mb-4">*/}
+            {/*                    For your safety and to minimize disruption, members who arrive*/}
+            {/*                    more than 10 minutes late may not be permitted to join the*/}
+            {/*                    class. Please arrive at least 5 minutes early to set up.*/}
+            {/*                </p>*/}
+            {/*            </div>*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*</section>*/}
 
             {/* CTA Section */}
-            <section className="py-20 bg-primary text-white">
+            <section className="py-20 bg-[#0A0A0A] text-white">
                 <div className="container mx-auto px-4 md:px-6 text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-6">
                         Ready to Join a Class?
@@ -551,7 +551,7 @@ const Classes = () => {
                     <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
                         <Link
                             to="/membership"
-                            className="bg-white text-primary font-semibold py-3 px-8 rounded-md hover:bg-gray-100 transition duration-300"
+                            className="bg-white text-[#FF4500] font-semibold py-3 px-8 rounded-md hover:bg-gray-100 transition duration-300"
                         >
                             Become a Member
                         </Link>

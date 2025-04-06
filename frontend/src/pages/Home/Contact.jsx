@@ -87,11 +87,9 @@ const Contact = () => {
                             </div>
                             <h3 className="text-xl font-bold mb-2">Our Location</h3>
                             <p className="text-gray-600">
-                                123 Fitness Street
+                                Main St, sarayadi 40000
                                 <br />
-                                Gym City, GC 12345
-                                <br />
-                                United States
+                                Point Pedro
                             </p>
                         </motion.div>
 
@@ -107,11 +105,9 @@ const Contact = () => {
                             </div>
                             <h3 className="text-xl font-bold mb-2">Phone Number</h3>
                             <p className="text-gray-600">
-                                Main: (123) 456-7890
+                                Main: 077 239 5819
                                 <br />
-                                Membership: (123) 456-7891
-                                <br />
-                                Support: (123) 456-7892
+                                Support: 077 539 6467
                             </p>
                         </motion.div>
 
@@ -127,11 +123,9 @@ const Contact = () => {
                             </div>
                             <h3 className="text-xl font-bold mb-2">Email Address</h3>
                             <p className="text-gray-600">
-                                General: info@fitnesshub.com
+                                General: info@jkfitness.com
                                 <br />
-                                Membership: join@fitnesshub.com
-                                <br />
-                                Support: help@fitnesshub.com
+                                Support: help@jkfitness.com
                             </p>
                         </motion.div>
 
@@ -298,101 +292,15 @@ const Contact = () => {
                             className="rounded-lg overflow-hidden shadow-xl h-[500px]"
                         >
                             <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d387193.30596552044!2d-74.25986548248684!3d40.69714941932609!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2sca!4v1645564108847!5m2!1sen!2sca"
+                                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3931.448178422435!2d80.2284661!3d9.8126733!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3aff030868e6a757%3A0xdf52b7a81d77b835!2sJK%20fitness%201.0!5e0!3m2!1sen!2slk!4v1743792137005!5m2!1sen!2slk"
                                 width="100%"
                                 height="100%"
                                 style={{ border: 0 }}
                                 allowFullScreen=""
                                 loading="lazy"
-                                title="FitnessHub Location"
+                                title="JK FitnessLocation"
                             ></iframe>
                         </motion.div>
-                    </div>
-                </div>
-            </section>
-
-            {/* FAQ Section */}
-            <section className="py-16 bg-light">
-                <div className="container mx-auto px-4 md:px-6">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                            Frequently Asked Questions
-                        </h2>
-                        <p className="text-gray-600 max-w-2xl mx-auto">
-                            Find quick answers to common questions about our gym and services.
-                        </p>
-                    </div>
-
-                    <div className="max-w-3xl mx-auto">
-                        <div className="space-y-6">
-                            <motion.div
-                                className="bg-white rounded-lg p-6"
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5 }}
-                                viewport={{ once: true }}
-                            >
-                                <h3 className="text-lg font-bold mb-2">
-                                    What are your operating hours?
-                                </h3>
-                                <p className="text-gray-600">
-                                    We are open Monday through Friday from 5:00 AM to 10:00 PM,
-                                    Saturday from 6:00 AM to 8:00 PM, and Sunday from 8:00 AM to
-                                    6:00 PM. Elite members have 24/7 access.
-                                </p>
-                            </motion.div>
-
-                            <motion.div
-                                className="bg-white rounded-lg p-6"
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.1 }}
-                                viewport={{ once: true }}
-                            >
-                                <h3 className="text-lg font-bold mb-2">
-                                    How do I sign up for a membership?
-                                </h3>
-                                <p className="text-gray-600">
-                                    You can sign up for a membership online through our website,
-                                    or visit us in person at our facility. We offer various
-                                    membership options to suit your needs.
-                                </p>
-                            </motion.div>
-
-                            <motion.div
-                                className="bg-white rounded-lg p-6"
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.2 }}
-                                viewport={{ once: true }}
-                            >
-                                <h3 className="text-lg font-bold mb-2">
-                                    Do you offer personal training?
-                                </h3>
-                                <p className="text-gray-600">
-                                    Yes, we offer personal training services with our certified
-                                    trainers. You can book one-on-one sessions, partner training,
-                                    or small group training depending on your preference.
-                                </p>
-                            </motion.div>
-
-                            <motion.div
-                                className="bg-white rounded-lg p-6"
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.3 }}
-                                viewport={{ once: true }}
-                            >
-                                <h3 className="text-lg font-bold mb-2">
-                                    Is there parking available?
-                                </h3>
-                                <p className="text-gray-600">
-                                    Yes, we have a spacious parking lot available for our members
-                                    at no additional cost. The parking area is well-lit and
-                                    monitored for your safety.
-                                </p>
-                            </motion.div>
-                        </div>
                     </div>
                 </div>
             </section>

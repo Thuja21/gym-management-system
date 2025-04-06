@@ -1,0 +1,117 @@
+.login-container1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+    box-sizing: border-box;
+    /*background: linear-gradient(to bottom, #1a1d35 0%, #e6e9f0 100%);*/
+    background: linear-gradient(to bottom, #1a1d35 0%, #1a1d35 50%, #e6e9f0 50%, #e6e9f0 100%);
+}
+
+.login-box1 {
+    border-radius: 0px;
+    background-color: rgba(255, 255, 255, 1); /* White with 80% opacity */
+    color: white;
+    padding: 2.1rem;
+    width: 410px;
+    height: 520px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(100px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.login-box1 h2 {
+    text-align: center;
+    margin-bottom: 2.6rem;
+    margin-top: 1.4rem;
+    font-size: 2rem;
+    color: #1a1d35;
+}
+
+.input-group {
+    margin-bottom: 2.3rem;
+    text-align: left;
+    color: #1a1d35;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.1rem;
+    color: #1a1d35;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #272930;
+    border-radius: 5px;
+    font-size: 1rem;
+    margin-top: 0.1rem;
+    color: black;
+}
+
+.form-label1{
+    display: block;
+    text-align: left;
+    color: #1a1d35;
+}
+
+.signup-text {
+    text-align: center;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    color: #1a1d35;
+}
+
+.signup-text a {
+    color: #f1c40f;
+    text-decoration: none;
+}
+
+.signup-text a:hover {
+    color: #1547e6;
+}
+
+.login-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: none;
+
+}
+
+.info-box {
+    width: 420px;
+    height: 520px;
+    padding: 2rem;
+    background-color: #ffffff;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #333;
+}
+
+.info-box h3 {
+    font-size: 1.5rem;
+    margin-top: 1.2rem;
+}
+
+.info-box p {
+    font-size: 0.95rem;
+    margin-top: 0.7rem;
+    line-height: 1.4;
+    color: #555;
+}
+
+.info-img {
+    width: 85%;
+    max-width: 300px;
+    margin: 0 auto;
+}

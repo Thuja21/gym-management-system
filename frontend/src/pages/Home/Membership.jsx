@@ -7,7 +7,6 @@ import axios from "axios";
 
 const Membership = () => {
 
-    // const [error, setError] = useState({});
     const [plans, setPlans] = useState([]); // State to store membership types
 
     useEffect(() => {
@@ -48,7 +47,7 @@ const Membership = () => {
                         <p className="text-gray-600 max-w-2xl mx-auto mb-8">We offer flexible membership options to fit your lifestyle and budget.</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 ">
                         {plans.map((plan, index) => (
                             <MembershipCard
                                 key={index}

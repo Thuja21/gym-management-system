@@ -20,6 +20,7 @@ const Navbar = () => {
         '/attendanceHistory',
         '/notification',
         '/memberProfile',
+        '/changePlan',
     ];
 
     const isSolidBackground = scrolled || alwaysDarkBackground.includes(location.pathname);
@@ -234,15 +235,18 @@ const Navbar = () => {
 
                                 {/* Dropdown Menu */}
                                 {showDropdown && (
-                                    <div className="absolute right-0 mt-3 w-44 bg-white rounded-lg shadow-lg border border-gray-300">
+                                    <div className="absolute right-0 mt-3 w-[200px] bg-white rounded-lg shadow-lg border border-gray-300">
 
                                         {/* Curved Arrow */}
-                                        <div className="absolute -top-2 right-4 w-4 h-4 bg-white transform rotate-45 border-t border-l border-gray-300"></div>
+                                        <div className="absolute -top-2 right-1 w-4 h-4 bg-white transform rotate-45 border-t border-l border-gray-300"></div>
 
                                         {/* Profile Options */}
                                         <div className="py-2 text-left">
                                             <Link to="/memberProfile" className="block px-4 py-3 text-gray-800 text-sm hover:bg-gray-100 transition">
                                                 Profile
+                                            </Link>
+                                            <Link to="/changePlan" className="block px-4 py-3 text-gray-800 text-sm hover:bg-gray-100 transition">
+                                                Plan
                                             </Link>
                                             <Link to="/attendanceHistory" className="block px-4 py-3 text-gray-800 text-sm hover:bg-gray-100 transition">
                                                 Attendance History

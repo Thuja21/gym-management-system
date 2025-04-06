@@ -32,6 +32,8 @@ import Notification from "./pages/Member/Notification.jsx";
 import AttendanceHistory from "./pages/Member/AttendanceHistory.jsx";
 import MemberProfile from "./pages/Member/MemberProfile.jsx";
 import PaymentHistory from "./pages/Member/PaymentHistory.jsx";
+import MemberLogin from "./pages/Member/MemberLogin.jsx";
+import ChangePlan from "@/pages/Member/ChangePlan.jsx";
 
 function App() {
   return (
@@ -66,7 +68,9 @@ function App() {
           <Route path="/notification" element={<Notification />} />
           <Route path="/attendanceHistory" element={<AttendanceHistory />} />
           <Route path="/memberProfile" element={<MemberProfile />} />
+          <Route path="/memberLogin" element={<MemberLogin />} />
           <Route path="/paymentHistory" element={<PaymentHistory />} />
+          <Route path="/changePlan" element={<ChangePlan />} />
 
           <Route path="/trainerDashboard" element={<TrainerDashboard />} />
           <Route path="/members1" element={<ViewMembers />} />

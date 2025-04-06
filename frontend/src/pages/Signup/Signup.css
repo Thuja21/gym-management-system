@@ -1,3 +1,164 @@
+/*body {*/
+/*  margin: 0;*/
+/*  font-family: Arial, sans-serif;*/
+/*}*/
+
+/*!* Signup Container *!*/
+/*.signup-container {*/
+/*  display: flex;*/
+/*  justify-content: center;*/
+/*  align-items: center;*/
+/*  height: 100vh;*/
+/*  width: 100vw;*/
+/*  background: url("../../assets/images/loginbg.png") no-repeat center center/cover;*/
+/*  !*background: url("../../assets/images/loginbg1.jpg") no-repeat center center/cover;*!*/
+/*  !*background: url("../../assets/images/img9.jpg")no-repeat center center/cover;*!*/
+/*  !*background: url("../../assets/images/img10.png") no-repeat center center/cover;*!*/
+/*  overflow: hidden; !* Ensure content stays within viewport *!*/
+/*}*/
+
+/*.signup-form {*/
+/*  !*background-color: rgba(255, 255, 255, 0.2); !* White with 80% opacity *!*!*/
+/*  background-color: rgba(255, 255, 255, 0.3); !* White with 80% opacity *!*/
+/*  color: white;*/
+/*  padding: 2rem;*/
+/*  border-radius: 10px;*/
+/*  width: 800px;*/
+/*  height: 550px;*/
+/*  text-align: center;*/
+/*  margin-top: -25px;*/
+/*  max-height: 90vh; !* Ensure the form doesn't exceed the viewport *!*/
+/*  overflow-y: auto; !* Add vertical scrolling *!*/
+/*  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);*/
+/*  backdrop-filter: blur(35px);*/
+/*  border: 1px solid rgba(255, 255, 255, 0.3);*/
+/*  scrollbar-width: none;*/
+/*}*/
+
+/*.SignUp-title {*/
+/*  text-align: center;*/
+/*  margin-bottom: 2.9rem;*/
+/*  margin-top: 0.25rem;*/
+/*  font-size: 1.8rem;*/
+/*}*/
+
+/*.user-type {*/
+/*  display: flex;*/
+/*  justify-content: space-evenly;*/
+/*  align-items: center; !* Ensures vertical alignment *!*/
+/*  gap: 1rem; !* Adds space between the radio buttons and labels *!*/
+/*  margin-bottom: 3rem;*/
+/*  margin-top: -15px;*/
+/*}*/
+
+/*.user-type label {*/
+/*  display: flex;*/
+/*  align-items: center; !* Aligns the label text and the radio button vertically *!*/
+/*  gap: 0.5rem; !* Adds space between the radio button and the text *!*/
+/*  font-size: 1.3rem;*/
+/*  color: white;*/
+/*  white-space: nowrap; !* Prevents text from breaking into multiple lines *!*/
+/*}*/
+
+/*!* Form Group for Two Columns *!*/
+/*.form-group1 ,*/
+/*.form-group {*/
+/*  display: flex;*/
+/*  justify-content: space-between; !* Space between the input fields *!*/
+/*  gap: 1rem; !* Add gap between the two input fields *!*/
+/*  margin-bottom: 1.5rem; !* Spacing between rows *!*/
+/*  margin-right: 15px;*/
+/*  margin-left: 22px;*/
+/*  text-align: left;*/
+/*}*/
+
+/*.form-group input {*/
+/*  width: 315px; !* Adjust the width to your preference *!*/
+/*  height: 40px; !* Adjust the height to your preference *!*/
+/*  padding: 5px; !* Optional: for better spacing *!*/
+/*  font-size: 16px; !* Optional: for text size *!*/
+/*  border: 1px solid rgba(255, 255, 255, 0.3);*/
+/*  border-radius: 8px;*/
+/*  background: rgba(255, 255, 255, 0.3);*/
+/*  color: #000000;*/
+/*  outline: none;*/
+/*  transition: 0.3s ease-in-out;*/
+/*}*/
+
+/*.form-group1 input{*/
+/*  width: 525px; !* Adjust the width to your preference *!*/
+/*  height: 40px; !* Adjust the height to your preference *!*/
+/*  padding: 5px; !* Optional: for better spacing *!*/
+/*  font-size: 16px; !* Optional: for text size *!*/
+/*  border: 1px solid rgba(255, 255, 255, 0.3);*/
+/*  border-radius: 8px;*/
+/*  background: rgba(255, 255, 255, 0.3);*/
+/*  color: #000000;*/
+/*  outline: none;*/
+/*  transition: 0.3s ease-in-out;*/
+/*}*/
+
+/*.form-group1 label,*/
+/*.form-group label {*/
+/*  display: block;*/
+/*  margin-bottom: 0.3rem;*/
+/*  color: #d5d2d2;*/
+/*  font-weight: 500;*/
+/*}*/
+
+/*.input-field select {*/
+/*  width: 325px; !* Adjust the width to your preference *!*/
+/*  height: 49px; !* Adjust the height to your preference *!*/
+/*  padding: 5px; !* Optional: for better spacing *!*/
+/*  font-size: 16px; !* Optional: for text size *!*/
+/*  border: 1px solid rgba(255, 255, 255, 0.3);*/
+/*  border-radius: 8px;*/
+/*  background: rgba(255, 255, 255, 0.2);*/
+/*  color: #292828;*/
+/*  outline: none;*/
+/*  transition: 0.3s ease-in-out;*/
+/*}*/
+
+
+/*.input-field1 select {*/
+/*  width: 536px; !* Adjust the width to your preference *!*/
+/*  height: 49px; !* Adjust the height to your preference *!*/
+/*  padding: 5px; !* Optional: for better spacing *!*/
+/*  font-size: 16px; !* Optional: for text size *!*/
+/*  border: 1px solid rgba(255, 255, 255, 0.3);*/
+/*  border-radius: 8px;*/
+/*  background: rgba(255, 255, 255, 0.2);*/
+/*  color: #292828;*/
+/*  outline: none;*/
+/*  transition: 0.3s ease-in-out;*/
+/*}*/
+
+
+/*!* Placeholder Styling *!*/
+/*.input-field input::placeholder,*/
+/*.input-field1 input::placeholder {*/
+/*  color: rgba(27, 25, 25, 0.6);*/
+/*}*/
+
+/*!* Focus Effect *!*/
+/*.form-group1 input:focus,*/
+/*.input-field1 input:focus,*/
+/*.input-field1 select:focus,*/
+/*.input-field input:focus,*/
+/*.input-field select:focus {*/
+/*  background: rgba(255, 255, 255, 0.3);*/
+/*  border-color: #e1e1ea;*/
+/*  box-shadow: 0 0 10px rgba(237, 201, 198, 0.5);*/
+/*}*/
+
+/*.error {*/
+/*  display: block;*/
+/*  margin-bottom: 5px;*/
+/*  color: red;*/
+/*  font-size: 14px;*/
+/*}*/
+
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -10,88 +171,88 @@ body {
   align-items: center;
   height: 100vh;
   width: 100vw;
-  background: url("../../assets/images/loginbg.png") no-repeat center center/cover;
-  /*background: url("../../assets/images/loginbg1.jpg") no-repeat center center/cover;*/
-  /*background: url("../../assets/images/img9.jpg")no-repeat center center/cover;*/
-  /*background: url("../../assets/images/img10.png") no-repeat center center/cover;*/
-  overflow: hidden; /* Ensure content stays within viewport */
+  background: linear-gradient(to bottom, #1a1d35 0%, #1a1d35 50%, #e6e9f0 50%, #e6e9f0 100%);
+  overflow: hidden;
 }
 
+/* Signup Form */
 .signup-form {
-  /*background-color: rgba(255, 255, 255, 0.2); !* White with 80% opacity *!*/
-  background-color: rgba(255, 255, 255, 0.3); /* White with 80% opacity */
-  color: white;
+  background-color: rgba(255, 255, 255, 1); /* Solid white background */
+  color: #1a1d35;
   padding: 2rem;
-  border-radius: 10px;
+  border-radius: 15px;
   width: 800px;
   height: 550px;
   text-align: center;
   margin-top: -25px;
-  max-height: 90vh; /* Ensure the form doesn't exceed the viewport */
-  overflow-y: auto; /* Add vertical scrolling */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(35px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   scrollbar-width: none;
 }
 
+/* Signup Title */
 .SignUp-title {
   text-align: center;
   margin-bottom: 2.9rem;
   margin-top: 0.25rem;
-  font-size: 1.8rem;
+  font-size: 2rem;
+  color: #1a1d35;
 }
 
+/* User Type Selection */
 .user-type {
   display: flex;
   justify-content: space-evenly;
-  align-items: center; /* Ensures vertical alignment */
-  gap: 1rem; /* Adds space between the radio buttons and labels */
+  align-items: center;
+  gap: 1rem;
   margin-bottom: 3rem;
   margin-top: -15px;
 }
 
 .user-type label {
   display: flex;
-  align-items: center; /* Aligns the label text and the radio button vertically */
-  gap: 0.5rem; /* Adds space between the radio button and the text */
+  align-items: center;
+  gap: 0.5rem;
   font-size: 1.3rem;
-  color: white;
-  white-space: nowrap; /* Prevents text from breaking into multiple lines */
+  color: #1a1d35;
+  white-space: nowrap;
 }
 
 /* Form Group for Two Columns */
-.form-group1 ,
+.form-group1,
 .form-group {
   display: flex;
-  justify-content: space-between; /* Space between the input fields */
-  gap: 1rem; /* Add gap between the two input fields */
-  margin-bottom: 1.5rem; /* Spacing between rows */
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
   margin-right: 15px;
   margin-left: 22px;
   text-align: left;
 }
 
 .form-group input {
-  width: 315px; /* Adjust the width to your preference */
-  height: 40px; /* Adjust the height to your preference */
-  padding: 5px; /* Optional: for better spacing */
-  font-size: 16px; /* Optional: for text size */
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
+  width: 315px;
+  height: 40px;
+  padding: 5px;
+  font-size: 16px;
+  border: 1px solid #272930;
+  border-radius: 5px;
   background: rgba(255, 255, 255, 0.3);
   color: #000000;
   outline: none;
   transition: 0.3s ease-in-out;
 }
 
-.form-group1 input{
-  width: 525px; /* Adjust the width to your preference */
-  height: 40px; /* Adjust the height to your preference */
-  padding: 5px; /* Optional: for better spacing */
-  font-size: 16px; /* Optional: for text size */
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
+.form-group1 input {
+  width: 525px;
+  height: 40px;
+  padding: 5px;
+  font-size: 16px;
+  border: 1px solid #272930;
+  border-radius: 5px;
   background: rgba(255, 255, 255, 0.3);
   color: #000000;
   outline: none;
@@ -102,37 +263,36 @@ body {
 .form-group label {
   display: block;
   margin-bottom: 0.3rem;
-  color: #d5d2d2;
+  color: #1a1d35;
   font-weight: 500;
 }
 
+/* Select Box Styling */
 .input-field select {
-  width: 325px; /* Adjust the width to your preference */
-  height: 49px; /* Adjust the height to your preference */
-  padding: 5px; /* Optional: for better spacing */
-  font-size: 16px; /* Optional: for text size */
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.2);
+  width: 325px;
+  height: 49px;
+  padding: 5px;
+  font-size: 16px;
+  border: 1px solid #272930;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.3);
   color: #292828;
   outline: none;
   transition: 0.3s ease-in-out;
 }
-
 
 .input-field1 select {
-  width: 536px; /* Adjust the width to your preference */
-  height: 49px; /* Adjust the height to your preference */
-  padding: 5px; /* Optional: for better spacing */
-  font-size: 16px; /* Optional: for text size */
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.2);
+  width: 536px;
+  height: 49px;
+  padding: 5px;
+  font-size: 16px;
+  border: 1px solid #272930;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.3);
   color: #292828;
   outline: none;
   transition: 0.3s ease-in-out;
 }
-
 
 /* Placeholder Styling */
 .input-field input::placeholder,
@@ -151,9 +311,27 @@ body {
   box-shadow: 0 0 10px rgba(237, 201, 198, 0.5);
 }
 
+/* Error Message Styling */
 .error {
   display: block;
   margin-bottom: 5px;
   color: red;
   font-size: 14px;
+}
+
+/* Sign Up Text */
+.signup-text {
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  color: #1a1d35;
+}
+
+.signup-text a {
+  color: #f1c40f;
+  text-decoration: none;
+}
+
+.signup-text a:hover {
+  color: #1547e6;
 }

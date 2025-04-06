@@ -447,7 +447,7 @@ const Signup = () => {
 
           <button
               type="submit"
-              className="bg-[#870000] text-white border-none rounded-md cursor-pointer text-base w-[210px] h-[35px] transition duration-300 hover:bg-[#6e0404] text-center mt-4"
+              className="bg-[#FF4500] text-white border-none rounded-md cursor-pointer text-base w-[210px] h-[35px] transition duration-300 hover:bg-[#6e0404] text-center mt-4"
           >
             Register
           </button>
