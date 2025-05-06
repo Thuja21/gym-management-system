@@ -240,3 +240,28 @@ export const editTrainer = async (req, res) => {
     }
 };
 
+
+export const getLoggedInTrainerDetails = (req, res) => {
+    const trainerId = req.user.trainer_id;
+
+    const q = `
+    SELECT trainers.*, users.*
+    FROM trainers
+    JOIN users ON users.id = trainers.user_id
+    WHERE trainers.trainer_id = ?
+  `;
+
+
+    db.query(q, [trainerId], (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: "Error fetching details", details: err });
+        }
+
+        if (data.length === 0) {
+            return res.status(404).json({ message: "No trainer found" });
+        }
+
+        return res.status(200).json(data);
+    });
+};
+

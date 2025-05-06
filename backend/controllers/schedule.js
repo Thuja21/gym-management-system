@@ -2,10 +2,30 @@ import { db } from "../config/connectDatabase.js";
 
 // View all schedules
 export const viewAllSchedules = (req, res) => {
-    const q = `SELECT schedules.*,  users.full_name
-    FROM schedules
-    JOIN trainers ON trainers.trainer_id = schedules.trainer_id
-    JOIN users ON trainers.user_id = users.id`;
+    const q = `
+        SELECT
+            schedules.schedule_id,
+            schedules.title,
+            schedules.schedule_date,
+            schedules.schedule_time_slot,
+            schedules.end_time,
+            schedules.notes,
+            schedules.trainer_id,
+            schedules.schedule_type,
+            users.full_name,
+            JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                            'day', weekly_schedule.day,
+                            'start_time', weekly_schedule.start_time,
+                            'end_time', weekly_schedule.end_time
+                    )
+            ) AS weekly_schedule
+        FROM schedules
+                 JOIN trainers ON trainers.trainer_id = schedules.trainer_id
+                 JOIN users ON trainers.user_id = users.id
+                 LEFT JOIN weekly_schedule ON weekly_schedule.schedule_id = schedules.schedule_id
+        GROUP BY schedules.schedule_id
+    `;
 
         db.query(q, (err, data) => {
         if (err) return res.status(500).json(err);
@@ -18,66 +38,119 @@ export const addSchedule = (req, res) => {
     db.beginTransaction((err) => {
         if (err) return res.status(500).json(err);
 
-        const userInsertQuery = "INSERT INTO schedules (`title`, `schedule_date`, `schedule_time_slot`, `end_time`, `notes`, `trainer_id`) VALUES (?)";
-        const userValues = [
-            req.body.title,
-            req.body.schedule_date,
-            req.body.schedule_time_slot,
-            req.body.end_time,
-            req.body.notes,
-            1,
-        ];
+        const { title, notes, schedule_date, schedule_time_slot,end_time, weekly_schedule, schedule_type } = req.body;
 
-        db.query(userInsertQuery, [userValues], (err, result) => {
+        const insertScheduleQuery = "INSERT INTO schedules (`title`, `schedule_date`, `schedule_time_slot`, `end_time`, `notes`, `trainer_id`, `schedule_type`) VALUES (?)";
+        const scheduleValues = [title, schedule_date, schedule_time_slot, end_time, notes, 1, schedule_type];
+
+        db.query(insertScheduleQuery, [scheduleValues], (err, result) => {
             if (err) {
                 return db.rollback(() => {
                     res.status(500).json(err);
                 });
             }
-            // Commit the transaction if both queries succeed
+
+            const scheduleId = result.insertId;
+
+            // Prepare the weekly slots insertion
+            const insertWeeklyQuery = "INSERT INTO weekly_schedule (`schedule_id`, `day`, `start_time`, `end_time`) VALUES ?";
+            const weeklyValues = weekly_schedule.map(slot => [
+                scheduleId,
+                slot.day,
+                slot.start_time,
+                slot.end_time
+            ]);
+
+            if (schedule_type === "weekly") {
+                db.query(insertWeeklyQuery, [weeklyValues], (err) => {
+                    if (err) {
+                        return db.rollback(() => {
+                            res.status(500).json(err);
+                        });
+                    }
+
+                    db.commit((err) => {
+                        if (err) {
+                            return db.rollback(() => {
+                                res.status(500).json(err);
+                            });
+                        }
+
+                        res.status(200).json("Schedule with weekly slots has been created.");
+                    });
+                });
+            } else {
+                db.commit((err) => {
+                    if (err) {
+                        return db.rollback(() => {
+                            res.status(500).json(err);
+                        });
+                    }
+
+                    res.status(200).json("Schedule (one-time) has been created.");
+                });
+            }
+
+        });
+    });
+};
+
+export const editSchedule = (req, res) => {
+    const scheduleId = req.params.id;
+
+    db.beginTransaction(async (err) => {
+        if (err) return res.status(500).json(err);
+
+        try {
+            const { title, notes, schedule_date, schedule_time_slot, end_time, schedule_type, weekly_schedule } = req.body;
+
+            // Convert schedule_date to YYYY-MM-DD
+            const formattedDate = new Date(schedule_date).toISOString().split('T')[0];
+
+            const updateQuery = `
+                UPDATE schedules 
+                SET title = ?, schedule_date = ?, schedule_time_slot = ?, end_time = ?, notes = ?, schedule_type = ?
+                WHERE schedule_id = ?
+            `;
+            const updateValues = [title, formattedDate, schedule_time_slot, end_time, notes, schedule_type, scheduleId];
+
+            await db.promise().query(updateQuery, updateValues);
+
+            // Delete old weekly schedule slots for this schedule
+            const deleteWeeklyQuery = "DELETE FROM weekly_schedule WHERE schedule_id = ?";
+            await db.promise().query(deleteWeeklyQuery, [scheduleId]);
+
+            // Insert new weekly schedule slots
+            const insertWeeklyQuery = "INSERT INTO weekly_schedule (schedule_id, day, start_time, end_time) VALUES ?";
+            const weeklyValues = weekly_schedule.map(slot => [
+                scheduleId,
+                slot.day,
+                slot.start_time,
+                slot.end_time
+            ]);
+
+            if (schedule_type === "weekly") {
+                await db.promise().query(insertWeeklyQuery, [weeklyValues]);
+            }
+
             db.commit((err) => {
                 if (err) {
                     return db.rollback(() => {
                         res.status(500).json(err);
                     });
                 }
-                // Send success response
-                res.status(200).json("Schedule has been created.");
+                res.status(200).json({ message: "Schedule and weekly slots updated successfully." });
             });
-        });
+
+        } catch (error) {
+            console.error("Error updating schedule:", error);
+            db.rollback(() => {
+                res.status(500).json({ error: "Internal Server Error. Please try again." });
+            });
+        }
     });
 };
 
-export const editSchedule = async (req, res) => {
-    const scheduleId = req.params.id;
-    console.log("Updating schedule ID:", scheduleId);
-
-    try {
-
-        // Convert schedule_date to YYYY-MM-DD format
-        const scheduleDate = new Date(req.body.schedule_date).toISOString().split('T')[0];
-
-        const query = "UPDATE schedules SET title = ?, schedule_date = ?, schedule_time_slot = ?, end_time = ?,  notes = ? WHERE schedule_id = ?";
-
-        const updateValues = [
-            req.body.title,
-            scheduleDate,
-            req.body.schedule_time_slot,
-            req.body.end_time,
-            req.body.notes,
-            scheduleId
-        ];
-        console.log(updateValues);
-
-        await db.promise().query(query, updateValues);
-        res.status(200).json({ message: "Schedules details updated successfully." });
-
-    } catch (error) {
-        console.error("Error updating schedule:", error);
-        await db.promise().rollback();
-        res.status(500).json({ error: "Internal Server Error. Please try again." });
-    }
-};
 
 // Delete a schedule
 export const deleteSchedule = (req, res) => {

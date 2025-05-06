@@ -1,105 +1,16 @@
 import { db } from "../config/connectDatabase.js";
 
 export const viewAllEquipments =(req,res)=> {
-    const q = "SELECT * FROM equipments";
+    const q = `
+            SELECT equipment_variants.*, equipments.*
+            FROM equipments
+            JOIN equipment_variants ON equipment_variants.equipment_id = equipments.equipment_id`;
 
     db.query(q, (err, data) => {
         if (err) return res.status(500).json(err);
         return res.status(200).json(data);
     } )
 }
-
-export const addEquipment = async (req, res) => {
-    const { equipment_name, category, brand, quantity, purchase_date, unit_price, status } = req.body;
-
-    try {
-        db.beginTransaction(async (err) => {
-            if (err) {
-                return res.status(500).json({ error: "Transaction error!" });
-            }
-
-            // Check if the equipment already exists
-            const [existingEquipment] = await db.promise().query(
-                "SELECT * FROM equipments WHERE equipment_name = ?",
-                [equipment_name]
-            );
-
-            let equipmentId;
-
-            if (existingEquipment.length > 0) {
-                // Equipment exists → Update quantity & category
-                equipmentId = existingEquipment[0].equipment_id;
-
-                await db.promise().query(
-                    `UPDATE equipments 
-                     SET category = ?, brand = ?, quantity = quantity + ?, status = ? 
-                     WHERE equipment_id = ?`,
-                    [category, brand, quantity, status, equipmentId]
-                );
-            } else {
-                // Equipment doesn't exist → Insert new row
-                const [insertResult] = await db.promise().query(
-                    `INSERT INTO equipments (equipment_name, category, brand, quantity, status) 
-                     VALUES (?, ?, ?, ?, ?)`,
-                    [equipment_name, category, brand, quantity, status]
-                );
-
-                equipmentId = insertResult.insertId;
-            }
-
-            // Insert into purchase history table
-            await db.promise().query(
-                `INSERT INTO equipment_purchases (equipment_id, purchase_date, unit_price, quantity) 
-                 VALUES (?, ?, ?, ?)`,
-                [equipmentId, purchase_date, unit_price, quantity]
-            );
-
-            db.commit((commitErr) => {
-                if (commitErr) {
-                    return db.rollback(() => {
-                        res.status(500).json({ error: "Transaction commit failed!" });
-                    });
-                }
-                res.status(200).json({ message: "Equipment added/updated successfully!", equipment_id: equipmentId });
-            });
-        });
-    } catch (error) {
-        db.rollback(() => {
-            console.error("Database error:", error);
-            res.status(500).json({ error: "Database error!" });
-        });
-    }
-};
-
-
-
-export const editEquipment = async (req, res) => {
-    const equipmentId = req.params.id;
-    console.log("Updating schedule ID:", equipmentId);
-
-    try {
-        const query = "UPDATE equipments SET plan_name = ?, plan_price = ?, plan_duration = ?, features = ? WHERE plan_id = ?";
-
-        const updateValues = [
-            req.body.plan_name,
-            req.body.plan_price ,
-            req.body.plan_duration,
-            req.body.features,
-            planId
-        ];
-        console.log(updateValues);
-
-        await db.promise().query(query, updateValues);
-        res.status(200).json({ message: "Plans details updated successfully." });
-
-    } catch (error) {
-        console.error("Error updating plan:", error);
-        await db.promise().rollback();
-        res.status(500).json({ error: "Internal Server Error. Please try again." });
-    }
-};
-
-
 
 export const deleteEquipment = (req, res) => {
     const equipmentId = req.params.id;
@@ -122,3 +33,174 @@ export const deleteEquipment = (req, res) => {
     });
 };
 
+export const addEquipmentVariants = (req, res) => {
+    const { equipment_name, category, brand, quantity, purchase_date, price, status } = req.body;
+
+    if (!equipment_name || !category || !brand || !quantity || !purchase_date || !price || !status) {
+        return res.status(400).json({ message: 'Missing required fields.' });
+    }
+
+    // Check if equipment already exists
+    const checkEquipmentExists = `
+        SELECT equipment_id FROM equipments
+        WHERE equipment_name = ? AND category = ?
+    `;
+
+    db.query(checkEquipmentExists, [equipment_name, category], (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error checking equipment existence', error: err });
+        }
+
+        if (result.length > 0) {
+            // Equipment exists
+            const equipment_id = result[0].equipment_id;
+            insertVariants(equipment_id);
+        } else {
+            // Insert new equipment
+            const insertEquipment = `
+                INSERT INTO equipments (equipment_name, category, total_quantity)
+                VALUES (?, ?, 0)
+            `;
+
+            db.query(insertEquipment, [equipment_name, category], (err, result) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Error inserting equipment', error: err });
+                }
+
+                const equipment_id = result.insertId;
+                insertVariants(equipment_id);
+            });
+        }
+
+        function insertVariants(equipment_id) {
+            const insertVariant = `
+                INSERT INTO equipment_variants (equipment_id, brand, quantity, purchase_date, price, status)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `;
+
+            let count = 0;
+
+            for (let i = 0; i < quantity; i++) {
+                db.query(insertVariant, [equipment_id, brand, 1, purchase_date, price, status], (err, result) => {
+                    if (err) {
+                        return res.status(500).json({ message: 'Error inserting variants', error: err });
+                    }
+
+                    count++;
+
+                    if (count === quantity) {
+                        // After inserting all variants, update equipment total_quantity
+                        const updateEquipmentQuantity = `
+                            UPDATE equipments
+                            SET total_quantity = total_quantity + ?
+                            WHERE equipment_id = ?
+                        `;
+
+                        db.query(updateEquipmentQuantity, [quantity, equipment_id], (err, result) => {
+                            if (err) {
+                                return res.status(500).json({ message: 'Error updating total quantity', error: err });
+                            }
+
+                            return res.status(201).json({ message: 'Equipment and variants added successfully' });
+                        });
+                    }
+                });
+            }
+        }
+    });
+};
+
+// Update equipment item
+export const updateEquipmentItem = (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    console.log(req.params);
+    console.log(req.body);
+
+
+    // Validate input
+    if (!status) {
+        return res.status(400).json({
+            success: false,
+            message: 'Status is required'
+        });
+    }
+
+    const updateQuery = `
+        UPDATE equipment_variants
+        SET status = ?
+        WHERE variant_id = ?
+    `;
+
+    db.query(updateQuery, [status, id], (err, result) => {
+        if (err) {
+            console.error('Error updating equipment item:', err);
+            return res.status(500).json({
+                success: false,
+                message: 'Database error updating equipment item',
+                error: err.message
+            });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Equipment item not found'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Equipment item updated successfully',
+            data: {
+                variant_id: id,
+                status
+            }
+        });
+    });
+};
+
+// In controllers/equipmentController.js
+export const deleteEquipmentItem = (req, res) => {
+    const variantId = req.params.variantId;
+    console.log("Deleting equipment variant ID:", variantId);
+
+    // Step 1: Get the current quantity
+    const selectQuery = 'SELECT * FROM equipment_variants WHERE variant_id = ?';
+
+    db.query(selectQuery, [variantId], (selectErr, selectResult) => {
+        if (selectErr) {
+            console.error("Error fetching equipment variant:", selectErr);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+
+        if (!selectResult || selectResult.length === 0) {
+            return res.status(404).json({ message: "Equipment item not found" });
+        }
+
+        const currentQuantity = selectResult[0].quantity;
+
+        if (currentQuantity > 1) {
+            // Step 2a: Decrease quantity
+            const updateQuery = 'UPDATE equipment_variants SET quantity = quantity - 1 WHERE variant_id = ?';
+            db.query(updateQuery, [variantId], (updateErr, updateResult) => {
+                if (updateErr) {
+                    console.error("Error updating equipment quantity:", updateErr);
+                    return res.status(500).json({ message: "Internal server error" });
+                }
+                res.status(200).json({ message: "Equipment quantity decreased by 1" });
+            });
+        } else {
+            // Step 2b: Delete the variant
+            const deleteQuery = 'DELETE FROM equipment_variants WHERE variant_id = ?';
+            db.query(deleteQuery, [variantId], (deleteErr, deleteResult) => {
+                if (deleteErr) {
+                    console.error("Error deleting equipment variant:", deleteErr);
+                    return res.status(500).json({ message: "Internal server error" });
+                }
+                res.status(200).json({ message: "Equipment variant deleted successfully" });
+            });
+        }
+    });
+};

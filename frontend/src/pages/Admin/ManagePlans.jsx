@@ -3,7 +3,17 @@ import Sidebar from "../../pages/Admin/AdminSideBar.jsx";
 import {Check, Plus, Search} from "lucide-react";
 import { Delete, MoreVert } from "@mui/icons-material";
 import AdminSideBar from "../../pages/Admin/AdminSideBar.jsx";
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography} from "@mui/material";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Grid,
+    Paper,
+    TextField,
+    Typography
+} from "@mui/material";
 import axios from "axios";
 
 const ManagePlans = () => {
@@ -157,8 +167,8 @@ const ManagePlans = () => {
                 </Typography>
 
                 {/* Page Header */}
-                <div className="bg-white rounded-xl shadow-sm p-3 " style={{marginBottom: "70px"}}>
-                    <div className="flex items-center">
+                <Paper elevation={1} className="p-4 mb-6 rounded-lg" style={{marginBottom: "70px"}}>
+                    <div className="flex flex-col md:flex-row md:items-center gap-4 rounded-xl">
                         {/* Search Input */}
                         <div className="relative flex-1">
                             <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -181,11 +191,12 @@ const ManagePlans = () => {
                             </button>
                         </div>
                     </div>
-                </div>
+                </Paper>
 
                 {/* Plans Grid */}
+                <Paper elevation={1} className="rounded-lg">
                 <div className="bg-white rounded-xl shadow-sm p-3 " style={{ marginTop: "-55px"}} >
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-16 " style={{paddingLeft: "20px", marginRight: "20px", marginTop:"35px" ,paddingTop: "20px"}}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-16 " style={{paddingLeft: "20px", marginRight: "20px", marginTop:"35px" ,paddingTop: "20px", marginBottom: "55px" }}>
                         {plans.map((plan, index) => (
                             <div
                                 key={index}
@@ -250,6 +261,7 @@ const ManagePlans = () => {
                         ))}
                     </div>
                 </div>
+                </Paper>
             </div>
 
             {/*Add plan*/}

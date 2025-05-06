@@ -1,8 +1,11 @@
 import express from "express";
-import {getAllMembers, viewAllPlanPayments,} from "../controllers/planPayment.js";
+import {getAllPaymentDetails, getPaymentDetails} from "../controllers/planPayment.js";
+import {verifyToken} from "../middleware/verifyToken.js";
 const router = express.Router();
 
-router.get('/all' , viewAllPlanPayments);
-router.get('/getmembers' , getAllMembers);
+
+router.get('/details', verifyToken, getPaymentDetails);
+router.get('/payments', getAllPaymentDetails);
+
 
 export default router;

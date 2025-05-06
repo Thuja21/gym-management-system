@@ -87,14 +87,6 @@ function ViewSchedules() {
                                             <p className="mt-1 text-sm text-gray-600">{schedule.notes}</p>
                                         )}
                                     </div>
-                                    <div className="flex space-x-2">
-                                        <button onClick={() => handleEdit(schedule.schedule_id)} className="p-2 text-gray-400 hover:text-blue-500">
-                                            <Edit className="w-5 h-5" />
-                                        </button>
-                                        <button onClick={() => handleDelete(schedule.schedule_id)} className="p-2 text-gray-400 hover:text-red-500">
-                                            <Trash2 className="w-5 h-5" />
-                                        </button>
-                                    </div>
                                 </div>
 
                                 <div className="mt-4 grid grid-cols-2 gap-4">

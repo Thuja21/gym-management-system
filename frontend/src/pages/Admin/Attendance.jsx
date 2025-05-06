@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Search } from "lucide-react";
 import AdminSideBar from "./AdminSideBar.jsx";
 import axios from "axios";
+import {Paper} from "@mui/material";
 
 function Attendance() {
     const [members, setMembers] = useState([]); // State to store all members data
@@ -162,8 +163,9 @@ function Attendance() {
             <AdminSideBar style={{ flexShrink: 0, width: 250 }} />
             <div style={{ flexGrow: 1, padding: "20px", height: "100vh", overflowY: "auto" }}>
 
+                <Paper elevation={0.7} className="rounded-lg">
                 <div className="card mt-4">
-                    <div className="card-body p-4">
+                    <div className="card-body p-4 rounded-lg">
                         <div className="mb-4 flex items-center space-x-2" style={{ paddingBottom: "20px" }}>
                             <div>
                                 <input
@@ -272,11 +274,12 @@ function Attendance() {
                         )}
                     </div>
                 </div>
+                </Paper>
 
                 {/* Attendance Table */}
-                <div className="overflow-x-auto mt-6" style={{ overflow: "hidden" }}>
+                <div className="overflow-x-auto mt-6 rounded-xl border-2" style={{ overflow: "hidden" }}>
                     <table className="min-w-full divide-y">
-                        <thead className="bg-red-200 text-black">
+                        <thead className="bg-gray-200 text-black">
                         <tr>
                             <th className="px-6 py-3">Member ID</th>
                             <th className="px-6 py-3">Name</th>

@@ -12,6 +12,9 @@ const MembershipCard = ({
                             popular = true,
                             delay = 0,
                         }) => {
+
+    const isLoggedIn = localStorage.getItem("user") !== null;
+
     return (
         <motion.div
             className={`rounded-lg shadow-lg overflow-hidden ${
@@ -42,14 +45,14 @@ const MembershipCard = ({
                     ))}
                 </ul>
                 <Link
-                    to="/contact"
+                    to={isLoggedIn ? "/changePlan" : "/signup"}
                     className={`block text-center py-3 px-6 rounded-md font-semibold transition duration-300 ${
                         popular
                             ? "bg-[#FF4500] text-white hover:bg-opacity-90"
                             : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                     }`}
                 >
-                    Choose Plan
+                    {isLoggedIn ? "Change Plan" : "Choose Plan"}
                 </Link>
             </div>
         </motion.div>

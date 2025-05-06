@@ -21,6 +21,7 @@ const Navbar = () => {
         '/notification',
         '/memberProfile',
         '/changePlan',
+        '/checkout',
     ];
 
     const isSolidBackground = scrolled || alwaysDarkBackground.includes(location.pathname);
@@ -70,6 +71,7 @@ const Navbar = () => {
         { name: "Classes", path: "/classes" },
         // { name: "Trainers", path: "/trainers" },
         { name: "Membership", path: "/membership" },
+        // ...(userType !== "MEMBER" ? [{ name: "Membership", path: "/membership" }] : []),
         { name: "Supplements", path: "/supplements" },
         { name: "Contact", path: "/contact" },
     ];
@@ -238,7 +240,7 @@ const Navbar = () => {
                                     <div className="absolute right-0 mt-3 w-[200px] bg-white rounded-lg shadow-lg border border-gray-300">
 
                                         {/* Curved Arrow */}
-                                        <div className="absolute -top-2 right-1 w-4 h-4 bg-white transform rotate-45 border-t border-l border-gray-300"></div>
+                                        <div className="absolute -top-[6px] right-1 w-4 h-4 bg-white transform rotate-45 border-t border-l border-gray-300"></div>
 
                                         {/* Profile Options */}
                                         <div className="py-2 text-left">

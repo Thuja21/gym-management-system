@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import {
-    Calendar,
+import React, {useEffect, useState} from 'react';
+import {Calendar,
     Trophy,
     Target,
     Clock,
@@ -14,16 +13,36 @@ import {
     Camera
 } from 'lucide-react';
 import Navbar from "../../components/Member/Navbar.jsx";
+import axios from "axios";
+import image from "../../assets/images/Profile.png"
 
 function Profile() {
     const [isEditing, setIsEditing] = useState(false);
     const [profileData, setProfileData] = useState({
-        name: "John Doe",
-        phone: "+1 234 567 8900",
-        email: "john.doe@example.com",
-        address: "123 Fitness Street, NY",
-        image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&h=400&fit=crop"
+        image:  "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&h=400&fit=crop"
     });
+
+    const [members, setMembers] = useState([]);
+    const [memberData, setMemberData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const fetchMemberDetails = async () => {
+        try {
+            const response = await axios.get('http://localhost:8800/api/members/member', {
+                withCredentials: true
+            });
+            console.log(response.data);
+            setMemberData(response.data); // Set the fetched data to state
+        } catch (error) {
+            console.error('Error fetching plan data', error);
+            setMemberData([]); // <-- This is the fix
+        }
+    };
+
+    useEffect(() => {
+        fetchMemberDetails();
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -54,182 +73,187 @@ function Profile() {
                     <h1 className="text-3xl font-bold" style={{ fontFamily: "Segoe UI" }}>Profile</h1>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
-                    {/* Profile Card */}
-                    <div className="md:col-span-1 ">
-                        <div className="bg-white rounded-2xl p-6 relative border-1">
-                            <button
-                                onClick={() => setIsEditing(!isEditing)}
-                                className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
-                            >
-                                {isEditing ? (
-                                    <X className="w-5 h-5 text-gray-600" />
-                                ) : (
-                                    <Edit2 className="w-5 h-5 text-gray-600" />
-                                )}
-                            </button>
-
-                            <div className="flex flex-col items-center">
-                                <div className="w-32 h-32 rounded-full overflow-hidden mb-4 relative group">
-                                    <img
-                                        src={profileData.image}
-                                        alt="Profile"
-                                        className="w-full h-full object-cover"
-                                    />
-                                    {isEditing && (
-                                        <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 cursor-pointer group-hover:bg-opacity-60 transition-all">
-                                            <Camera className="w-8 h-8 text-white" />
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={handleImageChange}
-                                                className="hidden"
-                                            />
-                                        </label>
-                                    )}
-                                </div>
-                                {isEditing ? (
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={profileData.name}
-                                        onChange={handleInputChange}
-                                        className="text-2xl font-bold text-gray-800 text-center bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none"
-                                    />
-                                ) : (
-                                    <h2 className="text-2xl font-bold text-gray-800 font-mono">{profileData.name}</h2>
-                                )}
-                                <p className="text-gray-500 mb-2  font-mono">ID: GYM-2024-001</p>
-                            </div>
-
-                            <div className="mt-6 space-y-4 font-medium " style={{ fontFamily: "Segoe UI" }}>
-                                <div className="flex items-center gap-3 text-gray-600">
-                                    <Phone className="w-5 h-5 flex-shrink-0" />
+                {memberData.map((member, index) => (
+                <div key={index} >
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
+                        {/* Profile Card */}
+                        <div className="md:col-span-1 ">
+                            <div className="bg-white rounded-2xl p-6 relative border-1">
+                                <button
+                                    onClick={() => setIsEditing(!isEditing)}
+                                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                >
                                     {isEditing ? (
-                                        <input
-                                            type="tel"
-                                            name="phone"
-                                            value={profileData.phone}
-                                            onChange={handleInputChange}
-                                            className="flex-1 bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none"
-                                        />
+                                        <X className="w-5 h-5 text-gray-600" />
                                     ) : (
-                                        <span>{profileData.phone}</span>
+                                        <Edit2 className="w-5 h-5 text-gray-600" />
                                     )}
-                                </div>
-                                <div className="flex items-center gap-3 text-gray-600">
-                                    <Mail className="w-5 h-5 flex-shrink-0" />
-                                    {isEditing ? (
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            value={profileData.email}
-                                            onChange={handleInputChange}
-                                            className="flex-1 bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none"
+                                </button>
+
+                                <div className="flex flex-col items-center">
+                                    <div className="w-32 h-32 rounded-full overflow-hidden mb-4 relative group">
+                                        <img
+                                            src={image}
+                                            alt="Profile"
+                                            className="w-full h-full object-cover"
                                         />
-                                    ) : (
-                                        <span>{profileData.email}</span>
-                                    )}
-                                </div>
-                                <div className="flex items-center gap-3 text-gray-600">
-                                    <MapPin className="w-5 h-5 flex-shrink-0" />
+                                        {isEditing && (
+                                            <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 cursor-pointer group-hover:bg-opacity-60 transition-all">
+                                                <Camera className="w-8 h-8 text-white" />
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleImageChange}
+                                                    className="hidden"
+                                                />
+                                            </label>
+                                        )}
+                                    </div>
                                     {isEditing ? (
                                         <input
                                             type="text"
-                                            name="address"
-                                            value={profileData.address}
+                                            name="name"
+                                            value={member.full_name}
                                             onChange={handleInputChange}
-                                            className="flex-1 bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none"
+                                            className="text-2xl font-bold text-gray-800 text-center bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none"
                                         />
                                     ) : (
-                                        <span>{profileData.address}</span>
+                                        <h2 className="text-2xl font-bold text-gray-800 font-mono">{member.full_name}</h2>
+                                    )}
+                                    <p className="text-gray-500 mb-2  font-mono">ID: GYM-2024-001</p>
+                                </div>
+
+                                <div className="mt-6 space-y-4 font-medium " style={{ fontFamily: "Segoe UI" }}>
+                                    <div className="flex items-center gap-3 text-gray-600">
+                                        <Phone className="w-5 h-5 flex-shrink-0" />
+                                        {isEditing ? (
+                                            <input
+                                                type="tel"
+                                                name="phone"
+                                                value={member.contact_no}
+                                                onChange={handleInputChange}
+                                                className="flex-1 bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none"
+                                            />
+                                        ) : (
+                                            <span>{member.contact_no}</span>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-3 text-gray-600">
+                                        <Mail className="w-5 h-5 flex-shrink-0" />
+                                        {isEditing ? (
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                value={member.email}
+                                                onChange={handleInputChange}
+                                                className="flex-1 bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none"
+                                            />
+                                        ) : (
+                                            <span>{member.email}</span>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-3 text-gray-600">
+                                        <MapPin className="w-5 h-5 flex-shrink-0" />
+                                        {isEditing ? (
+                                            <input
+                                                type="text"
+                                                name="address"
+                                                value={member.address}
+                                                onChange={handleInputChange}
+                                                className="flex-1 bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none"
+                                            />
+                                        ) : (
+                                            <span>{member.address}</span>
+                                        )}
+                                    </div>
+                                    {isEditing && (
+                                        <button
+                                            onClick={() => setIsEditing(false)}
+                                            className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                                        >
+                                            Save Changes
+                                        </button>
                                     )}
                                 </div>
-                                {isEditing && (
-                                    <button
-                                        onClick={() => setIsEditing(false)}
-                                        className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                                    >
-                                        Save Changes
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Membership & Goals */}
-                    <div className="md:col-span-2 space-y-6 ">
-                        {/* Membership Details */}
-                        <div className="bg-white rounded-xl p-6 border-1 text-left">
-                            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-xl" style={{ fontFamily: "Segoe UI" }}>
-                                <Star className="w-5 h-5 text-yellow-500" />
-                                Membership Details
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-3">
-                                        <Calendar className="w-5 h-5 text-blue-600" />
-                                        <div>
-                                            <p className="text-gray-500 text-[17px]" style={{ fontFamily: "Segoe UI" }}>Start Date</p>
-                                            <p className="font-medium font-mono">January 15, 2024</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Clock className="w-5 h-5 text-blue-600" />
-                                        <div>
-                                            <p className="text-gray-500 text-[17px]" style={{ fontFamily: "Segoe UI" }}>Duration</p>
-                                            <p className="font-medium font-mono">12 Months</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-3">
-                                        <Trophy className="w-5 h-5 text-blue-600" />
-                                        <div>
-                                            <p className="text-gray-500 text-[17px]" style={{ fontFamily: "Segoe UI" }} >Plan Type</p>
-                                            <p className="font-medium font-mono">Premium Plus</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Target className="w-5 h-5 text-blue-600" />
-                                        <div>
-                                            <p className="text-gray-500 text-[17px]" style={{ fontFamily: "Segoe UI" }}>Access Level</p>
-                                            <p className="font-medium font-mono">All Facilities + Trainer</p>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
-                        {/* Fitness Goals */}
-                        <div className="bg-white rounded-xl border-1 p-6 text-left " style={{ fontStyle: "Segoe UI"}} >
-                            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                <Flag className="w-5 h-5 text-green-600" />
-                                Fitness Goals
-                            </h3>
-                            <div className="space-y-4">
-                                <div className="bg-gray-50 p-4 rounded-lg">
-                                    <h4 className="text-gray-800 font-medium">Primary Goal</h4>
-                                    <p className="text-gray-600 mt-1 font-light">Build muscle mass and increase strength</p>
-                                </div>
+                        {/* Membership & Goals */}
+                        <div className="md:col-span-2 space-y-6 ">
+                            {/* Membership Details */}
+                            <div className="bg-white rounded-xl p-6 border-1 text-left">
+                                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-xl" style={{ fontFamily: "Segoe UI" }}>
+                                    <Star className="w-5 h-5 text-yellow-500" />
+                                    Membership Details
+                                </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="bg-gray-50 p-4 rounded-lg">
-                                        <h4 className="font-medium text-gray-800">Target Weight</h4>
-                                        <p className="text-gray-600 mt-1">80 kg (Current: 75 kg)</p>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-3">
+                                            <Calendar className="w-5 h-5 text-blue-600" />
+                                            <div>
+                                                <p className="text-gray-500 text-[17px]" style={{ fontFamily: "Segoe UI" }}>Start Date</p>
+                                                {/*<p className="font-medium font-mono">January 15, 2024</p>*/}
+                                                <p className="font-medium font-mono">{(new Date(member.registered_date).toLocaleDateString())}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <Clock className="w-5 h-5 text-blue-600" />
+                                            <div>
+                                                <p className="text-gray-500 text-[17px]" style={{ fontFamily: "Segoe UI" }}>Duration</p>
+                                                <p className="font-medium font-mono">{member.plan_duration}</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="bg-gray-50 p-4 rounded-lg">
-                                        <h4 className="font-medium text-gray-800">Training Focus</h4>
-                                        <p className="text-gray-600 mt-1">Strength Training + HIIT</p>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-3">
+                                            <Trophy className="w-5 h-5 text-blue-600" />
+                                            <div>
+                                                <p className="text-gray-500 text-[17px]" style={{ fontFamily: "Segoe UI" }} >Plan Type</p>
+                                                <p className="font-medium font-mono">{member.plan_name} Plan</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <Target className="w-5 h-5 text-blue-600" />
+                                            <div>
+                                                <p className="text-gray-500 text-[17px]" style={{ fontFamily: "Segoe UI" }}>Access Level</p>
+                                                <p className="font-medium font-mono">All Facilities + Trainer</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="bg-gray-50 p-4 rounded-lg">
-                                    <h4 className="font-medium text-gray-800">Additional Notes</h4>
-                                    <p className="text-gray-600 mt-1">Focus on proper form and gradual progression. Includes meal plan consultation.</p>
+                            </div>
+
+                            {/* Fitness Goals */}
+                            <div className="bg-white rounded-xl border-1 p-6 text-left " style={{ fontStyle: "Segoe UI"}} >
+                                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                    <Flag className="w-5 h-5 text-green-600" />
+                                    Fitness Goals
+                                </h3>
+                                <div className="space-y-4">
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <h4 className="text-gray-800 font-medium">Primary Goal</h4>
+                                        <p className="text-gray-600 mt-1 font-light">Build muscle mass and increase strength</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="bg-gray-50 p-4 rounded-lg">
+                                            <h4 className="font-medium text-gray-800">Target Weight</h4>
+                                            <p className="text-gray-600 mt-1">80 kg (Current: {member.weight} kg)</p>
+                                        </div>
+                                        <div className="bg-gray-50 p-4 rounded-lg">
+                                            <h4 className="font-medium text-gray-800">Training Focus</h4>
+                                            <p className="text-gray-600 mt-1">Strength Training + HIIT</p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <h4 className="font-medium text-gray-800">Additional Notes</h4>
+                                        <p className="text-gray-600 mt-1">Focus on proper form and gradual progression. Includes meal plan consultation.</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+               </div>
+                ))}
             </div>
         </div>
     );

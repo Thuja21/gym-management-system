@@ -106,3 +106,44 @@ export const deletePlan = (req, res) => {
         res.status(200).json({ message: "Plan deleted successfully!" });
     });
 };
+
+export const getLoggedInMemberPlan= (req, res) => {
+    const memberId = req.user.member_id;
+
+    const q = `
+    SELECT plans.*
+    FROM plans
+    JOIN gym_members ON gym_members.plan_id = plans.plan_id
+    WHERE gym_members.member_id = ?
+  `;
+
+
+    db.query(q, [memberId], (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: "Error fetching plan", details: err });
+        }
+
+        if (data.length === 0) {
+            return res.status(404).json({ message: "No plan found" });
+        }
+
+        return res.status(200).json(data);
+    });
+};
+
+export const updatePlan = async (req, res) => {
+    const memberId = req.user.member_id;
+    const { plan_id } = req.body;
+
+    try {
+        const query = "UPDATE gym_members SET plan_id = ? WHERE member_id = ?";
+        await db.promise().query(query, [plan_id, memberId]);
+
+        res.status(200).json({ message: "Member's plan updated successfully." });
+    } catch (error) {
+        console.error("Error updating plan:", error);
+        res.status(500).json({ error: "Internal server error." });
+    }
+};
+
+

@@ -1,134 +1,93 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Navbar from "../../components/Member/Navbar.jsx";
+import axios from "axios";
 
 const Classes = () => {
     const [filter, setFilter] = useState("all");
+    const [scheduleData, setScheduleData] = useState([]);
+    useEffect(() => {
+        axios.get("http://localhost:8800/api/schedules/all") // adjust URL to your backend
+            .then((res) => {
+                const enrichedData = res.data.map(item => {
+                    const date = new Date(item.schedule_date);
+                    const options = { weekday: 'short', hour: 'numeric', minute: '2-digit', hour12: true };
+                    const formatted = date.toLocaleString('en-US', options);
+                    return { ...item,
+                        schedule_date: formatted,
+                        image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                    };
+                });
+                setScheduleData(enrichedData);
+            })
+            .catch((err) => console.error("Failed to fetch schedule", err));
+    }, []);
+
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+    const timeSlotsBeforeSort= [...new Set(scheduleData
+        .filter(schedule => schedule.schedule_type === "weekly")
+        .flatMap(schedule =>
+            schedule.weekly_schedule
+                .filter(slot => slot.start_time)
+                .map(slot => (slot.start_time?.toString().slice(0,5))
+        )))];
+
+    const timeSlots = timeSlotsBeforeSort.sort((a, b) => {
+        const [aHours, aMinutes] = a.split(':').map(Number);
+        const [bHours, bMinutes] = b.split(':').map(Number);
+
+        if (aHours !== bHours) {
+            return aHours - bHours;
+        } else {
+            return aMinutes - bMinutes;
+        }
+    });
+
+    console.log(timeSlots);
+
+    const getClassForSlot = (time, day) => {
+        // Find the class that matches the time and day from weekly_schedule
+        const cls = scheduleData.find((entry) =>
+            entry.schedule_type === "weekly" &&
+            entry.weekly_schedule.some(slot => slot.start_time?.toString().slice(0, 5) === time && slot.day === day)
+        );
+        return cls ? cls.title : "-";
+    };
+
+    const calculateDuration = (start, end) => {
+        const [startHour, startMinute] = start.split(":").map(Number);
+        const [endHour, endMinute] = end.split(":").map(Number);
+
+        const startTotal = startHour * 60 + startMinute;
+        const endTotal = endHour * 60 + endMinute;
+
+        const durationMinutes = endTotal - startTotal;
+
+        const hours = Math.floor(durationMinutes / 60);
+        const minutes = durationMinutes % 60
+
+        if (minutes > 0) {
+            return `${hours}h ${minutes}m`;
+        }
+        return `${hours}h`;
+    };
 
     const classCategories = [
         { id: "all", name: "All Classes" },
-        { id: "cardio", name: "Cardio" },
-        { id: "strength", name: "Strength" },
-        { id: "mind-body", name: "Mind & Body" },
-        { id: "hiit", name: "HIIT" },
-    ];
-
-    const classes = [
-        {
-            id: 1,
-            title: "HIIT Training",
-            category: "hiit",
-            image:
-                "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-            trainer: "Alex Johnson",
-            schedule: "Mon, Wed, Fri - 6:00 AM, 5:30 PM",
-            duration: "45 minutes",
-            level: "Intermediate",
-            description:
-                "High-intensity interval training to maximize calorie burn and improve cardiovascular health. This class alternates between intense bursts of activity and fixed periods of less-intense activity or rest.",
-        },
-        {
-            id: 2,
-            title: "Strength Training",
-            category: "strength",
-            image:
-                "https://images.unsplash.com/photo-1593810450967-f9c42742e3b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-            trainer: "Mike Williams",
-            schedule: "Tue, Thu, Sat - 7:00 AM, 6:30 PM",
-            duration: "60 minutes",
-            level: "All Levels",
-            description:
-                "Build muscle, increase strength, and improve overall body composition. This class focuses on resistance training using free weights, machines, and bodyweight exercises.",
-        },
-        {
-            id: 3,
-            title: "Yoga Flow",
-            category: "mind-body",
-            image:
-                "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-            trainer: "Sarah Chen",
-            schedule: "Daily - 8:00 AM, 7:00 PM",
-            duration: "75 minutes",
-            level: "All Levels",
-            description:
-                "Improve flexibility, balance, and mental clarity through guided yoga sessions. This class synchronizes movement with breath for a dynamic and flowing practice.",
-        },
-        {
-            id: 4,
-            title: "Spin Class",
-            category: "cardio",
-            image:
-                "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-            trainer: "David Kim",
-            schedule: "Mon, Wed, Fri - 7:00 AM, 6:00 PM",
-            duration: "45 minutes",
-            level: "All Levels",
-            description:
-                "High-energy indoor cycling workout that simulates outdoor riding with varying speeds and resistance levels. Great for cardiovascular health and lower body strength.",
-        },
-        {
-            id: 5,
-            title: "Pilates",
-            category: "mind-body",
-            image:
-                "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-            trainer: "Emma Thompson",
-            schedule: "Tue, Thu - 9:00 AM, 5:00 PM",
-            duration: "60 minutes",
-            level: "All Levels",
-            description:
-                "Focus on core strength, flexibility, and body awareness. Pilates helps develop balanced, lean muscles and improves posture and alignment.",
-        },
-        {
-            id: 6,
-            title: "Bootcamp",
-            category: "hiit",
-            image:
-                "https://images.unsplash.com/photo-1434682881908-b43d0467b798?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1474&q=80",
-            trainer: "James Wilson",
-            schedule: "Mon, Wed, Fri - 5:30 AM, 6:30 PM",
-            duration: "60 minutes",
-            level: "Intermediate to Advanced",
-            description:
-                "Military-inspired workout that combines strength training and intense cardio. This high-energy class will challenge you physically and mentally.",
-        },
-        {
-            id: 7,
-            title: "Zumba",
-            category: "cardio",
-            image:
-                "https://images.unsplash.com/photo-1518310383802-640c2de311b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-            trainer: "Maria Garcia",
-            schedule: "Tue, Thu, Sat - 10:00 AM, 5:00 PM",
-            duration: "60 minutes",
-            level: "All Levels",
-            description:
-                "Dance-based fitness class featuring Latin and international music. A fun way to get a total body workout while enjoying energetic music.",
-        },
-        {
-            id: 8,
-            title: "Powerlifting",
-            category: "strength",
-            image:
-                "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-            trainer: "Chris Johnson",
-            schedule: "Mon, Wed, Fri - 6:00 PM",
-            duration: "75 minutes",
-            level: "Intermediate to Advanced",
-            description:
-                "Focus on the three main powerlifting movements: squat, bench press, and deadlift. This class helps build maximum strength and power.",
-        },
+        { id: "one-time", name: "One Time" },
+        { id: "weekly", name: "Weekly" },
     ];
 
     const filteredClasses =
         filter === "all"
-            ? classes
-            : classes.filter((cls) => cls.category === filter);
+            ? scheduleData
+            : scheduleData.filter((cls) => cls.schedule_type === filter);
 
     return (
-        <div>
+        <div style={{width: "100vw"}}>
             <Navbar/>
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 bg-dark text-white">
@@ -160,7 +119,7 @@ const Classes = () => {
                                 onClick={() => setFilter(category.id)}
                                 className={`px-6 py-2 rounded-full font-medium transition-colors ${
                                     filter === category.id
-                                        ? "bg-primary text-white"
+                                        ? "bg-[#FF4500] text-white"
                                         : "bg-white text-gray-700 hover:bg-gray-100"
                                 }`}
                             >
@@ -177,7 +136,7 @@ const Classes = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredClasses.map((cls, index) => (
                             <motion.div
-                                key={cls.id}
+                                key={cls.schedule_id}
                                 className="bg-white rounded-lg shadow-lg overflow-hidden"
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
@@ -192,26 +151,26 @@ const Classes = () => {
                                 <div className="p-6">
                                     <div className="flex justify-between items-center mb-2">
                                         <h3 className="text-xl font-bold">{cls.title}</h3>
-                                        <span className="bg-primary text-white text-xs font-semibold px-2.5 py-1 rounded">
-                      {cls.level}
+                                        <span className="bg-[#FF4500] text-white text-xs font-semibold px-2.5 py-1 rounded">
+                      {cls.schedule_type}
                     </span>
                                     </div>
                                     <p className="text-gray-500 text-sm mb-3">
-                                        Instructor: {cls.trainer}
+                                        Instructor: {cls.full_name}
                                     </p>
-                                    <div className="mb-4">
+                                    {cls.schedule_type === "one-time" && <div className="mb-4">
                                         <div className="flex items-center mb-2">
                                             <span className="font-semibold mr-2">Schedule:</span>
-                                            <span className="text-gray-600">{cls.schedule}</span>
+                                            <span className="text-gray-600">{cls.schedule_date}</span>
                                         </div>
                                         <div className="flex items-center">
                                             <span className="font-semibold mr-2">Duration:</span>
-                                            <span className="text-gray-600">{cls.duration}</span>
+                                            <span className="text-gray-600">{calculateDuration(cls.schedule_time_slot, cls.end_time)}</span>
                                         </div>
-                                    </div>
-                                    <p className="text-gray-600 mb-4">{cls.description}</p>
-                                    <button
-                                        className="text-primary font-semibold hover:underline inline-flex items-center"
+                                    </div>}
+                                    <p className="text-gray-600 mb-4">{cls.notes}</p>
+                                    {cls.schedule_type === "weekly" && <button
+                                        className="text-[#FF4500] font-semibold hover:underline inline-flex items-center"
                                         onClick={() =>
                                             window.scrollTo({
                                                 top:
@@ -233,7 +192,7 @@ const Classes = () => {
                                                 clipRule="evenodd"
                                             ></path>
                                         </svg>
-                                    </button>
+                                    </button>}
                                 </div>
                             </motion.div>
                         ))}
@@ -285,258 +244,26 @@ const Classes = () => {
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td className="py-3 px-4 border-b border-gray-200 font-medium">
-                                    6:00 AM
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    HIIT Training
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    HIIT Training
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    HIIT Training
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                            </tr>
-                            <tr>
-                                <td className="py-3 px-4 border-b border-gray-200 font-medium">
-                                    7:00 AM
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Strength Training
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Spin Class
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Strength Training
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Spin Class
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Strength Training
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                            </tr>
-                            <tr>
-                                <td className="py-3 px-4 border-b border-gray-200 font-medium">
-                                    8:00 AM
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                            </tr>
-                            <tr>
-                                <td className="py-3 px-4 border-b border-gray-200 font-medium">
-                                    9:00 AM
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Pilates
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Pilates
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                            </tr>
-                            <tr>
-                                <td className="py-3 px-4 border-b border-gray-200 font-medium">
-                                    10:00 AM
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Zumba
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Zumba
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Zumba
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                            </tr>
-                            <tr>
-                                <td className="py-3 px-4 border-b border-gray-200 font-medium">
-                                    5:00 PM
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Pilates
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Pilates
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Zumba
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                            </tr>
-                            <tr>
-                                <td className="py-3 px-4 border-b border-gray-200 font-medium">
-                                    5:30 PM
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    HIIT Training
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    HIIT Training
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    HIIT Training
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                            </tr>
-                            <tr>
-                                <td className="py-3 px-4 border-b border-gray-200 font-medium">
-                                    6:00 PM
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Powerlifting
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Powerlifting
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Powerlifting
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                            </tr>
-                            <tr>
-                                <td className="py-3 px-4 border-b border-gray-200 font-medium">
-                                    6:30 PM
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Bootcamp
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Strength Training
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Bootcamp
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Strength Training
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Bootcamp
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                                <td className="py-3 px-4 border-b border-gray-200">-</td>
-                            </tr>
-                            <tr>
-                                <td className="py-3 px-4 border-b border-gray-200 font-medium">
-                                    7:00 PM
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                                <td className="py-3 px-4 border-b border-gray-200 bg-primary bg-opacity-10">
-                                    Yoga Flow
-                                </td>
-                            </tr>
+                            {timeSlots.map((time) => (
+                                <tr key={time}>
+                                    <td className="py-3 px-4 border-b border-gray-200 font-medium">{time}</td>
+                                    {days.map((day) => (
+                                        <td
+                                            key={day}
+                                            className={`py-3 px-4 border-b border-gray-200 ${
+                                                getClassForSlot(time, day) !== "-" ? "bg-[#FF4500] bg-opacity-10" : ""
+                                            }`}
+                                        >
+                                            {getClassForSlot(time, day)}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
                             </tbody>
                         </table>
                     </div>
                 </div>
             </section>
-
-            {/*/!* Class Policies *!/*/}
-            {/*<section className="py-16 bg-light">*/}
-            {/*    <div className="container mx-auto px-4 md:px-6">*/}
-            {/*        <div className="max-w-3xl mx-auto">*/}
-            {/*            <h2 className="text-3xl font-bold mb-6">Class Policies</h2>*/}
-
-            {/*            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">*/}
-            {/*                <h3 className="text-xl font-bold mb-3">Reservations</h3>*/}
-            {/*                <p className="text-gray-600 mb-4">*/}
-            {/*                    Members can reserve a spot in any class up to 7 days in advance*/}
-            {/*                    through our mobile app or website. We recommend booking early as*/}
-            {/*                    classes fill up quickly.*/}
-            {/*                </p>*/}
-            {/*            </div>*/}
-
-            {/*            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">*/}
-            {/*                <h3 className="text-xl font-bold mb-3">Cancellations</h3>*/}
-            {/*                <p className="text-gray-600 mb-4">*/}
-            {/*                    If you need to cancel your reservation, please do so at least 2*/}
-            {/*                    hours before the class starts to avoid a late cancellation fee.*/}
-            {/*                    This allows other members to take your spot.*/}
-            {/*                </p>*/}
-            {/*            </div>*/}
-
-            {/*            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">*/}
-            {/*                <h3 className="text-xl font-bold mb-3">What to Bring</h3>*/}
-            {/*                <p className="text-gray-600 mb-4">*/}
-            {/*                    Please bring a water bottle, towel, and appropriate workout*/}
-            {/*                    attire. For yoga and pilates classes, mats are provided, but*/}
-            {/*                    you're welcome to bring your own.*/}
-            {/*                </p>*/}
-            {/*            </div>*/}
-
-            {/*            <div className="bg-white rounded-lg shadow-lg p-6">*/}
-            {/*                <h3 className="text-xl font-bold mb-3">Late Arrivals</h3>*/}
-            {/*                <p className="text-gray-600 mb-4">*/}
-            {/*                    For your safety and to minimize disruption, members who arrive*/}
-            {/*                    more than 10 minutes late may not be permitted to join the*/}
-            {/*                    class. Please arrive at least 5 minutes early to set up.*/}
-            {/*                </p>*/}
-            {/*            </div>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*</section>*/}
 
             {/* CTA Section */}
             <section className="py-20 bg-[#0A0A0A] text-white">

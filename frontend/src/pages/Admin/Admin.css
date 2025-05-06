@@ -146,6 +146,7 @@ body {
 
 .table-row{
     height: 80px;
+    font-size: 15px;
 }
 .table-row:nth-of-type(odd) {
     background-color: #f5f5f5;

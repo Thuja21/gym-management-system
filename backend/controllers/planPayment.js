@@ -1,34 +1,35 @@
-import {db} from "../config/connectDatabase.js";
+import { db } from "../config/connectDatabase.js";
 
-export const viewAllPlanPayments =(req,res)=> {
+export const getPaymentDetails = (req, res) => {
+    const memberId = req.user.member_id;
 
     const q = `
-        SELECT
-            pp.payment_id,
-            pp.amount,
-            pp.payment_date,
-            pp.due_date,
-            pp.status,
-            p.plan_id,
-            p.plan_name,
-            p.plan_price,
-            u.full_name,
-            gm.member_id
-            
-        FROM
-            plan_payments pp
+    SELECT plan_payments.*, plans.*
+    FROM plan_payments
+    JOIN plans ON plans.plan_id = plan_payments.plan_id
+    WHERE plan_payments.member_id = ?
+  `;
 
-        JOIN
-            gym_members gm
-        ON pp.member_id = gm.member_id
-        
-        JOIN
-            users u
-        ON gm.user_id = u.id
-        JOIN
-            plans p
-        ON pp.plan_id = p.plan_id;
-    `;
+    db.query(q, [memberId], (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: "Error fetching details", details: err });
+        }
+
+        if (data.length === 0) {
+            return res.status(404).json({ message: "No details found" });
+        }
+
+        return res.status(200).json(data);
+    });
+};
+
+export const getAllPaymentDetails =(req,res)=> {
+    const q = `
+    SELECT plan_payments.*, plans.plan_name, gym_members.user_id, users.full_name
+    FROM plan_payments
+    JOIN gym_members ON gym_members.member_id = plan_payments.member_id
+    JOIN plans ON plans.plan_id = gym_members.plan_id
+    JOIN users ON users.id = gym_members.user_id`
 
     db.query(q, (err, data) => {
         if (err) return res.status(500).json(err);
@@ -36,23 +37,5 @@ export const viewAllPlanPayments =(req,res)=> {
     } )
 }
 
-export const getAllMembers = async (req, res) => {
-    try {
-        const q =`SELECT p.plan_id, plan_name, p.plan_price, u.full_name, gm.registered_date, gm.member_id
-                  FROM plans p
-                    JOIN gym_members gm ON p.plan_id = gm.plan_id
-                    JOIN users u ON gm.user_id = u.id;`;
 
 
-        db.query(q, (err, data) => {
-            if (err) return res.status(500).json(err);
-            if (data.length === 0) return res.status(404).json("No members found!");
-
-            res.status(200).json(data);
-        });
-    } catch (error) {
-        // Handle any errors that occur during the database query
-        console.error("Error fetching data:", error);
-        res.status(500).json({message: "Internal Server Error"});
-    }
-}

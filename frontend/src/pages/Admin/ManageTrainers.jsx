@@ -25,6 +25,7 @@ import axios from "axios";
 
 const ManageTrainers = () => {
     const [trainers, setTrainers] = useState([]);
+    const [filteredTrainers, setFilteredTrainers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
@@ -56,6 +57,34 @@ const ManageTrainers = () => {
 
         fetchTrainers();
     }, [loading]);
+
+    // Search functionality
+    useEffect(() => {
+        if (searchTerm.trim() === "") {
+            setFilteredTrainers(trainers);
+        } else {
+            const lowercasedTerm = searchTerm.toLowerCase();
+            const filtered = trainers.filter(trainer => {
+                // Search through multiple fields
+                return (
+                    (trainer.trainer_id && trainer.trainer_id.toString().includes(searchTerm)) ||
+                    (trainer.user_name && trainer.user_name.toLowerCase().includes(lowercasedTerm)) ||
+                    (trainer.full_name && trainer.full_name.toLowerCase().includes(lowercasedTerm)) ||
+                    (trainer.email && trainer.email.toLowerCase().includes(lowercasedTerm)) ||
+                    (trainer.contact_no && trainer.contact_no.includes(searchTerm)) ||
+                    (trainer.address && trainer.address.toLowerCase().includes(lowercasedTerm)) ||
+                    (trainer.specialization && trainer.specialization.toLowerCase().includes(lowercasedTerm))
+                );
+            });
+            setFilteredTrainers(filtered);
+        }
+    }, [searchTerm, trainers]);
+
+    // Handle search input change
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
 
 
     // Input validation
@@ -128,15 +157,45 @@ const ManageTrainers = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
 
-        setNewTrainer((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+        // Calculate age if dob is changed
+        if (name === "dob") {
+            const today = new Date();
+            const birthDate = new Date(value);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
 
-        setSelectedTrainer((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+            // Update dob and calculated age
+            if (newTrainer) {
+                setNewTrainer((prev) => ({
+                    ...prev,
+                    dob: value,
+                    age: age.toString(),
+                }));
+            }
+            if (selectedTrainer) {
+                setSelectedTrainer((prev) => ({
+                    ...prev,
+                    dob: value,
+                    age: age.toString(),
+                }));
+            }
+        } else {
+            if (newTrainer) {
+                setNewTrainer((prev) => ({
+                    ...prev,
+                    [name]: value,
+                }));
+            }
+            if (selectedTrainer) {
+                setSelectedTrainer((prev) => ({
+                    ...prev,
+                    [name]: value,
+                }));
+            }
+        }
 
         // Validate the current field and remove error if corrected
         setErrors((prevErrors) => {
@@ -223,8 +282,8 @@ const ManageTrainers = () => {
                 GYM TRAINERS
             </Typography>
 
-            <div className="bg-white rounded-xl shadow-sm p-4 mb-4">
-                <div className="flex items-center">
+            <Paper elevation={1} className="p-4 mb-6 rounded-lg">
+                <div className="flex flex-col md:flex-row md:items-center gap-4 rounded-xl">
                     {/* Search Input */}
                     <div className="relative flex-1">
                         <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -233,7 +292,7 @@ const ManageTrainers = () => {
                             placeholder="Search trainers..."
                             className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={handleSearchChange}
                         />
                     </div>
 
@@ -246,13 +305,15 @@ const ManageTrainers = () => {
                             Add Trainer
                         </button>
                     </div>
-                </div>
+                {/*</div>*/}
             </div>
+            </Paper>
 
             {loading && <Typography>Loading trainers...</Typography>}
             {error && <Typography color="error">{error}</Typography>}
 
             {!loading && !error && (
+                <Paper elevation={1} className="rounded-lg">
                 <div className="bg-white rounded-xl shadow-sm overflow-x-auto" >
                     <TableContainer
                         component={Paper} className="table-container"
@@ -266,7 +327,7 @@ const ManageTrainers = () => {
                     >
                         <Table className="w-full border-collapse">
                             <TableHead style={{ position: "sticky", top: 0,zIndex: 10 }}>
-                                <TableRow className="bg-red-200 text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
+                                <TableRow className="bg-gray-200 text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
                                     <th className="px-6 py-3 text-center">ID</th>
                                     <th className="px-6 py-3">Name</th>
                                     <th className="px-6 py-3">Username</th>
@@ -281,7 +342,7 @@ const ManageTrainers = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody className="divide-y divide-gray-200">
-                                {trainers.map((trainer, index) => (
+                                {filteredTrainers.map((trainer, index) => (
                                     <TableRow
                                         key={trainer.trainer_id} className="table-row"
                                         sx={{
@@ -351,8 +412,8 @@ const ManageTrainers = () => {
                             </TableBody>
                         </Table>
                     </TableContainer>
-
                 </div>
+                </Paper>
             )}
         </div>
 
@@ -395,6 +456,7 @@ const ManageTrainers = () => {
                                 onChange={handleInputChange}
                                 error={!!errors[field]}
                                 helperText={errors[field]}
+                                disabled={field === "age"}
                             />
                         ))}
                     </Grid>

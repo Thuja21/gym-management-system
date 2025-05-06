@@ -22,7 +22,6 @@ import Membership from "./pages/Home/Membership.jsx";
 import About from "./pages/Home/About.jsx";
 import Contact from "./pages/Home/Contact.jsx";
 import Classes  from "./pages/Home/Classes.jsx";
-import Trainers from "./pages/Home/Trainers.jsx";
 import TrainerDashboard from "./pages/Trainer/TrainerDashboard.jsx";
 import ViewMembers from "./pages/Trainer/ViewMembers.jsx"
 import ViewMembers1 from "./pages/Trainer/ViewMembers1.jsx"
@@ -34,6 +33,11 @@ import MemberProfile from "./pages/Member/MemberProfile.jsx";
 import PaymentHistory from "./pages/Member/PaymentHistory.jsx";
 import MemberLogin from "./pages/Member/MemberLogin.jsx";
 import ChangePlan from "@/pages/Member/ChangePlan.jsx";
+import Checkout from "@/pages/Member/Checkout.jsx";
+import Sample from "@/pages/Signup/Sample.jsx";
+import Sample2 from "./pages/Login/Sample2.jsx"
+import PaymentForm from "@/pages/Member/PaymentForm.jsx";
+import TrainerProfile from "@/pages/Trainer/TrainerProfile.jsx";
 
 function App() {
   return (
@@ -61,7 +65,6 @@ function App() {
           <Route path="/supplements" element={<Supplements />} />
           <Route path="/membership" element={<Membership />} />
           <Route path="/about" element={<About />} />
-          <Route path="/trainers" element={<Trainers />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/classes" element={<Classes />} />
 
@@ -72,10 +75,18 @@ function App() {
           <Route path="/paymentHistory" element={<PaymentHistory />} />
           <Route path="/changePlan" element={<ChangePlan />} />
 
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/paymentform" element={<PaymentForm />} />
+
           <Route path="/trainerDashboard" element={<TrainerDashboard />} />
           <Route path="/members1" element={<ViewMembers />} />
           <Route path="/members2" element={<ViewMembers1 />} />
           <Route path="/schedule" element={<Schedule />} />
+          <Route path="/trainerProfile" element={<TrainerProfile />} />
+
+
+          <Route path="/sample" element={<Sample />} />
+          <Route path="/sample2" element={<Sample2 />} />
         </Routes>
       </Router>
   );

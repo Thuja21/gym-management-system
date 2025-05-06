@@ -8,7 +8,6 @@ import FeatureCard from "../../components/Member/FeatureCard.jsx";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import "./Home.css";
-
 const Home = () => {
 
     const [trainers, setTrainers] = useState([]);
@@ -156,7 +155,7 @@ const Home = () => {
                             {trainers.map((trainer, index) => (
                                 <TrainerCard
                                     key={trainer.trainer_id}
-                                    // image={trainer.image}
+                                    image={trainer} // Local public folder image
                                     name={trainer.full_name}
                                     specialty={trainer.specialization}
                                     delay={index * 0.1}

@@ -8,9 +8,15 @@ import {
     DialogContent,
     DialogTitle,
     Grid,
+    Box,
     MenuItem,
     TextField,
-    Typography
+    Typography,
+    Radio,
+    RadioGroup,
+    FormControlLabel,
+    FormControl,
+    FormLabel, InputLabel, Select
 } from "@mui/material";
 import AdminSideBar from "../Admin/AdminSideBar.jsx";
 
@@ -18,40 +24,116 @@ function Schedules() {
     const [schedules, setSchedules] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
-    // const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
     const [openDialog, setOpenDialog] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [error, setError] = useState(null);
     const [errors, setErrors] = useState({});
     const [newSchedule, setNewSchedule] = useState({
         title: "",
-        schedule_date: "",
-        schedule_time_slot: "",
-        end_time: "",
         notes: "",
+        weekly_schedule: []
     });
+    const [scheduleType, setScheduleType] = useState('one-time');
+    const [editScheduleType, setEditScheduleType] = useState("one-time");
     const [selectedSchedule, setSelectedSchedule] = useState(null);
     const [editingSchedule, setEditingSchedule] = useState(null);
 
+    const fetchSchedules = async () => {
+        try {
+            const response = await fetch("http://localhost:8800/api/schedules/all"); // Update with your backend URL
+            if (!response.ok) {
+                throw new Error("Failed to fetch schedules.");
+            }
+            const data = await response.json();
+            console.log(data);
+            setSchedules(data); // Update schedules state with the fetched data
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Fetch schedules when the component loads
     useEffect(() => {
-        const fetchSchedules = async () => {
-            try {
-                const response = await fetch("http://localhost:8800/api/schedules/all"); // Update with your backend URL
-                if (!response.ok) {
-                    throw new Error("Failed to fetch schedules.");
-                }
-                const data = await response.json();
-                console.log(data);
-                setSchedules(data); // Update schedules state with the fetched data
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchSchedules();
     }, []); // Empty dependency array to fetch data only once on mount
+
+    const handleScheduleTypeChange = (event) => {
+        setScheduleType(event.target.value);
+    };
+
+    const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+    const addWeeklySlot = () => {
+        setNewSchedule((prev) => ({
+            ...prev,
+            weekly_schedule: [...prev.weekly_schedule, { day: "", start_time: "", end_time: "" }],
+        }));
+    };
+
+    const handleWeeklyChange = (index, field, value) => {
+        const updatedSlots = [...newSchedule.weekly_schedule];
+        updatedSlots[index][field] = value;
+        setNewSchedule((prev) => ({ ...prev, weekly_schedule: updatedSlots }));
+    };
+
+    const removeWeeklySlot = (index) => {
+        setNewSchedule((prev) => ({
+            ...prev,
+            weekly_schedule: prev.weekly_schedule.filter((_, i) => i !== index),
+        }));
+    };
+
+    const addEditWeeklySlot = () => {
+        setSelectedSchedule((prev) => ({
+            ...prev,
+            weekly_schedule: [...(prev?.weekly_schedule || []), { day: "", start_time: "", end_time: "" }],
+        }));
+    };
+
+    const handleEditWeeklyChange = (index, field, value) => {
+        const updatedSlots = [...(selectedSchedule.weekly_schedule || [])];
+        updatedSlots[index][field] = value;
+        setSelectedSchedule((prev) => ({ ...prev, weekly_schedule: updatedSlots }));
+    };
+
+    const removeEditWeeklySlot = (index) => {
+        setSelectedSchedule((prev) => ({
+            ...prev,
+            weekly_schedule: prev.weekly_schedule.filter((_, i) => i !== index),
+        }));
+    };
+
+    const handleEditScheduleTypeChange = (event) => {
+        const value = event.target.value;
+        setEditScheduleType(value); // This sets the radio button state
+        setSelectedSchedule((prev) => ({
+            ...prev,
+            schedule_type: value, // This updates the actual data object
+        }));
+    };
+
+    useEffect(() => {
+        if (selectedSchedule?.schedule_type) {
+            setEditScheduleType(selectedSchedule.schedule_type);
+        }
+    }, [selectedSchedule]);
+
+    const generateTimeOptions = () => {
+        const options = [];
+        for (let h = 0; h < 24; h++) {
+            for (let m = 0; m < 60; m += 30) {
+                const hh = h.toString().padStart(2, '0');
+                const mm = m.toString().padStart(2, '0');
+                options.push(`${hh}:${mm}`);
+            }
+        }
+        return options;
+    };
+
+    const timeOptions = generateTimeOptions();
 
     // Handle form input change with real-time validation
     const handleInputChange = (e) => {
@@ -76,12 +158,13 @@ function Schedules() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(newSchedule),
+                body: JSON.stringify({...newSchedule, schedule_type: scheduleType}),
             });
 
             if (!response.ok) {
                 throw new Error("Failed to add new schedule.");
             }
+            await fetchSchedules();
             alert("Schedule added successfully!");
             setOpenDialog(false); // Close the dialog
         } catch (err) {
@@ -156,7 +239,7 @@ function Schedules() {
                 if (!response.ok) {
                     throw new Error("Failed to delete schedule.");
                 }
-                setSchedules((prevSchedules) => prevSchedules.filter((schedule) => schedule.schedule_id !== scheduleId));
+                await fetchSchedules();
                 alert("Schedule deleted successfully!");
             } catch (err) {
                 setError(err.message);
@@ -235,17 +318,37 @@ function Schedules() {
                                         </button>
                                     </div>
                                 </div>
+                                {schedule.schedule_type === 'one-time' &&
+                                    <div className="mt-4 grid grid-cols-2 gap-4">
+                                        <div className="flex items-center text-sm text-gray-500">
+                                            <Calendar className="w-4 h-4 mr-2" />
+                                            {new Date(schedule.schedule_date).toLocaleDateString()}
+                                        </div>
+                                        <div className="flex items-center text-sm text-gray-500">
+                                            <Clock className="w-4 h-4 mr-2" />
+                                            {schedule.schedule_time_slot} - {schedule.end_time}
+                                        </div>
+                                    </div>
+                                }
+                                {schedule.schedule_type === 'weekly' && schedule.weekly_schedule?.map((slot, idx) => {
+                                        const formatTime = (timeStr) => {
+                                            const [hour, minute] = timeStr.split(':');
+                                            const date = new Date();
+                                            date.setHours(parseInt(hour), parseInt(minute));
+                                            return date.toLocaleTimeString('en-US', {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: true,
+                                            }).replace(':', '.');
+                                        };
 
-                                <div className="mt-4 grid grid-cols-2 gap-4">
-                                    <div className="flex items-center text-sm text-gray-500">
-                                        <Calendar className="w-4 h-4 mr-2" />
-                                        {new Date(schedule.schedule_date).toLocaleDateString()}
-                                    </div>
-                                    <div className="flex items-center text-sm text-gray-500">
-                                        <Clock className="w-4 h-4 mr-2" />
-                                        {schedule.schedule_time_slot} - {schedule.end_time}
-                                    </div>
-                                </div>
+                                        return (
+                                            <div key={idx} className="flex items-center text-sm text-gray-500">
+                                                <Clock className="w-4 h-4 mr-2" />
+                                                {slot.day} {formatTime(slot.start_time)} to {formatTime(slot.end_time)}
+                                            </div>
+                                        )
+                                })}
                             </div>
                         ))}
                 </div>
@@ -257,56 +360,161 @@ function Schedules() {
                         <DialogTitle>Add New Schedule</DialogTitle>
                         <DialogContent>
                             <Grid container spacing={2}>
-                                {[
-                                    { name: "title", label: "Schedule Title", type: "text" },
-                                    { name: "schedule_date", label: "Schedule Date", type: "date" }
-                                ].map(({ name, label, type }) => (
-                                    <Grid item xs={12} key={name}>
-                                        <TextField
-                                            fullWidth
-                                            variant="outlined"
-                                            label={label}
-                                            name={name}
-                                            type={type}
-                                            value={newSchedule[name]}
-                                            onChange={handleInputChange}
-                                            error={!!errors[name]}
-                                            helperText={errors[name]}
-                                            margin="dense"
-                                            InputLabelProps={{ shrink: true }} // Keeps label fixed
-                                        />
+                                {/* Schedule Type (One-time / Weekly) */}
+                                <Grid item xs={12}>
+                                    <FormControl component="fieldset">
+                                        <FormLabel component="legend">Schedule Type</FormLabel>
+                                        <RadioGroup
+                                            row
+                                            name="schedule_type"
+                                            value={scheduleType}
+                                            onChange={handleScheduleTypeChange}
+                                        >
+                                            <FormControlLabel value="one-time" control={<Radio />} label="One-time" />
+                                            <FormControlLabel value="weekly" control={<Radio />} label="Weekly" />
+                                        </RadioGroup>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={12} key={"title"}>
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        label={"Schedule Title"}
+                                        name={"title"}
+                                        type={"text"}
+                                        value={newSchedule.title}
+                                        onChange={handleInputChange}
+                                        error={!!errors.title}
+                                        helperText={errors.title}
+                                        margin="dense"
+                                        InputLabelProps={{ shrink: true }} // Keeps label fixed
+                                    />
+                                </Grid>
+                                {/* One-time Fields (Only shown when "One-time" is selected) */}
+                                {scheduleType === 'one-time' && (
+                                    <>
+                                        <Grid item xs={4}>
+                                            <TextField
+                                                fullWidth
+                                                variant="outlined"
+                                                label="Schedule Date"
+                                                type="date"
+                                                name="schedule_date"
+                                                value={newSchedule.schedule_date}
+                                                onChange={handleInputChange}
+                                                error={!!errors.schedule_date}
+                                                helperText={errors.schedule_date}
+                                                margin="dense"
+                                                InputLabelProps={{ shrink: true }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <FormControl fullWidth margin="dense">
+                                                <InputLabel>Start Time</InputLabel>
+                                                <Select
+                                                    name="schedule_time_slot"
+                                                    value={newSchedule.schedule_time_slot}
+                                                    onChange={handleInputChange}
+                                                    error={!!errors.schedule_time_slot}
+                                                    variant="outlined"
+                                                >
+                                                    {timeOptions.map((time) => (
+                                                        <MenuItem key={time} value={time}>
+                                                            {time}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <FormControl fullWidth margin="dense">
+                                                <InputLabel>End Time</InputLabel>
+                                                <Select
+                                                    name="end_time"
+                                                    value={newSchedule.end_time}
+                                                    onChange={handleInputChange}
+                                                    error={!!errors.end_time}
+                                                    variant="outlined"
+                                                >
+                                                    {timeOptions.map((time) => (
+                                                        <MenuItem key={time} value={time}>
+                                                            {time}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+                                    </>
+                                )}
+
+                                {/* Weekly Schedule */}
+                                {scheduleType === 'weekly' && (
+                                    <Grid item xs={12}>
+                                        <Typography variant="subtitle1" gutterBottom>
+                                            Weekly Schedule
+                                        </Typography>
+                                        {newSchedule.weekly_schedule.map((slot, index) => (
+                                            <Box key={index} mb={2}>
+                                                <Grid container spacing={1} alignItems="center">
+                                                    <Grid item xs={4}>
+                                                        <TextField
+                                                            select
+                                                            label="Day"
+                                                            fullWidth
+                                                            value={slot.day}
+                                                            onChange={(e) => handleWeeklyChange(index, "day", e.target.value)}
+                                                        >
+                                                            {weekDays.map((day) => (
+                                                                <MenuItem key={day} value={day}>{day}</MenuItem>
+                                                            ))}
+                                                        </TextField>
+                                                    </Grid>
+                                                    <Grid item xs={3}>
+                                                        <FormControl fullWidth margin="dense">
+                                                            <InputLabel>Start Time</InputLabel>
+                                                            <Select
+                                                                name="start_time"
+                                                                value={slot.start_time}
+                                                                onChange={(e) => handleWeeklyChange(index, "start_time", e.target.value)}
+                                                                error={!!errors.start_time}
+                                                                variant="outlined"
+                                                            >
+                                                                {timeOptions.map((time) => (
+                                                                    <MenuItem key={time} value={time}>
+                                                                        {time}
+                                                                    </MenuItem>
+                                                                ))}
+                                                            </Select>
+                                                        </FormControl>
+                                                    </Grid>
+                                                    <Grid item xs={3}>
+                                                        <FormControl fullWidth margin="dense">
+                                                            <InputLabel>End Time</InputLabel>
+                                                            <Select
+                                                                name="end_time"
+                                                                value={slot.end_time}
+                                                                onChange={(e) => handleWeeklyChange(index, "end_time", e.target.value)}
+                                                                error={!!errors.end_time}
+                                                                variant="outlined"
+                                                            >
+                                                                {timeOptions.map((time) => (
+                                                                    <MenuItem key={time} value={time}>
+                                                                        {time}
+                                                                    </MenuItem>
+                                                                ))}
+                                                            </Select>
+                                                        </FormControl>
+                                                    </Grid>
+                                                    <Grid item xs={2}>
+                                                        <Button color="error" onClick={() => removeWeeklySlot(index)}>Remove</Button>
+                                                    </Grid>
+                                                </Grid>
+                                            </Box>
+                                        ))}
+                                        <Button onClick={addWeeklySlot} style={{ marginTop: "10px" }} variant="outlined">+ Add Day</Button>
                                     </Grid>
-                                ))}
-                                <Grid item xs={6}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        label="Start Time"
-                                        name="schedule_time_slot"
-                                        type="time"
-                                        value={newSchedule.schedule_time_slot}
-                                        onChange={handleInputChange}
-                                        error={!!errors.schedule_time_slot}
-                                        helperText={errors.schedule_time_slot}
-                                        margin="dense"
-                                        InputLabelProps={{ shrink: true }} // Keeps label fixed
-                                    />
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        label="End Time"
-                                        name="end_time"
-                                        type="time"
-                                        value={newSchedule.end_time}
-                                        onChange={handleInputChange}
-                                        error={!!errors.end_time}
-                                        helperText={errors.end_time}
-                                        margin="dense"
-                                        InputLabelProps={{ shrink: true }} // Keeps label fixed
-                                    />
-                                </Grid>
+                                )}
+
                                 <Grid item xs={12}>
                                     <TextField
                                         fullWidth
@@ -340,74 +548,161 @@ function Schedules() {
                         <DialogTitle>Edit Schedule</DialogTitle>
                         <DialogContent>
                             <Grid container spacing={2}>
-                                {[
-                                    { name: "title", label: "Schedule Title", type: "text" },
-                                ].map(({ name, label, type }) => (
-                                    <Grid item xs={12} key={name}>
-                                        <TextField
-                                            fullWidth
-                                            variant="outlined"
-                                            label={label}
-                                            name={name}
-                                            type={type}
-                                            value={selectedSchedule?.[name] || ""}
-                                            onChange={handleInputChange}
-                                            error={!!errors[name]}
-                                            helperText={errors[name]}
-                                            margin="dense"
-                                            InputLabelProps={{ shrink: true }} // Keeps label fixed
-                                        />
+                                {/* Schedule Type */}
+                                <Grid item xs={12}>
+                                    <FormControl component="fieldset">
+                                        <FormLabel component="legend">Schedule Type</FormLabel>
+                                        <RadioGroup
+                                            row
+                                            name="schedule_type"
+                                            value={editScheduleType}
+                                            onChange={handleEditScheduleTypeChange}
+                                        >
+                                            <FormControlLabel value="one-time" control={<Radio />} label="One-time" />
+                                            <FormControlLabel value="weekly" control={<Radio />} label="Weekly" />
+                                        </RadioGroup>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={12} key={"title"}>
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        label={"Schedule Title"}
+                                        name={"title"}
+                                        type={"text"}
+                                        value={selectedSchedule?.title || ""}
+                                        onChange={handleInputChange}
+                                        error={!!errors.title}
+                                        helperText={errors.title}
+                                        margin="dense"
+                                        InputLabelProps={{ shrink: true }} // Keeps label fixed
+                                    />
+                                </Grid>
+                                {/* One-time fields */}
+                                {editScheduleType === 'one-time' && (
+                                    <>
+                                        <Grid item xs={4}>
+                                            <TextField
+                                                fullWidth
+                                                variant="outlined"
+                                                label="Schedule Date"
+                                                type="date"
+                                                name="schedule_date"
+                                                value={selectedSchedule?.schedule_date
+                                                    ? new Date(selectedSchedule.schedule_date).toISOString().slice(0, 10)
+                                                    : ""}
+                                                onChange={handleInputChange}
+                                                error={!!errors.schedule_date}
+                                                helperText={errors.schedule_date}
+                                                margin="dense"
+                                                InputLabelProps={{ shrink: true }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <FormControl fullWidth margin="dense">
+                                                <InputLabel>Start Time</InputLabel>
+                                                <Select
+                                                    name="schedule_time_slot"
+                                                    value={selectedSchedule?.schedule_time_slot?.toString().slice(0,5) || ""}
+                                                    onChange={handleInputChange}
+                                                    error={!!errors.schedule_time_slot}
+                                                    variant="outlined"
+                                                >
+                                                    {timeOptions.map((time) => (
+                                                        <MenuItem key={time} value={time}>
+                                                            {time}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <FormControl fullWidth margin="dense">
+                                                <InputLabel>End Time</InputLabel>
+                                                <Select
+                                                    name="end_time"
+                                                    value={selectedSchedule?.end_time?.toString().slice(0,5) || ""}
+                                                    onChange={handleInputChange}
+                                                    error={!!errors.end_time}
+                                                    variant="outlined"
+                                                >
+                                                    {timeOptions.map((time) => (
+                                                        <MenuItem key={time} value={time}>
+                                                            {time}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+                                    </>
+                                )}
+                                {/* Weekly fields */}
+                                {editScheduleType === 'weekly' && (
+                                    <Grid item xs={12}>
+                                        <Typography variant="subtitle1" gutterBottom>
+                                            Weekly Schedule
+                                        </Typography>
+                                        {selectedSchedule.weekly_schedule?.map((slot, index) => (
+                                            <Box key={index} mb={2}>
+                                                <Grid container spacing={1} alignItems="center">
+                                                    <Grid item xs={4}>
+                                                        <TextField
+                                                            select
+                                                            label="Day"
+                                                            fullWidth
+                                                            value={slot.day}
+                                                            onChange={(e) => handleEditWeeklyChange(index, "day", e.target.value)}
+                                                        >
+                                                            {weekDays.map((day) => (
+                                                                <MenuItem key={day} value={day}>{day}</MenuItem>
+                                                            ))}
+                                                        </TextField>
+                                                    </Grid>
+                                                    <Grid item xs={3}>
+                                                        <FormControl fullWidth margin="dense">
+                                                            <InputLabel>Start Time</InputLabel>
+                                                            <Select
+                                                                name="end_time"
+                                                                value={slot?.start_time?.toString().slice(0,5)}
+                                                                onChange={(e) => handleEditWeeklyChange(index, "start_time", e.target.value)}
+                                                                error={!!errors.start_time}
+                                                                variant="outlined"
+                                                            >
+                                                                {timeOptions.map((time) => (
+                                                                    <MenuItem key={time} value={time}>
+                                                                        {time}
+                                                                    </MenuItem>
+                                                                ))}
+                                                            </Select>
+                                                        </FormControl>
+                                                    </Grid>
+                                                    <Grid item xs={3}>
+                                                        <FormControl fullWidth margin="dense">
+                                                            <InputLabel>End Time</InputLabel>
+                                                            <Select
+                                                                name="end_time"
+                                                                value={slot?.end_time?.toString().slice(0,5)}
+                                                                onChange={(e) => handleEditWeeklyChange(index, "end_time", e.target.value)}
+                                                                error={!!errors.end_time}
+                                                                variant="outlined"
+                                                            >
+                                                                {timeOptions.map((time) => (
+                                                                    <MenuItem key={time} value={time}>
+                                                                        {time}
+                                                                    </MenuItem>
+                                                                ))}
+                                                            </Select>
+                                                        </FormControl>
+                                                    </Grid>
+                                                    <Grid item xs={2}>
+                                                        <Button color="error" onClick={() => removeEditWeeklySlot(index)}>Remove</Button>
+                                                    </Grid>
+                                                </Grid>
+                                            </Box>
+                                        ))}
+                                        <Button onClick={addEditWeeklySlot} style={{ marginTop: "10px" }} variant="outlined">+ Add Day</Button>
                                     </Grid>
-                                ))}
-                                <Grid item xs={6}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        label="Schedule Date"
-                                        name="schedule_date"
-                                        type="date"
-                                        value={selectedSchedule?.schedule_date
-                                            ? new Date(selectedSchedule.schedule_date).toISOString().slice(0, 10)
-                                            : ""
-                                        }
-                                        onChange={handleInputChange}
-                                        error={!!errors?.schedule_date}
-                                        helperText={errors?.schedule_date}
-                                        margin="dense"
-                                        InputLabelProps={{ shrink: true }} // Keeps label fixed
-                                    />
-
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        label="Start Time"
-                                        name="start_time"
-                                        type="time"
-                                        value={selectedSchedule?.schedule_time_slot || ""}
-                                        onChange={handleInputChange}
-                                        error={!!errors.schedule_time_slot}
-                                        helperText={errors.schedule_time_slot}
-                                        margin="dense"
-                                        InputLabelProps={{ shrink: true }} // Keeps label fixed
-                                    />
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        label="End Time"
-                                        name="end_time"
-                                        type="time"
-                                        value={selectedSchedule?.end_time || ""}
-                                        onChange={handleInputChange}
-                                        error={!!errors.end_time}
-                                        helperText={errors.end_time}
-                                        margin="dense"
-                                        InputLabelProps={{ shrink: true }} // Keeps label fixed
-                                    />
-                                </Grid>
+                                )}
                                 <Grid item xs={12}>
                                     <TextField
                                         fullWidth

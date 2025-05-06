@@ -123,13 +123,13 @@ const Membership = () => {
                             <p className="text-gray-600">
                                 Schedule your complimentary fitness assessment, get oriented
                                 with our facilities, and begin your fitness journey with
-                                FitnessHub.
+                                JK Fitness.
                             </p>
                         </motion.div>
                     </div>
 
                     <div className="text-center mt-12">
-                        <Link to="/contact" className="btn-primary inline-block">
+                        <Link to="/signup" className="btn-primary inline-block">
                             Join Now
                         </Link>
                     </div>

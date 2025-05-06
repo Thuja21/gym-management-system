@@ -190,7 +190,7 @@ export const editMember = async (req, res) => {
 
     export const getAllMembershipTypes = async (req, res) => {
     try {
-        const q = "SELECT plan_id, plan_name FROM plans";
+        const q = "SELECT plan_id, plan_name, features, plan_price, plan_duration FROM plans";
 
         db.query(q, (err, data) => {
             if (err) return res.status(500).json(err);
@@ -279,6 +279,27 @@ export const deleteMember = (req, res) => {
     });
 };
 
+export const getLoggedInMemberDetails = (req, res) => {
+    const memberId = req.user.member_id;
+
+    const q = `
+    SELECT gym_members.*, users.*, plans.*
+    FROM plans
+    JOIN gym_members ON plans.plan_id = gym_members.plan_id
+    JOIN users ON users.id = gym_members.user_id
+    WHERE gym_members.member_id = ?
+  `;
 
 
+    db.query(q, [memberId], (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: "Error fetching details", details: err });
+        }
 
+        if (data.length === 0) {
+            return res.status(404).json({ message: "No member found" });
+        }
+
+        return res.status(200).json(data);
+    });
+};

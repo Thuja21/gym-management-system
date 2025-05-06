@@ -9,6 +9,7 @@ import axios from "axios";
 
 const ManageMembers = () => {
     const [members, setMembers] = useState([]);
+    const [filteredMembers, setFilteredMembers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
@@ -46,6 +47,7 @@ const ManageMembers = () => {
                 }
                 const data = await response.json();
                 setMembers(data);
+                setFilteredMembers(data); // Initialize filtered members with all members
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -54,6 +56,34 @@ const ManageMembers = () => {
         };
         fetchMembers();
     }, [loading]);
+
+    // Search functionality
+    useEffect(() => {
+        if (searchTerm.trim() === "") {
+            setFilteredMembers(members);
+        } else {
+            const lowercasedTerm = searchTerm.toLowerCase();
+            const filtered = members.filter(member => {
+                // Search through multiple fields
+                return (
+                    (member.member_id && member.member_id.toString().includes(searchTerm)) ||
+                    (member.user_name && member.user_name.toLowerCase().includes(lowercasedTerm)) ||
+                    (member.full_name && member.full_name.toLowerCase().includes(lowercasedTerm)) ||
+                    (member.email && member.email.toLowerCase().includes(lowercasedTerm)) ||
+                    (member.contact_no && member.contact_no.includes(searchTerm)) ||
+                    (member.address && member.address.toLowerCase().includes(lowercasedTerm)) ||
+                    (member.fitness_goal && member.fitness_goal.toLowerCase().includes(lowercasedTerm)) ||
+                    (member.plan_name && member.plan_name.toLowerCase().includes(lowercasedTerm))
+                );
+            });
+            setFilteredMembers(filtered);
+        }
+    }, [searchTerm, members]);
+
+    // Handle search input change
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
 
 
     // Input validation
@@ -138,19 +168,50 @@ const ManageMembers = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
 
-        setNewMember((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+        // Calculate age if dob is changed
+        if (name === "dob") {
+            const today = new Date();
+            const birthDate = new Date(value);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
 
-        setSelectedMember((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+            // Update dob and calculated age
+            if (newMember) {
+                setNewMember((prev) => ({
+                    ...prev,
+                    dob: value,
+                    age: age.toString(),
+                }));
+            }
+            if (selectedMember) {
+                setSelectedMember((prev) => ({
+                    ...prev,
+                    dob: value,
+                    age: age.toString(),
+                }));
+            }
+        } else {
+            if (newMember) {
+                setNewMember((prev) => ({
+                    ...prev,
+                    [name]: value,
+                }));
+            }
+            if (selectedMember) {
+                setSelectedMember((prev) => ({
+                    ...prev,
+                    [name]: value,
+                }));
+            }
+        }
 
-        // Validate the current field and remove error if corrected
+        // Validate and update errors
         setErrors((prevErrors) => {
             const newErrors = { ...prevErrors };
+
             switch (name) {
                 case "username":
                 case "fullname":
@@ -184,9 +245,11 @@ const ManageMembers = () => {
                 default:
                     break;
             }
+
             return newErrors;
         });
     };
+
 
 
     // Handle Edit button click
@@ -246,8 +309,9 @@ const ManageMembers = () => {
                     GYM MEMBERS
                 </Typography>
 
-                <div className="bg-white rounded-xl shadow-sm p-4 mb-4 ">
-                    <div className="flex items-center">
+                <Paper elevation={1} className="p-4 mb-6 rounded-lg">
+                    <div className="flex flex-col md:flex-row md:items-center gap-4 rounded-xl">
+                    {/*<div className="flex items-center">*/}
                         {/* Search Input */}
                         <div className="relative flex-1">
                             <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -256,7 +320,7 @@ const ManageMembers = () => {
                                 placeholder="Search members..."
                                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500"
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={handleSearchChange}
                             />
                         </div>
 
@@ -269,8 +333,9 @@ const ManageMembers = () => {
                                 Add Member
                             </button>
                         </div>
-                    </div>
+                    {/*</div>*/}
                 </div>
+                </Paper>
 
 
 
@@ -278,6 +343,7 @@ const ManageMembers = () => {
                 {error && <Typography color="error">{error}</Typography>}
 
                 {!loading && !error && (
+                    <Paper elevation={1} className="rounded-lg">
                     <div className="bg-white rounded-xl shadow-sm overflow-x-auto" >
                         <TableContainer
                             component={Paper} className="table-container"
@@ -291,7 +357,7 @@ const ManageMembers = () => {
                         >
                             <Table className="w-full border-collapse">
                                 <TableHead style={{ position: "sticky", top: 0,zIndex: 10 }}>
-                                    <TableRow className="bg-red-200 text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
+                                    <TableRow className="bg-gray-200 text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
 
                                         <th className="px-6 py-3 text-center">ID</th>
                                         <th className="px-6 py-3 text-center">Name</th>
@@ -308,7 +374,7 @@ const ManageMembers = () => {
                                         <th className="px-6 py-3 text-center">Fitness Level</th>
                                         <th className="px-6 py-3 text-center">Fitness Goal</th>
                                         <th className="px-6 py-3 text-center">Plan</th>
-                                        <th className="px-6 py-3 text-center">Schedule</th>
+                                        {/*<th className="px-6 py-3 text-center">Schedule</th>*/}
                                         <th className="px-6 py-3 text-center">Health Issues</th>
                                         <th className="px-6 py-3 text-center">Registered Date</th>
                                         <th className="px-6 py-3 text-center">Status</th>
@@ -319,7 +385,7 @@ const ManageMembers = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody className="divide-y divide-gray-200">
-                                    {members.map((member, index) => (
+                                    {filteredMembers.map((member, index) => (
                                         <TableRow
                                             key={member.member_id} className="table-row"
                                             sx={{
@@ -345,7 +411,7 @@ const ManageMembers = () => {
                                             <TableCell>{member.current_fitness_level}</TableCell>
                                             <TableCell>{member.fitness_goal}</TableCell>
                                             <TableCell>{member.plan_name}</TableCell>
-                                            <TableCell>{member.schedule_id}</TableCell>
+                                            {/*<TableCell>{member.schedule_id}</TableCell>*/}
                                             <TableCell>{member.health_issues}</TableCell>
                                             <TableCell>{(new Date(member.registered_date).toLocaleDateString())}</TableCell>
                                             <TableCell><span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -406,6 +472,7 @@ const ManageMembers = () => {
                         </TableContainer>
 
                     </div>
+                    </Paper>
                 )}
             </div>
 
@@ -490,6 +557,7 @@ const ManageMembers = () => {
                                     onChange={handleInputChange}
                                     error={!!errors[field]}
                                     helperText={errors[field]}
+                                    disabled={field === "age"}
                                 />
                             ))}
 

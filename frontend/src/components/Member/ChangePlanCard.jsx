@@ -1,16 +1,37 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FaCheck } from "react-icons/fa";
 
 const ChangePlanCard = ({
                             title,
                             price,
                             period,
+                            plan_id,
                             features,
-                            isCurrentPlan = false, // Change "popular" to "isCurrentPlan"
+                            isCurrentPlan = false,
                             delay = 0,
+                            shadow = true
                         }) => {
+
+    const navigate = useNavigate();
+
+    const handleSwitchPlan = () => {
+        if (!isCurrentPlan) {
+            navigate("/checkout", {
+                state: {
+                    plan: {
+                        title,
+                        price,
+                        period,
+                        plan_id,
+                        features
+                    }
+                }
+            });
+        }
+    };
+
     return (
         <motion.div
             className={`rounded-lg overflow-hidden ${isCurrentPlan ? "border-2 border-orange-400" : "border border-gray-200"}`}
@@ -40,17 +61,17 @@ const ChangePlanCard = ({
                         </li>
                     ))}
                 </ul>
-                <Link
-                    to="/contact"
-                    className={`block text-center py-3 px-6 rounded-md font-semibold transition duration-300 ${
+                <button
+                    onClick={handleSwitchPlan}
+                    disabled={isCurrentPlan}
+                    className={`block w-full text-center py-3 px-6 rounded-md font-semibold transition duration-300 ${
                         isCurrentPlan
-                            ? "bg-transparent text-gray-500 cursor-not-allowed"
+                            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                             : "bg-[#FF4500] text-white hover:bg-opacity-90"
                     }`}
-                    style={{ pointerEvents: isCurrentPlan ? "none" : "auto" }}
                 >
-                    Switch Plan
-                </Link>
+                    {isCurrentPlan ? "Current Plan" : "Switch Plan"}
+                </button>
             </div>
         </motion.div>
     );

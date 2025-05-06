@@ -3,10 +3,13 @@ import { AppBar, Toolbar, Typography, Box, InputBase, IconButton, Avatar, Menu, 
 import { Search as SearchIcon, AccountCircle } from "@mui/icons-material";
 import Logo from "../assets/images/logo.png";
 import "../pages/Admin/Admin.css";
+import { useNavigate } from "react-router-dom";
+
 
 const TopBar = ({ userName, title, onSearch }) => {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
+    const navigate = useNavigate();
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -65,7 +68,7 @@ const TopBar = ({ userName, title, onSearch }) => {
                     />
                 </Box>
 
-                <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Box sx={{ display: "flex", alignItems: "center" , marginRight: "-15px"}}>
                     <Typography variant="subtitle1" component="div" sx={{ color: "#ffffff", marginRight: "16px" }}>
                         {userName}
                     </Typography>
@@ -81,10 +84,50 @@ const TopBar = ({ userName, title, onSearch }) => {
                         onClose={handleClose}
                         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                         transformOrigin={{ vertical: "top", horizontal: "right" }}
+                        PaperProps={{
+                            elevation: 4,
+                            sx: {
+                                mt: 1.5,
+                                minWidth: 200,
+                                borderRadius: 2,
+                                border: '1px solid #d1d5db', // Tailwind: border-gray-300
+                                backgroundColor: '#ffffff',
+                                boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                                overflow: 'visible',
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    right: 14,
+                                    width: 14,
+                                    height: 14,
+                                    bgcolor: 'background.paper',
+                                    transform: 'translateY(-50%) rotate(45deg)',
+                                    zIndex: 0,
+                                    borderTop: '1px solid #d1d5db',
+                                    borderLeft: '1px solid #d1d5db',
+                                }
+                            }
+                        }}
                     >
-                        <MenuItem onClick={handleClose}>Profile</MenuItem>
-                        <MenuItem onClick={handleClose}>Settings</MenuItem>
-                        <MenuItem onClick={handleClose}>Logout</MenuItem>
+                        <MenuItem
+                            onClick={() => {
+                                handleClose();
+                                navigate("/trainerProfile"); // replace with your actual route
+                            }}
+                        >
+                            Profile
+                        </MenuItem>
+
+                        <MenuItem
+                            onClick={() => {
+                                handleClose();
+                                navigate("/login"); // or "/" if that's your logout landing
+                            }}
+                        >
+                            Logout
+                        </MenuItem>
+
                     </Menu>
                 </Box>
             </Toolbar>

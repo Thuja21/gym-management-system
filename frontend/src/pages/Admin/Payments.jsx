@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import AdminSideBar from "./AdminSideBar.jsx";
 import { IconButton, Paper, Table, TableBody, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { Button, Menu, MenuItem } from '@mui/material';
-import { Edit as EditIcon, Trash as DeleteIcon, Search } from "lucide-react";
-import { FiCheckCircle, FiClock, FiXCircle, FiFilter } from "react-icons/fi";
+import { Search } from "lucide-react";
+import { FiFilter } from "react-icons/fi";
+import axios from "axios";
 
 const Payment = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -12,58 +12,42 @@ const Payment = () => {
     const [filterStatus, setFilterStatus] = useState("all");
     const [payments, setPayments] = useState([]);
 
-
     // Fetch payments from backend
     useEffect(() => {
-        const fetchAllMembers = async () => {
+        const fetchPaymentDetails = async () => {
             try {
-                const response = await fetch("http://localhost:8800/api/planpayments/getmembers"); // Update with your backend URL
-                if (!response.ok) {
-                    throw new Error("Failed to fetch payments.");
-                }
-                const data = await response.json();
-                setPayments(data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
+                const response = await axios.get("http://localhost:8800/api/planpayments/payments");
+                setPayments(response.data);
+                setLoading(false);
+            } catch (error) {
+                console.error("Error fetching payment details:", error);
+                setError("Failed to load payment data");
                 setLoading(false);
             }
         };
-        fetchAllMembers();
+        fetchPaymentDetails();
     }, []);
 
-    // Filtered payments based on search and status
+    // Add this function to handle marking payment as paid
+    const handleMarkPayment = (payment) => {
+        console.log("Marking payment as paid:", payment);
+        // Implement your payment update logic here
+    };
+
+    // Filter payments based on search term and status
     const filteredPayments = payments.filter((payment) => {
         return (
             (filterStatus === "all" || payment?.status?.toLowerCase() === filterStatus.toLowerCase()) &&
-            (payment?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (payment?.member_id?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
                 payment?.plan_name?.toLowerCase().includes(searchTerm.toLowerCase()))
         );
     });
 
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-
-
-    const handleStatusChange = (id, newStatus) => {
-        setPayments((prev) =>
-            prev.map((payment) =>
-                payment.id === id ? { ...payment, status: newStatus } : payment
-            )
-        );
-    };
     const statusStyles = {
         paid: "bg-green-100 text-green-700",
         pending: "bg-yellow-100 text-yellow-700",
         overdue: "bg-red-100 text-red-700",
     };
-
 
     return (
         <div className="bg-gray-100" style={{ display: "flex", height: "100vh", paddingRight: "30px" }}>
@@ -123,74 +107,62 @@ const Payment = () => {
                     >
                         <Table className="w-full border-collapse">
                             <TableHead style={{ position: "sticky", top: 0, zIndex: 10 }}>
-                                <TableRow className="bg-red-200 text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
+                                <TableRow className="bg-gray-300  text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-center">ID</th>
                                     <th className="px-6 py-3 text-center">Member Name</th>
                                     <th className="pl-14 py-3">Plan</th>
                                     <th className="pl-32 py-3">Amount</th>
                                     <th className="pl-24 py-3">Due Date</th>
                                     <th className="px-5 py-3">Status</th>
-                                    <th className="pl-14 py-3">Action</th>
+                                    {/*<th className="pl-14 py-3">Action</th>*/}
                                 </TableRow>
                             </TableHead>
                             <TableBody className="divide-y divide-gray-200">
                                 {loading ? (
                                     <TableRow>
-                                        <td colSpan="6" className="text-center py-4">Loading...</td>
+                                        <td colSpan={6} className="px-6 py-4 text-center">Loading payment data...</td>
                                     </TableRow>
                                 ) : error ? (
                                     <TableRow>
-                                        <td colSpan="6" className="text-center text-red-500 py-4">{error}</td>
+                                        <td colSpan={6} className="px-6 py-4 text-center text-red-500">{error}</td>
                                     </TableRow>
                                 ) : filteredPayments.length === 0 ? (
                                     <TableRow>
-                                        <td colSpan="6" className="text-center py-4">No results found.</td>
+                                        <td colSpan={6} className="px-6 py-4 text-center">No payment records found</td>
                                     </TableRow>
                                 ) : (
-                                    filteredPayments.map((payment) => (
-                                        // <TableRow key={payment.payment_id}>
-                                        <TableRow key={payment.payment_id}>
+                                    filteredPayments.map((payment, index) => (
+                                        <TableRow key={payment.payment_id || index}>
+                                            <td className="px-6 py-3 text-center">{index + 1}</td>  {/* Auto incremented ID */}
                                             <td className="px-6 py-3 text-center">{payment.full_name}</td>
                                             <td className="pl-6 py-3">
                                                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
-                                                {payment.plan_name}
+                                                    {payment.plan_name}
                                                 </span>
                                             </td>
-                                            <td className="pl-16 py-3 text-center">{payment.plan_price}</td>
+                                            <td className="pl-16 py-3 text-center">{payment.amount}</td>
                                             <td className="px-16 py-3 text-center">
-                                                {new Date(payment.registered_date).toLocaleDateString("en-GB", {
-                                                    day: "2-digit",
-                                                    month: "2-digit",
-                                                    year: "numeric",
-                                                })}
+                                                {payment.due_date &&
+                                                    new Date(payment.due_date).toLocaleDateString("en-GB", {
+                                                        day: "2-digit",
+                                                        month: "2-digit",
+                                                        year: "numeric",
+                                                    })}
                                             </td>
                                             <td className="pr-10 ">
                                                 <span
-                                                    className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[payment.status]}`}>
-                                                {payment.status}
+                                                    className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[payment.status] || "bg-gray-100 text-gray-700"}`}>
+                                                    {payment.status}
                                                 </span>
                                             </td>
-                                            <td className = "pr-6 ">
-                                                <button
-                                                    onClick={() => handleMarkPayment(payment)}
-                                                    className="text-indigo-600 hover:text-indigo-900"
-                                                >
-                                                    Mark as Paid
-                                                </button>
-                                            </td>
-                                            {/*<td className="p-2">*/}
-                                            {/*    <select*/}
-                                            {/*        value={payment.status}*/}
-                                            {/*        onChange={(e) =>*/}
-                                            {/*            handleStatusChange(payment.id, e.target.value)*/}
-                                            {/*        }*/}
-                                            {/*        className="rounded p-1 shadow-sm"*/}
+                                            {/*<td className="pr-6 ">*/}
+                                            {/*    <button*/}
+                                            {/*        onClick={() => handleMarkPayment(payment)}*/}
+                                            {/*        className="text-indigo-600 hover:text-indigo-900"*/}
                                             {/*    >*/}
-                                            {/*        <option value="paid">Paid</option>*/}
-                                            {/*        <option value="pending">Pending</option>*/}
-                                            {/*        <option value="overdue">Overdue</option>*/}
-                                            {/*    </select>*/}
+                                            {/*        Mark as Paid*/}
+                                            {/*    </button>*/}
                                             {/*</td>*/}
-
                                         </TableRow>
                                     ))
                                 )}

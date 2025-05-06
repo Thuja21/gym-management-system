@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Bell, Plus, Trash2, Calendar, Search ,Megaphone} from "lucide-react";
 import AdminSideBar from "./AdminSideBar.jsx";
-import { Typography } from "@mui/material";
+import {Paper, Typography} from "@mui/material";
 
 function Announcements() {
     const [announcements, setAnnouncements] = useState([]);
@@ -86,8 +86,8 @@ function Announcements() {
                 {loading && <p>Loading announcements...</p>} {/* Show loading message */}
                 {error && <p>Error: {error}</p>} {/* Show error message */}
 
-                <div className="bg-white rounded-xl shadow-sm p-3 mb-4" style={{ marginRight: "-5px" }}>
-                    <div className="flex items-center">
+                <Paper elevation={1} className="p-4 mb-6 rounded-lg" style={{ marginRight: "-5px" }}>
+                    <div className="flex flex-col md:flex-row md:items-center gap-4 rounded-xl">
                         <div className="relative flex-1">
                             <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                             <input
@@ -109,9 +109,9 @@ function Announcements() {
                             </button>
                         </div>
                     </div>
-                </div>
+                </Paper>
 
-                <div className="bg-white rounded-xl shadow-sm" style={{ marginTop: "-10px", marginRight: "-5px", height: "100%" }}>
+                <div className="bg-white rounded-xl shadow-sm" style={{ marginTop: "-10px", marginRight: "-5px", height: "100%"  }}>
                     <div className="space-y-4 p-3">
                         {announcements.length > 0 ? (
                             announcements.map((announcement) => (
@@ -121,10 +121,10 @@ function Announcements() {
                                 >
                                     <div className="w-full p-3 rounded-2xl flex justify-between items-center bg-gradient-to-r from-gray-100 via-gray-300 to-blue-50" >
                                         <div className="space-y-2">
-                                            <h3 className="text-left flex items-center gap-2 leading-tight text-blue-900" style={{ fontSize: "20px", fontWeight: "bold" , fontFamily: "Montserrat"}}>
+                                            <h3 className="text-left flex items-center gap-2 leading-tight text-blue-900" style={{ fontSize: "20px", fontWeight: "bold" , fontFamily: "Segoe UI"}}>
                                                  {announcement.announcement_title}
                                             </h3>
-                                            <p className="leading-relaxed text-md text-gray-700" >
+                                            <p className="leading-relaxed text-md text-gray-700" style={{fontFamily: "Segoe UI"}} >
                                                 {announcement.announcement_content}
                                             </p>
                                             <div className="flex items-center gap-2 text-sm text-gray-600">

@@ -1,5 +1,9 @@
 import {db} from "../config/connectDatabase.js";
-import express from "express";
+import express from 'express';
+import multer from 'multer';
+
+const app = express();
+
 
 export const viewAllSupplements = (req, res) => {
     const q = "SELECT * FROM supplements";
@@ -61,5 +65,22 @@ export const deleteSupplement = (req, res) => {
     });
 };
 
+
+export const getAllSupplementCategories = async (req, res) => {
+    try {
+        const q = "SELECT DISTINCT category FROM supplements";;
+
+        db.query(q, (err, data) => {
+            if (err) return res.status(500).json(err);
+            if (data.length === 0) return res.status(404).json("No categories found!");
+
+            res.status(200).json(data);
+        });
+    } catch (error) {
+        // Handle any errors that occur during the database query
+        console.error("Error fetching categories:", error);
+        res.status(500).json({message: "Internal Server Error"});
+    }
+}
 
 

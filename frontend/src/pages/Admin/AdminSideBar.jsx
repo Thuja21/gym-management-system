@@ -25,6 +25,7 @@ const AdminSideBar = () => {
 
     const [isCollapsed] = useState(false);
     const styles = {
+        // sidebarBg: "#ffffff", textColor: "#262626", iconBg: "#262626", activeBg: "#3c1e1e",
         sidebarBg: "#1a1b23", textColor: "#a4a1b6", iconBg: "#262626", activeBg: "#3c1e1e",
         activeText: "#e3e3e8", fontSize: "14.5px", iconSize: "17px"
     };
