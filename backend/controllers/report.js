@@ -5,16 +5,13 @@ import ExcelJS from 'exceljs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import axios from "axios";
-import fs from 'fs';
-
-
-// Add this to your imports at the top
-import { ChartJSNodeCanvas } from'chartjs-node-canvas';
-import tmp from 'tmp';
 
 // Create __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+import  {ChartJSNodeCanvas} from 'chartjs-node-canvas';
+import tmp from 'tmp';
+import fs from 'fs';
 
 
 
@@ -189,7 +186,8 @@ function getPaymentData(startDate, endDate, callback) {
 // Report File Generators
 // ------------------------------------
 
-async  function generatePDF(res, data, title, startDate, endDate, gymName, logoPath, contactInfo = {}) {
+
+async function generatePDF(res, data, title, startDate, endDate, gymName, logoPath, contactInfo = {}) {
     // Default contact info
     const defaultLogoPath = path.join(__dirname, '..', 'public', 'logo.png');
     const address = contactInfo.address || 'Sarayadi,PointPedro';
@@ -255,46 +253,41 @@ async  function generatePDF(res, data, title, startDate, endDate, gymName, logoP
     // Add summary section with enhanced styling
     if (data && data.length > 0) {
         if (title === 'Membership Report') {
-            // Calculate member stats
+            // For membership report, calculate active vs expired
             const activeMembers = data.filter(item => item.status === 'Active').length;
             const expiredMembers = data.filter(item => item.status === 'Expired').length;
 
-            // Layout constants
+            // Summary box with proper spacing
             const summaryY = doc.y + 10;
-            const summaryBoxWidth = (doc.page.width - 120) / 2.5; // Make summary box smaller
-            const chartBoxWidth = (doc.page.width - 120) * 0.6; // Make chart area larger
-            const chartX = 60 + summaryBoxWidth + 10; // Right of summary box
 
-            // Draw summary box (left) with improved styling
-            doc.roundedRect(60, summaryY, summaryBoxWidth, 70, 5).fillAndStroke('#f8f8f8', '#aaaaaa');
+// Create the box
+            doc.roundedRect(50, summaryY, doc.page.width - 100, 40, 5).fillAndStroke('#f8f8f8', '#aaaaaa');
 
-// Add title with better positioning
-            doc.font('Helvetica-Bold').fontSize(13).fillColor('#333333')
-                .text('MEMBERSHIP SUMMARY', 75, summaryY + 14, { align: 'center', width: summaryBoxWidth - 30 });
+// Title with emphasis
+            doc.font('Helvetica-Bold').fontSize(12).fillColor('#333333')
+                .text('MEMBERSHIP SUMMARY', 70, summaryY + 14);
 
-// Create consistent column layout for stats
-            const leftColX = 80;
-            const rightColX = leftColX + 90;
+// Use explicit positioning for each metric instead of continued: true
+            const x_total = 240;
+            const x_active = x_total + 120;  // 120 units after total
+            const x_expired = x_active + 80;  // 80 units after active
 
-// Add stats with improved alignment
             doc.fontSize(11).fillColor('#555555')
-                .text(`Total Members:`, leftColX, summaryY + 35)
-                .text(`${data.length}`, rightColX, summaryY + 35)
-                .text(`Active:`, leftColX, summaryY + 50)
-                .text(`${activeMembers}`, rightColX, summaryY + 50)
-                .text(`Expired:`, leftColX, summaryY + 65)
-                .text(`${expiredMembers}`, rightColX, summaryY + 65);
+                .text(`Total Members: ${totalActiveMembers}`, x_total, summaryY + 14);
+            doc.text(`Active: ${activeMembers}`, x_active, summaryY + 14);
+            doc.text(`Expired: ${expiredMembers}`, x_expired, summaryY + 14);
 
+            doc.moveDown(3);
 
-            // Generate pie chart
-            // Generate pie chart with increased dimensions
+            // Generate pie chart for membership data
             const chartJSNodeCanvas = new ChartJSNodeCanvas({
                 type: 'png',
-                width: 400,  // Increased from 250
-                height: 250, // Increased from 120
+                width: 400,
+                height: 300,
                 backgroundColour: 'white'
             });
 
+            // Chart configuration
             const chartConfig = {
                 type: 'pie',
                 data: {
@@ -310,45 +303,31 @@ async  function generatePDF(res, data, title, startDate, endDate, gymName, logoP
                         title: {
                             display: true,
                             text: 'Membership Status',
-                            font: { size: 16 }  // Slightly larger title
+                            font: { size: 16 }
                         },
                         legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: {
-                                    size: 14  // Larger legend text
-                                },
-                                padding: 15   // More padding around legend items
-                            }
+                            position: 'bottom'
                         }
-                    },
-                    layout: {
-                        padding: {
-                            top: 10,
-                            bottom: 10
-                        }
-                    },
-                    maintainAspectRatio: false  // Allows custom height/width ratio
+                    }
                 }
             };
 
-
+            // Generate and add chart to PDF
             const imageBuffer = await chartJSNodeCanvas.renderToBuffer(chartConfig);
             const tempImg = tmp.fileSync({ postfix: ".png" });
             fs.writeFileSync(tempImg.name, imageBuffer);
 
-            // Draw chart (right)
-            // Draw chart (right) with better sizing
-            doc.image(tempImg.name, chartX, summaryY, {
-                fit: [chartBoxWidth, 80],  // Increased height from 60
-                align: 'center',
-                valign: 'top'
+            // Position chart centered below summary box
+            doc.moveDown(1);
+            doc.image(tempImg.name, {
+                fit: [300, 200],
+                align: 'left',
+                valign: 'left'
             });
 
+            doc.moveDown(2);
 
-            doc.moveDown(5);
-        }
-        else {
+        } else {
             // For attendance report
             const checkedIn = data.length;
             const attendanceRate = Math.round((checkedIn / totalActiveMembers) * 100);
@@ -509,6 +488,7 @@ async  function generatePDF(res, data, title, startDate, endDate, gymName, logoP
             align: 'left'
         });
     }
+
     doc.end();
 }
 
