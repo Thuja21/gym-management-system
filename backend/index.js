@@ -19,7 +19,8 @@ import planPaymentRoutes from "./routes/planPayment.js";
 import attendanceRoutes from "./routes/attendance.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import scheduleRoutes from "./routes/schedule.js";
-
+import reportRoutes from "./routes/report.js";
+import report from "./routes/report.js";
 
 
 //middlewares
@@ -145,6 +146,7 @@ app.use("/api/planpayments", planPaymentRoutes)
 app.use("/api/attendance", attendanceRoutes)
 app.use("/api/dash", dashboardRoutes)
 app.use("/api/schedules", scheduleRoutes)
+app.use("/api/reports", reportRoutes)
 
 
 //listen port

@@ -45,7 +45,7 @@ const MembershipCard = ({
                     ))}
                 </ul>
                 <Link
-                    to={isLoggedIn ? "/changePlan" : "/signup"}
+                    to={isLoggedIn ? "../../pages/Member/ChangePlan.jsx" : "../../pages/Signup/Signup.jsx"}
                     className={`block text-center py-3 px-6 rounded-md font-semibold transition duration-300 ${
                         popular
                             ? "bg-[#FF4500] text-white hover:bg-opacity-90"

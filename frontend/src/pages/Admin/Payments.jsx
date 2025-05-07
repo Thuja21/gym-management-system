@@ -36,12 +36,21 @@ const Payment = () => {
 
     // Filter payments based on search term and status
     const filteredPayments = payments.filter((payment) => {
+        const lowerSearchTerm = searchTerm.toLowerCase();
+
         return (
             (filterStatus === "all" || payment?.status?.toLowerCase() === filterStatus.toLowerCase()) &&
-            (payment?.member_id?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
-                payment?.plan_name?.toLowerCase().includes(searchTerm.toLowerCase()))
+            (
+                payment?.member_id?.toString().toLowerCase().includes(lowerSearchTerm) ||
+                payment?.plan_name?.toLowerCase().includes(lowerSearchTerm) ||
+                payment?.full_name?.toLowerCase().includes(lowerSearchTerm) ||
+                payment?.due_date?.toString().toLowerCase().includes(lowerSearchTerm) ||  // Add due_date search
+                payment?.status?.toLowerCase().includes(lowerSearchTerm)       // Add status search
+            )
         );
     });
+
+
 
     const statusStyles = {
         paid: "bg-green-100 text-green-700",
