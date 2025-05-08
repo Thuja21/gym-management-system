@@ -11,7 +11,7 @@ const steps = [
     { title: 'Confirmation', description: 'Review your order', icon: 'check' }
 ];
 
-export default function Checkout() {
+export default function ChangePlanCheckout() {
     const { planId } = useParams();
     const navigate = useNavigate();
     // const plan = plans.find((p) => p.id === planId);
@@ -20,8 +20,26 @@ export default function Checkout() {
     const location = useLocation();
     const selectedPlan = location.state?.plan;
     const token = localStorage.getItem('token'); // or from state/context
+    const [memberData, setMemberData] = useState([]);
 
     console.log("selected plan",selectedPlan)
+
+    const fetchMemberDetails = async () => {
+        try {
+            const response = await axios.get('http://localhost:8800/api/members/member', {
+                withCredentials: true
+            });
+            console.log(response.data);
+            setMemberData(response.data); // Set the fetched data to state
+        } catch (error) {
+            console.error('Error fetching plan data', error);
+            setMemberData([]); // <-- This is the fix
+        }
+    };
+    useEffect(() => {
+        fetchMemberDetails();
+    }, []);
+
 
     // Default fallback plan (if none selected)
     const plan = selectedPlan || {
@@ -62,22 +80,36 @@ export default function Checkout() {
         e.preventDefault();
 
         try {
+            // Create payment data object
+            const paymentData = {
+                plan_id: selectedPlan.plan_id,
+                price: selectedPlan.price,
+                payment_method: selectedPayment,
+                payment_details: selectedPayment === 'card' ? {
+                    card_number: formData.cardNumber,
+                    expiry_date: formData.expiryDate,
+                    cvv: formData.cvv
+                } : {}
+            };
+
+            // Update both plan and payment data
             const response = await axios.put(
-                'http://localhost:8800/api/plans/update-plan',
-                { plan_id: selectedPlan.plan_id },
+                'http://localhost:8800/api/plans/update-plan-with-payment',
+                paymentData,
                 { withCredentials: true }
             );
+
             alert('Payment successful!');
             setCurrentStep(2);
+            navigate('/changePlan');
         } catch (error) {
-            console.error('Error updating plan:', error);
+            console.error('Error updating plan and payment:', error);
             if (error.response) {
-                alert('Payment succeeded, but failed to update plan in DB.');
+                alert('Payment succeeded, but failed to update data in DB.');
             } else {
                 alert('An error occurred during the purchase.');
             }
         }
-
     };
 
 
@@ -141,7 +173,7 @@ export default function Checkout() {
                                         <input
                                             type="text"
                                             name="name"
-                                            value={formData.name}
+                                            value={memberData.full_name}
                                             onChange={handleInputChange}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition-all"
                                             style={{ focusRing: `${themeColor}40` }}

@@ -25,11 +25,13 @@ export const getPaymentDetails = (req, res) => {
 
 export const getAllPaymentDetails =(req,res)=> {
     const q = `
-    SELECT plan_payments.*, plans.plan_name, gym_members.user_id, users.full_name
-    FROM plan_payments
-    JOIN gym_members ON gym_members.member_id = plan_payments.member_id
-    JOIN plans ON plans.plan_id = gym_members.plan_id
-    JOIN users ON users.id = gym_members.user_id`
+        SELECT plan_payments.*, plans.plan_name, gym_members.user_id, users.full_name
+        FROM plan_payments
+                 JOIN plans ON plans.plan_id = plan_payments.plan_id
+                 JOIN gym_members ON gym_members.member_id = plan_payments.member_id
+                 JOIN users ON users.id = gym_members.user_id
+        ORDER BY plan_payments.payment_id DESC
+    `;
 
     db.query(q, (err, data) => {
         if (err) return res.status(500).json(err);

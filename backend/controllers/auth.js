@@ -48,80 +48,143 @@ export const register = (req, res) => {
           const dueDate = new Date();
           dueDate.setDate(dueDate.getDate() + 30);
 
-          // Insert into gym_members table
-          const memberInsertQuery =
-              "INSERT INTO gym_members (`user_id`, `age`, `gender`, `dob`, `status`, `registered_date`, `height`, `weight`, `blood_group`, `current_fitness_level`, `fitness_goal`, `health_issues`, `plan_id`) VALUES (?)";
-          const memberValues = [
-            userId,
-            req.body.age,
-            req.body.gender,
-            req.body.dob,
-            1, // status (1 for active)
-            new Date(),
-            req.body.height,
-            req.body.weight,
-            req.body.bloodGroup,
-            req.body.currentFitnessLevel,
-            req.body.fitnessGoal,
-            req.body.healthIssues,
-            req.body.plan_id
-          ];
+          // Get the current date for start_date
+          const startDate = new Date();
+          console.log("Start date:", startDate);
 
-          db.query(memberInsertQuery, [memberValues], (err, memberResult) => {
-            if (err) {
-              return db.rollback(() => {
-                res.status(500).json(err);
-              });
-            }
-
-            const memberId = memberResult.insertId;
-
-            // Generate payment ID
-            const paymentId = `PAY-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-
-            // Insert payment record
-            const paymentQuery =
-                "INSERT INTO plan_payments (`payment_id`, `member_id`, `plan_id`, `amount`, `payment_date`, `due_date`, `status`, `payment_method`) VALUES (?)";
-            const paymentValues = [
-              paymentId,
-              memberId,
-              req.body.plan_id,
-              parseFloat(req.body.payment_details?.amount || 0),
-              new Date(), // payment_date
-              dueDate, // due_date
-              1, // status (1 for paid)
-              req.body.payment_details?.payment_method || "Credit Card"
-            ];
-
-            db.query(paymentQuery, [paymentValues], (err, paymentResult) => {
-              if (err) {
-                return db.rollback(() => {
-                  res.status(500).json(err);
-                });
-              }
-
-              // Commit transaction
-              db.commit((err) => {
+          // Fetch plan details to determine duration
+          db.query(
+              "SELECT plan_name FROM plans WHERE plan_id = ?",
+              [req.body.plan_id],
+              (err, planDetails) => {
                 if (err) {
+                  console.error("Error fetching plan details:", err);
                   return db.rollback(() => {
                     res.status(500).json(err);
                   });
                 }
 
-                // Return payment details for invoice generation
-                return res.status(200).json({
-                  message: "User has been created successfully",
-                  paymentDetails: {
-                    payment_id: paymentId,
-                    payment_date: paymentValues[4], // Fixed index (was 3)
-                    amount: paymentValues[3],        // Fixed index (was 4)
-                    plan_id: req.body.plan_id
+                console.log("Plan details from DB:", planDetails);
+
+                // Initialize end date
+                let endDate = new Date();
+
+                if (planDetails && planDetails.length > 0) {
+                  const plan_name = planDetails[0].plan_name.toLowerCase();
+                  console.log("Plan name (lowercase):", plan_name);
+
+                  // Calculate end date differently based on plan
+                  if (plan_name.includes('monthly')) {
+                    // Add exactly 30 days for monthly plan
+                    endDate = new Date(startDate.getTime() + (30 * 24 * 60 * 60 * 1000));
+                    console.log("Monthly plan - End date:", endDate);
+                  } else if (plan_name.includes('quarterly')) {
+                    // Add exactly 90 days for quarterly plan
+                    endDate = new Date(startDate.getTime() + (90 * 24 * 60 * 60 * 1000));
+                    console.log("Quarterly plan - End date:", endDate);
+                  } else if (plan_name.includes('yearly') || plan_name.includes('annual')) {
+                    // Add exactly 365 days for yearly plan
+                    endDate = new Date(startDate.getTime() + (365 * 24 * 60 * 60 * 1000));
+                    console.log("Yearly plan - End date:", endDate);
+                  } else {
+                    // Default to 30 days if plan type is unknown
+                    endDate = new Date(startDate.getTime() + (30 * 24 * 60 * 60 * 1000));
+                    console.log("Unknown plan type, defaulting to 30 days - End date:", endDate);
                   }
+                } else {
+                  console.log("No plan details found, defaulting end date to 30 days from start");
+                  // Default to 30 days if no plan details found
+                  endDate = new Date(startDate.getTime() + (30 * 24 * 60 * 60 * 1000));
+                }
+
+                console.log("Final end date to be inserted:", endDate);
+
+                // Insert into gym_members table
+                const memberInsertQuery =
+                    "INSERT INTO gym_members (`user_id`, `age`, `gender`, `dob`, `status`, `registered_date`, `height`, `weight`, `blood_group`, `current_fitness_level`, `fitness_goal`, `health_issues`, `plan_id`, `start_date`, `end_date`) VALUES (?)";
+                const memberValues = [
+                  userId,
+                  req.body.age,
+                  req.body.gender,
+                  req.body.dob,
+                  1, // status (1 for active)
+                  new Date(),
+                  req.body.height,
+                  req.body.weight,
+                  req.body.bloodGroup,
+                  req.body.currentFitnessLevel,
+                  req.body.fitnessGoal,
+                  req.body.healthIssues,
+                  req.body.plan_id,
+                  startDate,
+                  endDate
+                ];
+
+                console.log("Member values to be inserted:", memberValues);
+
+                db.query(memberInsertQuery, [memberValues], (err, memberResult) => {
+                  if (err) {
+                    console.error("Error inserting member data:", err);
+                    return db.rollback(() => {
+                      res.status(500).json(err);
+                    });
+                  }
+
+                  const memberId = memberResult.insertId;
+                  console.log("Member inserted with ID:", memberId);
+
+                  // Generate payment ID
+                  // const paymentId = `PAY-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                  const paymentId = 'PAY-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+                  // Insert payment record
+                  const paymentQuery =
+                      "INSERT INTO plan_payments (`payment_id`, `member_id`, `plan_id`, `amount`, `payment_date`, `due_date`, `status`, `payment_method`) VALUES (?)";
+                  const paymentValues = [
+                    paymentId,
+                    memberId,
+                    req.body.plan_id,
+                    parseFloat(req.body.payment_details?.amount || 0),
+                    new Date(), // payment_date
+                    dueDate, // due_date
+                    1, // status (1 for paid)
+                    req.body.payment_details?.payment_method || "Credit Card"
+                  ];
+
+                  db.query(paymentQuery, [paymentValues], (err, paymentResult) => {
+                    if (err) {
+                      console.error("Error inserting payment data:", err);
+                      return db.rollback(() => {
+                        res.status(500).json(err);
+                      });
+                    }
+
+                    // Commit transaction
+                    db.commit((err) => {
+                      if (err) {
+                        console.error("Error committing transaction:", err);
+                        return db.rollback(() => {
+                          res.status(500).json(err);
+                        });
+                      }
+
+                      console.log("Transaction committed successfully");
+                      // Return payment details for invoice generation
+                      return res.status(200).json({
+                        message: "User has been created successfully",
+                        paymentDetails: {
+                          payment_id: paymentId,
+                          payment_date: paymentValues[4],
+                          amount: paymentValues[3],
+                          plan_id: req.body.plan_id
+                        }
+                      });
+                    });
+                  });
                 });
-              });
-            });
-          });
-        } else if (user_type === "CUSTOMER") {
+              }
+          );
+      }else if (user_type === "CUSTOMER") {
           // Handle CUSTOMER-specific data
           const customerInsertQuery = "INSERT INTO customers (`user_id`) VALUES (?)";
 

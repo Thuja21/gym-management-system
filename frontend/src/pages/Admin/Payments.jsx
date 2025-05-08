@@ -44,7 +44,7 @@ const Payment = () => {
                 payment?.member_id?.toString().toLowerCase().includes(lowerSearchTerm) ||
                 payment?.plan_name?.toLowerCase().includes(lowerSearchTerm) ||
                 payment?.full_name?.toLowerCase().includes(lowerSearchTerm) ||
-                payment?.due_date?.toString().toLowerCase().includes(lowerSearchTerm) ||  // Add due_date search
+                payment?.payment_date?.toString().toLowerCase().includes(lowerSearchTerm) ||  // Add due_date search
                 payment?.status?.toLowerCase().includes(lowerSearchTerm)       // Add status search
             )
         );
@@ -126,7 +126,7 @@ const Payment = () => {
                                     {/*<th className="pl-14 py-3">Action</th>*/}
                                 </TableRow>
                             </TableHead>
-                            <TableBody className="divide-y divide-gray-200">
+                            <TableBody className="divide-y divide-gray-200 text-[15px]">
                                 {loading ? (
                                     <TableRow>
                                         <td colSpan={6} className="px-6 py-4 text-center">Loading payment data...</td>
@@ -142,7 +142,8 @@ const Payment = () => {
                                 ) : (
                                     filteredPayments.map((payment, index) => (
                                         <TableRow key={payment.payment_id || index}>
-                                            <td className="px-6 py-3 text-center">{index + 1}</td>  {/* Auto incremented ID */}
+                                            {/*<td className="px-6 py-3 text-center">{index + 1}</td>  /!* Auto incremented ID *!/*/}
+                                            <td className="px-6 py-3 text-center">{payment.payment_id}</td>  {/* Auto incremented ID */}
                                             <td className="px-6 py-3 text-center">{payment.full_name}</td>
                                             <td className="pl-6 py-3">
                                                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
@@ -151,8 +152,8 @@ const Payment = () => {
                                             </td>
                                             <td className="pl-16 py-3 text-center">{payment.amount}</td>
                                             <td className="px-16 py-3 text-center">
-                                                {payment.due_date &&
-                                                    new Date(payment.due_date).toLocaleDateString("en-GB", {
+                                                {payment.payment_date &&
+                                                    new Date(payment.payment_date).toLocaleDateString("en-GB", {
                                                         day: "2-digit",
                                                         month: "2-digit",
                                                         year: "numeric",

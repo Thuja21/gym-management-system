@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Search, Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import Navbar from "../../components/Member/Navbar.jsx";
@@ -7,6 +6,7 @@ import axios from "axios";
 export default function AttendanceHistory() {
 
     const [attendanceData, setAttendanceData] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [dateRange, setDateRange] = useState('all');
     const [customStartDate, setCustomStartDate] = useState('');
@@ -22,10 +22,12 @@ export default function AttendanceHistory() {
                 withCredentials: true
             });
             console.log(response.data);
-            setAttendanceData(response.data); // Set the fetched data to state
+            setAttendanceData(response.data);
+            setFilteredData(response.data); // Initialize filtered data
         } catch (error) {
             console.error('Error fetching attendance data', error);
-            setAttendanceData([]); // If error, empty data
+            setAttendanceData([]);
+            setFilteredData([]);
         }
     };
 
@@ -35,10 +37,10 @@ export default function AttendanceHistory() {
 
     useEffect(() => {
         applyFilters();
-    }, [searchTerm, dateRange, customStartDate, customEndDate, sortField, sortDirection]);
+    }, [searchTerm, dateRange, customStartDate, customEndDate, sortField, sortDirection, attendanceData]);
 
     const applyFilters = () => {
-        let filteredData = [...attendanceData];
+        let filtered = [...attendanceData];
 
         // Apply date range filter
         const today = new Date().toISOString().split('T')[0];
@@ -49,35 +51,37 @@ export default function AttendanceHistory() {
         };
 
         if (dateRange === 'today') {
-            filteredData = filteredData.filter(record => record.attendance_date === today);
+            filtered = filtered.filter(record => record.attendance_date === today);
         } else if (dateRange === 'week') {
             const weekAgo = getDateBefore(7);
-            filteredData = filteredData.filter(record => record.attendance_date >= weekAgo);
+            filtered = filtered.filter(record => record.attendance_date >= weekAgo);
         } else if (dateRange === 'month') {
             const monthAgo = getDateBefore(30);
-            filteredData = filteredData.filter(record => record.attendance_date >= monthAgo);
+            filtered = filtered.filter(record => record.attendance_date >= monthAgo);
         } else if (dateRange === 'year') {
             const yearAgo = getDateBefore(365);
-            filteredData = filteredData.filter(record => record.attendance_date >= yearAgo);
+            filtered = filtered.filter(record => record.attendance_date >= yearAgo);
         } else if (dateRange === 'custom' && (customStartDate || customEndDate)) {
             if (customStartDate) {
-                filteredData = filteredData.filter(record => record.attendance_date >= customStartDate);
+                filtered = filtered.filter(record => record.attendance_date >= customStartDate);
             }
             if (customEndDate) {
-                filteredData = filteredData.filter(record => record.attendance_date <= customEndDate);
+                filtered = filtered.filter(record => record.attendance_date <= customEndDate);
             }
         }
 
         // Apply search filter
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
-            filteredData = filteredData.filter(record =>
+            filtered = filtered.filter(record =>
                 record.attendance_date.toLowerCase().includes(term) ||
-                record.checkIn.toLowerCase().includes(term) ||
-                record.checkOut.toLowerCase().includes(term)
+                (record.check_in_time && record.check_in_time.toLowerCase().includes(term)) ||
+                (record.check_out_time && record.check_out_time.toLowerCase().includes(term))
             );
         }
-        setAttendanceData(filteredData);
+
+        // Set filtered data instead of modifying original data
+        setFilteredData(filtered);
     };
 
     const handleDateRangeChange = (range) => {
@@ -95,7 +99,7 @@ export default function AttendanceHistory() {
         setCustomStartDate('');
         setCustomEndDate('');
         setShowDatePicker(false);
-        fetchAttendanceData(); // Fetch data again when resetting filters
+        setFilteredData(attendanceData); // Reset to original data
     };
 
     const formatSelectedDateRange = () => {
@@ -119,7 +123,6 @@ export default function AttendanceHistory() {
 
     const calculateDuration = (checkIn, checkOut) => {
         if (!checkIn || !checkOut) return 'N/A';
-
         const [inHours, inMinutes] = checkIn.split(':').map(Number);
         const [outHours, outMinutes] = checkOut.split(':').map(Number);
 
@@ -139,7 +142,6 @@ export default function AttendanceHistory() {
         return `${hours}h ${minutes}m`;
     };
 
-
     return (
         <div className="min-h-screen bg-gray-100" style={{ width: '100vw' }}>
             <Navbar />
@@ -147,7 +149,6 @@ export default function AttendanceHistory() {
                 <div className="mb-4 mt-[60px] text-left">
                     <h1 className="text-3xl font-bold" style={{ fontFamily: "Segoe UI" }}>Attendance History</h1>
                 </div>
-
                 <div className="bg-white rounded-xl border-1 overflow-hidden mb-8">
                     <div className="p-6 border-b border-gray-200">
                         <div className="flex flex-col md:flex-row justify-between gap-4">
@@ -177,7 +178,7 @@ export default function AttendanceHistory() {
                                 </button>
 
                                 {showFilters && (
-                                    <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg z-10 w-64 border border-gray-200">
+                                    <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg z-50 w-64 border border-gray-200">
                                         <div className="p-2">
                                             <div className="text-sm font-medium text-gray-700 p-2 border-b">Date Range</div>
                                             <div className="mt-1">
@@ -257,35 +258,23 @@ export default function AttendanceHistory() {
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto p-7">
+                    <div className="overflow-x-auto p-7" style={{ minHeight: "430px" }}>
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                             <tr>
-                                <th
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                                    // onClick={() => handleSort('date')}
-                                >
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
                                     <div className="flex items-center">
                                         <span>Date</span>
-                                        {/*<div className="ml-1">{getSortIcon('date')}</div>*/}
                                     </div>
                                 </th>
-                                <th
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                                    // onClick={() => handleSort('checkIn')}
-                                >
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
                                     <div className="flex items-center">
                                         <span>Check In</span>
-                                        {/*<div className="ml-1">{getSortIcon('checkIn')}</div>*/}
                                     </div>
                                 </th>
-                                <th
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                                    // onClick={() => handleSort('checkOut')}
-                                >
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
                                     <div className="flex items-center">
                                         <span>Check Out</span>
-                                        {/*<div className="ml-1">{getSortIcon('checkOut')}</div>*/}
                                     </div>
                                 </th>
                                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -294,8 +283,8 @@ export default function AttendanceHistory() {
                             </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                            {attendanceData.length > 0 ? (
-                                attendanceData.map((record, index) => (
+                            {filteredData.length > 0 ? (
+                                filteredData.map((record, index) => (
                                     <tr key={index} className="hover:bg-gray-50 transition duration-150">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
@@ -335,4 +324,3 @@ export default function AttendanceHistory() {
         </div>
     );
 }
-

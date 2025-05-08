@@ -1,3 +1,5 @@
+//Keela keela
+
 import {db} from "../config/connectDatabase.js";
 // import PDFDocument from 'pdfkit';
 import PDFDocument from 'pdfkit-table';
@@ -261,7 +263,7 @@ async function generatePDF(res, data, title, startDate, endDate, gymName, logoPa
             const summaryY = doc.y + 10;
 
 // Create the box
-            doc.roundedRect(50, summaryY, doc.page.width - 100, 40, 5).fillAndStroke('#f8f8f8', '#aaaaaa');
+            doc.roundedRect(50, summaryY, doc.page.width - 100, 40, 5).fillAndStroke('#f8f8f8', '#cfcfcf');
 
 // Title with emphasis
             doc.font('Helvetica-Bold').fontSize(12).fillColor('#333333')
@@ -277,7 +279,7 @@ async function generatePDF(res, data, title, startDate, endDate, gymName, logoPa
             doc.text(`Active: ${activeMembers}`, x_active, summaryY + 14);
             doc.text(`Expired: ${expiredMembers}`, x_expired, summaryY + 14);
 
-            doc.moveDown(3);
+            doc.moveDown(2);
 
             // Generate pie chart for membership data
             const chartJSNodeCanvas = new ChartJSNodeCanvas({
@@ -287,7 +289,7 @@ async function generatePDF(res, data, title, startDate, endDate, gymName, logoPa
                 backgroundColour: 'white'
             });
 
-            // Chart configuration
+// Chart configuration
             const chartConfig = {
                 type: 'pie',
                 data: {
@@ -312,20 +314,34 @@ async function generatePDF(res, data, title, startDate, endDate, gymName, logoPa
                 }
             };
 
-            // Generate and add chart to PDF
+// Generate and save chart image
             const imageBuffer = await chartJSNodeCanvas.renderToBuffer(chartConfig);
             const tempImg = tmp.fileSync({ postfix: ".png" });
             fs.writeFileSync(tempImg.name, imageBuffer);
 
-            // Position chart centered below summary box
-            doc.moveDown(1);
-            doc.image(tempImg.name, {
-                fit: [300, 200],
-                align: 'left',
-                valign: 'left'
+// Define box dimensions and position
+            const chartBoxX = 50;
+            const chartBoxWidth = doc.page.width - 100;
+            const chartBoxHeight = 190; // Enough space for the image and padding
+            const chartBoxY = doc.y + 10;
+
+// Draw the bordered box
+            doc.roundedRect(chartBoxX, chartBoxY, chartBoxWidth, chartBoxHeight, 5)
+                .fillAndStroke('#F5F9FC', '#cfcfcf');
+
+// Define image dimensions and centered position inside the box
+            const imageWidth = 220;
+            const imageHeight = 150;
+            const imageX = chartBoxX + (chartBoxWidth - imageWidth) / 2;
+            const imageY = chartBoxY + 20; // padding from top of the box
+
+// Insert the image
+            doc.image(tempImg.name, imageX, imageY, {
+                fit: [imageWidth, imageHeight]
             });
 
-            doc.moveDown(2);
+// Move down after the chart section
+            doc.moveDown(18);
 
         } else {
             // For attendance report

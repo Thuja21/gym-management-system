@@ -193,7 +193,7 @@ function Profile() {
                                             <div>
                                                 <p className="text-gray-500 text-[17px]" style={{ fontFamily: "Segoe UI" }}>Start Date</p>
                                                 {/*<p className="font-medium font-mono">January 15, 2024</p>*/}
-                                                <p className="font-medium font-mono">{(new Date(member.registered_date).toLocaleDateString())}</p>
+                                                <p className="font-medium font-mono">{(new Date(member.start_date).toLocaleDateString())}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">

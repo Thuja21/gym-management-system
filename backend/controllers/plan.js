@@ -131,19 +131,99 @@ export const getLoggedInMemberPlan= (req, res) => {
     });
 };
 
-export const updatePlan = async (req, res) => {
+// export const updatePlanWithPayment = async (req, res) => {
+//     const memberId = req.user.member_id;
+//     const { plan_id } = req.body;
+//
+//     try {
+//         const query = "UPDATE gym_members SET plan_id = ? WHERE member_id = ?";
+//         await db.promise().query(query, [plan_id, memberId]);
+//
+//         res.status(200).json({ message: "Member's plan updated successfully." });
+//     } catch (error) {
+//         console.error("Error updating plan:", error);
+//         res.status(500).json({ error: "Internal server error." });
+//     }
+// };
+
+// export const updatePlanWithPayment = async (req, res) => {
+//     const memberId = req.user.member_id;
+//     const { plan_id, payment_method, payment_amount } = req.body;
+//
+//     try {
+//         // Begin transaction to ensure both operations succeed or fail together
+//         const connection = await db.promise().getConnection();
+//         await connection.beginTransaction();
+//
+//         try {
+//             // 1. Update the member's plan
+//             const updatePlanQuery = "UPDATE gym_members SET plan_id = ? WHERE member_id = ?";
+//             await connection.query(updatePlanQuery, [plan_id, memberId]);
+//
+//             // 2. Insert payment record into plan_payment table
+//             const insertPaymentQuery =
+//                 "INSERT INTO plan_payments (member_id, plan_id, payment_method, amount, payment_date, status) VALUES (?, ?, ?, ?, NOW(),?)";
+//             await connection.query(insertPaymentQuery, [
+//                 memberId,
+//                 plan_id,
+//                 'Credit',
+//                 req.body.plan_price ,
+//                 'Paid',
+//             ]);
+//
+//             // If both operations succeed, commit the transaction
+//             await connection.commit();
+//             connection.release();
+//
+//             res.status(200).json({
+//                 message: "Member's plan and payment information updated successfully."
+//             });
+//         } catch (error) {
+//             // If any operation fails, rollback the transaction
+//             await connection.rollback();
+//             connection.release();
+//             throw error;
+//         }
+//     } catch (error) {
+//         console.error("Error updating plan and payment:", error);
+//         res.status(500).json({ error: "Internal server error." });
+//     }
+// };
+
+
+export const updatePlanWithPayment = async (req, res) => {
     const memberId = req.user.member_id;
-    const { plan_id } = req.body;
+    const { plan_id, payment_method, price } = req.body;
 
+    // Generate payment ID
+    // const paymentId = `PAY-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const paymentId = 'PAY-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+    // Use direct query without getConnection
     try {
-        const query = "UPDATE gym_members SET plan_id = ? WHERE member_id = ?";
-        await db.promise().query(query, [plan_id, memberId]);
+        // Update member's plan
+        await db.promise().query(
+            "UPDATE gym_members SET plan_id = ? WHERE member_id = ?",
+            [plan_id, memberId]
+        );
 
-        res.status(200).json({ message: "Member's plan updated successfully." });
+        // Insert payment record
+        await db.promise().query(
+            "INSERT INTO plan_payments (payment_id, member_id, plan_id, payment_method, amount, payment_date, status) VALUES (?,?, ?, ?, ?, NOW(),?)",
+            [paymentId, memberId, plan_id,  'Card', price , 'Paid']
+        );
+        //                 "INSERT INTO plan_payments (member_id, plan_id, payment_method, amount, payment_date, status) VALUES (?, ?, ?, ?, NOW(),?)";
+//             await connection.query(insertPaymentQuery, [
+//                 memberId,
+//                 plan_id,
+//                 'Credit',
+//                 req.body.plan_price ,
+//                 'Paid',
+//             ]);
+
+        res.status(200).json({ message: "Member's plan and payment information updated successfully." });
     } catch (error) {
-        console.error("Error updating plan:", error);
+        console.error("Error updating plan and payment:", error);
         res.status(500).json({ error: "Internal server error." });
     }
 };
-
-
