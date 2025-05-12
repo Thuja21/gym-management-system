@@ -31,7 +31,8 @@ function Announcements() {
             } finally {
                 setLoading(false);
             }
-        };fetchAnnouncements();
+        };
+        fetchAnnouncements();
     }, []); // Empty dependency array to fetch data only once on mount
 
     // Handle Add Trainer dialog submission
@@ -45,15 +46,24 @@ function Announcements() {
                     body: JSON.stringify(newAnnouncement),
                 });
 
-                if (!response.ok) {
-                    throw new Error("Failed to add new announcement.");
-                }
-                alert("Announcement added successfully!");
-                setLoading(true);
-                setShowForm(false); // Close the dialog
-            } catch (err) {
-                setError(err.message);
+            if (!response.ok) {
+                throw new Error("Failed to add new announcement.");
             }
+            const createdAnnouncement = await response.json();
+
+            // Update the state with the new announcement
+            setAnnouncements(prevAnnouncements => [...prevAnnouncements, createdAnnouncement]);
+            alert("Announcement added successfully!");
+            setLoading(false);
+            setShowForm(false); // Close the dialog
+            setNewAnnouncement({
+                title: "",
+                content: "",
+                date: "",
+            });
+        } catch (err) {
+            setError(err.message);
+        }
     };
 
     // Handle Delete button click
@@ -74,6 +84,14 @@ function Announcements() {
         }
     };
 
+    // Filter announcements based on search term
+    const filteredAnnouncements = announcements.filter((announcement) => {
+        if (searchTerm === "") return true;
+        return (
+            announcement.announcement_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            announcement.announcement_content.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    });
 
     return (
         <div className="bg-gray-100"  style={{ display: "flex", height: "100vh", paddingRight: "30px" }}>
@@ -97,6 +115,14 @@ function Announcements() {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
+                            {searchTerm && (
+                                <button
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    onClick={() => setSearchTerm("")}
+                                >
+                                    <span className="text-xl">×</span>
+                                </button>
+                            )}
                         </div>
 
                         <div className="ml-4 flex space-x-2">
@@ -111,36 +137,44 @@ function Announcements() {
                     </div>
                 </Paper>
 
-                <div className="bg-white rounded-xl shadow-sm" style={{ marginTop: "-10px", marginRight: "-5px", height: "100%"  }}>
+                <div className="bg-white rounded-xl shadow-sm" style={{ marginTop: "-10px", marginRight: "-5px", height: "100%" }}>
                     <div className="space-y-4 p-3">
                         {announcements.length > 0 ? (
-                            announcements.map((announcement) => (
-                                <div
-                                    key={announcement.announcement_id}
-                                    className="p-2 border border-gray-100 rounded-lg hover:border-gray-200 transition-all hover:shadow-md"
-                                >
-                                    <div className="w-full p-3 rounded-2xl flex justify-between items-center bg-gradient-to-r from-gray-100 via-gray-300 to-blue-50" >
-                                        <div className="space-y-2">
-                                            <h3 className="text-left flex items-center gap-2 leading-tight text-blue-900" style={{ fontSize: "20px", fontWeight: "bold" , fontFamily: "Segoe UI"}}>
-                                                 {announcement.announcement_title}
-                                            </h3>
-                                            <p className="leading-relaxed text-md text-gray-700" style={{fontFamily: "Segoe UI"}} >
-                                                {announcement.announcement_content}
-                                            </p>
-                                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                <Calendar className="h-4 w-4 text-indigo-500" />
-                                                <span>{new Date(announcement.posted_date ).toLocaleDateString()}</span>
+                            filteredAnnouncements.length > 0 ? (
+                                filteredAnnouncements.map((announcement) => (
+                                    <div
+                                        key={announcement.announcement_id}
+                                        className="p-2 border border-gray-100 rounded-lg hover:border-gray-200 transition-all hover:shadow-md"
+                                    >
+                                        <div className="w-full p-3 rounded-2xl flex justify-between items-center bg-gradient-to-r from-gray-100 via-gray-300 to-blue-50">
+                                            <div className="space-y-2">
+                                                <h3 className="text-left flex items-center gap-2 leading-tight text-blue-900" style={{ fontSize: "20px", fontWeight: "bold", fontFamily: "Segoe UI" }}>
+                                                    {announcement.announcement_title}
+                                                </h3>
+                                                <p className="leading-relaxed text-md text-gray-700" style={{ fontFamily: "Segoe UI" }}>
+                                                    {announcement.announcement_content}
+                                                </p>
+                                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                    <Calendar className="h-4 w-4 text-indigo-500" />
+                                                    <span>{new Date(announcement.posted_date).toLocaleDateString()}</span>
+                                                </div>
                                             </div>
+                                            <button
+                                                onClick={() => handleDelete(announcement.announcement_id)}
+                                                className="text-gray-500 hover:text-red-500 transition-colors p-2 hover:bg-red-200 rounded-full"
+                                            >
+                                                <Trash2 className="h-6 w-6" />
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={() => handleDelete(announcement.announcement_id)}
-                                            className="text-gray-500 hover:text-red-500 transition-colors p-2 hover:bg-red-200 rounded-full"
-                                        >
-                                            <Trash2 className="h-6 w-6 " />
-                                        </button>
                                     </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-12">
+                                    <Search className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                                    <h3 className="text-lg font-medium text-gray-900 mb-1">No matching announcements</h3>
+                                    <p className="text-gray-500">Try a different search term</p>
                                 </div>
-                            ))
+                            )
                         ) : (
                             <div className="text-center py-12">
                                 <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
@@ -168,6 +202,7 @@ function Announcements() {
                                             onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
                                             className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                             placeholder="Enter announcement title"
+                                            required
                                         />
                                     </div>
                                     <div>
@@ -181,6 +216,7 @@ function Announcements() {
                                             rows={4}
                                             className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                             placeholder="Enter announcement content"
+                                            required
                                         />
                                     </div>
                                     <div className="flex justify-end gap-3 mt-6">

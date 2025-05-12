@@ -1,7 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
-import trainer from "../../assets/images/trainer.png";
 
 const TrainerCard = ({ image, name, specialty, bio, delay = 0 }) => {
     return (
@@ -12,7 +11,14 @@ const TrainerCard = ({ image, name, specialty, bio, delay = 0 }) => {
             transition={{ duration: 0.5, delay }}
             viewport={{ once: true }}
         >
-            <img src={trainer} alt={name} className="w-full h-72 object-cover" />
+            <div className="relative">
+                <img
+                    src={image}
+                    alt={name}
+                    className="w-full h-72 object-cover"
+                />
+            </div>
+
             <div className="p-6">
                 <h3 className="text-xl font-bold mb-1">{name}</h3>
                 <p className="text-[#FF4500] font-medium mb-3">{specialty}</p>

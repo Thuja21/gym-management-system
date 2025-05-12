@@ -88,9 +88,9 @@ export default function Notifications() {
 
                 <div className="flex items-center justify-between mb-[-15px] border-b pb-2">
                     <div className="flex space-x-6 ml-auto">
-                        <button className="text-blue-600 hover:text-blue-700 text-[17px] font-medium">
-                            clear all
-                        </button>
+                        {/*<button className="text-blue-600 hover:text-blue-700 text-[17px] font-medium">*/}
+                        {/*    clear all*/}
+                        {/*</button>*/}
                     </div>
                 </div>
 

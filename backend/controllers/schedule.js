@@ -35,13 +35,15 @@ export const viewAllSchedules = (req, res) => {
 
 // Add a new schedule
 export const addSchedule = (req, res) => {
+
     db.beginTransaction((err) => {
         if (err) return res.status(500).json(err);
 
         const { title, notes, schedule_date, schedule_time_slot,end_time, weekly_schedule, schedule_type } = req.body;
+        const trainerId = req.user.trainer_id;
 
         const insertScheduleQuery = "INSERT INTO schedules (`title`, `schedule_date`, `schedule_time_slot`, `end_time`, `notes`, `trainer_id`, `schedule_type`) VALUES (?)";
-        const scheduleValues = [title, schedule_date, schedule_time_slot, end_time, notes, 1, schedule_type];
+        const scheduleValues = [title, schedule_date, schedule_time_slot, end_time, notes, trainerId, schedule_type];
 
         db.query(insertScheduleQuery, [scheduleValues], (err, result) => {
             if (err) {
@@ -60,6 +62,7 @@ export const addSchedule = (req, res) => {
                 slot.start_time,
                 slot.end_time
             ]);
+
 
             if (schedule_type === "weekly") {
                 db.query(insertWeeklyQuery, [weeklyValues], (err) => {
@@ -178,3 +181,97 @@ export const deleteSchedule = (req, res) => {
         res.status(200).json({ message: "Schedule deleted successfully!" });
     });
 };
+
+
+export const getLoggedInTrainerSchedule = (req, res) => {
+    const trainerId = req.user.trainer_id;
+
+    const q = `
+    SELECT
+    schedules.schedule_id,
+    schedules.title,
+    schedules.schedule_date,
+    schedules.schedule_time_slot,
+    schedules.end_time,
+    schedules.notes,
+    schedules.trainer_id,
+    schedules.schedule_type,
+    users.full_name,
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'day', weekly_schedule.day,
+            'start_time', weekly_schedule.start_time,
+            'end_time', weekly_schedule.end_time
+        )
+    ) AS weekly_schedule
+FROM schedules
+JOIN trainers ON trainers.trainer_id = schedules.trainer_id
+JOIN users ON trainers.user_id = users.id
+LEFT JOIN weekly_schedule ON weekly_schedule.schedule_id = schedules.schedule_id
+WHERE schedules.trainer_id = ?
+GROUP BY schedules.schedule_id
+`;
+
+    db.query(q, [trainerId], (err, data) => {
+        if (err) {
+            console.error("Error fetching schedules:", err);
+            return res.status(500).json({ message: "Failed to fetch schedules." });
+        }
+
+        res.status(200).json(data);
+    });
+};
+
+export const getTodaySessionCount = (req, res) => {
+    const trainerId = req.user.trainer_id;
+    const today = new Date();
+    const todayDate = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    // Get day name
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayName = days[dayOfWeek];
+
+    console.log(dayName); // Will output the current day name (e.g., "Monday")
+
+    console.log("Today's today:", today);
+    console.log("Today's date:", todayDate);
+    console.log("Today's dayOfWeek:", dayOfWeek);
+
+
+    // // Convert JavaScript day (0-6) to your database day format if needed
+    // const dbDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek; // Adjust if needed
+
+    // Using a simpler approach with UNION ALL and a single outer COUNT
+    const query = `
+        SELECT COUNT(*) as sessionCount FROM (
+            -- One-time sessions for today
+            SELECT schedule_id 
+            FROM schedules 
+            WHERE trainer_id = ? 
+            AND schedule_date = ?
+            AND (schedule_type = 'one-time' OR schedule_type IS NULL)
+            
+            UNION ALL
+            
+            -- Weekly sessions that fall on today's weekday
+            SELECT s.schedule_id 
+            FROM schedules s
+            JOIN weekly_schedule ws ON s.schedule_id = ws.schedule_id
+            WHERE s.trainer_id = ?
+            AND s.schedule_type = 'weekly'
+            AND ws.day = ?
+        ) AS all_sessions
+    `;
+
+
+
+    db.query(query, [trainerId, todayDate, trainerId, dayName], (err, result) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        const sessionCount = result[0].sessionCount;
+        res.status(200).json({ sessionCount });
+    });
+};
+

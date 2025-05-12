@@ -1,263 +1,395 @@
-import React, {useEffect, useState} from 'react';
-import {Calendar,
-    Trophy,
-    Target,
-    Clock,
-    Phone,
-    Mail,
-    MapPin,
-    Star,
-    Flag,
-    Edit2,
-    X,
-    Camera
-} from 'lucide-react';
-import Navbar from "../../components/Member/Navbar.jsx";
+import React, { useState, useEffect } from "react";
+import { User, Mail, Phone, MapPin, Building, Calendar, Edit, Camera, Save, Award, Book, Clock } from "lucide-react";
+import TrainerSideBar from "./TrainerSideBar.jsx"; // Assuming you have this component
+import { Paper, Typography, Avatar, Divider, Chip } from "@mui/material";
 import axios from "axios";
-import image from "../../assets/images/Profile.png"
-import TopBar from "@/components/TopBar.jsx";
-import TrainerSideBar from "@/pages/Trainer/TrainerSideBar.jsx";
 
-function Profile() {
-    const [isEditing, setIsEditing] = useState(false);
-    const [showForm, setShowForm] = useState(false);
-    const [profileData, setProfileData] = useState({
-        image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&h=400&fit=crop"
+function TrainerProfile() {
+    const [profile, setProfile] = useState({
+        name: "Sarah Johnson", // done
+        email: "sarah.johnson@example.com", // done
+        phone: "+1 (555) 987-6543", // done
+        address: "456 Fitness Avenue, Gym City, Country", // done
+        specialization: "Strength & Conditioning", // done
+        experience: "7 years",
+        joinDate: "2021-03-10",  // done
+        certifications: ["NASM Certified Personal Trainer", "CrossFit Level 2", "Nutrition Specialist"],
+        bio: "Dedicated fitness professional with expertise in strength training and rehabilitation. Passionate about helping clients achieve their fitness goals through personalized training programs and nutritional guidance.",
+        workingHours: "Mon-Fri: 8:00 AM - 6:00 PM"
     });
 
-    const [trainerData, setTrainerData] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedProfile, setEditedProfile] = useState({...profile});
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const fetchMemberDetails = async () => {
+
+    const fetchTrainerDetails = async () => {
         try {
             const response = await axios.get('http://localhost:8800/api/trainers/trainer', {
                 withCredentials: true
             });
-            console.log(response.data);
-            setTrainerData(response.data);
+            if (response.data.length !== 0) {
+                console.log(response.data[0]);
+                const retrievedProfile = {
+                    name: response.data[0].full_name,
+                    email: response.data[0].email,
+                    phone: response.data[0].contact_no,
+                    address: response.data[0].address,
+                    specialization: response.data[0].specialization,
+                    joined_date: response.data[0].registered_date,
+
+                }
+                setProfile(prev => ({ ...prev, ...retrievedProfile }));            }
         } catch (error) {
             console.error('Error fetching trainer data', error);
-            setTrainerData([]);
         }
     };
 
     useEffect(() => {
-        fetchMemberDetails();
+        fetchTrainerDetails();
     }, []);
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setProfileData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+    // Function to handle profile update
+    const handleUpdateProfile = async () => {
+        setLoading(true);
+        try {
+            // Mock API call - replace with actual implementation
+            // await fetch("http://localhost:8800/api/trainer/profile/update", {
+            //     method: "PUT",
+            //     headers: { "Content-Type": "application/json" },
+            //     body: JSON.stringify(editedProfile),
+            // });
 
-    const handleImageChange = (e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const imageUrl = URL.createObjectURL(file);
-            setProfileData(prev => ({
-                ...prev,
-                image: imageUrl
-            }));
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 800));
+
+            setProfile(editedProfile);
+            setIsEditing(false);
+            alert("Profile updated successfully!");
+        } catch (error) {
+            console.error("Failed to update profile:", error);
+            alert("Failed to update profile. Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
-    return (
-        <div>
-            <TopBar title="Profile" />
-            <TrainerSideBar />
-            <div className="h-screen bg-gray-100 overflow-y-auto ml-[120px]" style={{ width: '100vw' }}>
-                <div className="h-full max-w-[1200px] mx-auto px-3 py-8 mt-3">
-                    {trainerData.map((trainer, index) => (
-                        <div key={index}>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-[40px]">
-                                {/* Profile Card */}
-                                <div className="md:col-span-1">
-                                    <div className="bg-white rounded-2xl p-6 relative border-1">
-                                        <button
-                                            onClick={() => setIsEditing(!isEditing)}
-                                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
-                                        >
-                                            {isEditing ? <X className="w-5 h-5 text-gray-600" /> : <Edit2 className="w-5 h-5 text-gray-600" />}
-                                        </button>
+    const handlePhotoUpload = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Handle file upload logic here
+                console.log("File selected:", file.name);
+                // You would typically upload this to your server
+            }
+        };
+        input.click();
+    };
 
-                                        <div className="flex flex-col items-center">
-                                            <div className="w-32 h-32 rounded-full overflow-hidden mb-4 relative group">
-                                                <img
-                                                    src={image}
-                                                    alt="Profile"
-                                                    className="w-full h-full object-cover"
-                                                />
-                                                {isEditing && (
-                                                    <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 cursor-pointer group-hover:bg-opacity-60 transition-all">
-                                                        <Camera className="w-8 h-8 text-white" />
-                                                        <input
-                                                            type="file"
-                                                            accept="image/*"
-                                                            onChange={handleImageChange}
-                                                            className="hidden"
-                                                        />
-                                                    </label>
-                                                )}
-                                            </div>
+    // Function to handle certification changes
+    const handleCertificationChange = (index, value) => {
+        const updatedCertifications = [...editedProfile.certifications];
+        updatedCertifications[index] = value;
+        setEditedProfile({...editedProfile, certifications: updatedCertifications});
+    };
+
+    const addCertification = () => {
+        setEditedProfile({
+            ...editedProfile,
+            certifications: [...editedProfile.certifications, ""]
+        });
+    };
+
+    const removeCertification = (index) => {
+        const updatedCertifications = [...editedProfile.certifications];
+        updatedCertifications.splice(index, 1);
+        setEditedProfile({...editedProfile, certifications: updatedCertifications});
+    };
+
+    return (
+        <div className="bg-gray-100" style={{ display: "flex", height: "100vh", paddingRight: "30px" }}>
+            <TrainerSideBar style={{ flexShrink: 0, width: 250 }} />
+            <div style={{ flexGrow: 1, padding: "20px", height: "100vh", width: "1300px", overflowY: "auto", scrollbarWidth: "none", marginLeft: "-45px", marginTop: "10px" }}>
+                <Typography variant="h4" gutterBottom>
+                    Trainer Profile
+                </Typography>
+
+                <Paper elevation={1} className="p-4 mb-6 rounded-lg" style={{ marginRight: "-5px" }}>
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-semibold text-gray-800">Personal Information</h2>
+                        {!isEditing ? (
+                            <button
+                                className="bg-red-900 text-white px-4 py-2 rounded-lg flex items-center shadow-md hover:bg-red-800 transition"
+                                onClick={() => setIsEditing(true)}
+                            >
+                                <Edit className="w-5 h-5 mr-2" />
+                                Edit Profile
+                            </button>
+                        ) : (
+                            <div className="flex space-x-2">
+                                <button
+                                    className="bg-gray-500 text-white px-4 py-2 rounded-lg flex items-center shadow-md hover:bg-gray-600 transition"
+                                    onClick={() => {
+                                        setIsEditing(false);
+                                        setEditedProfile({...profile});
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center shadow-md hover:bg-green-700 transition"
+                                    onClick={handleUpdateProfile}
+                                    disabled={loading}
+                                >
+                                    <Save className="w-5 h-5 mr-2" />
+                                    {loading ? "Saving..." : "Save Changes"}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </Paper>
+
+                <div className="bg-white rounded-xl shadow-sm" style={{ marginTop: "-10px", marginRight: "-5px", height: "auto" }}>
+                    <div className="p-6">
+                        <div className="flex flex-col md:flex-row gap-8">
+                            {/* Profile Photo Section */}
+                            <div className="flex flex-col items-center">
+                                <div className="relative">
+                                    <Avatar
+                                        sx={{ width: 150, height: 150 }}
+                                        src="/path-to-trainer-image.jpg" // Replace with actual image path
+                                        alt={profile.name}
+                                    />
+                                    {isEditing && (
+                                        <button
+                                            onClick={handlePhotoUpload}
+                                            className="absolute bottom-0 right-0 bg-red-900 text-white p-2 rounded-full hover:bg-red-800"
+                                        >
+                                            <Camera size={20} />
+                                        </button>
+                                    )}
+                                </div>
+                                <h3 className="mt-4 text-xl font-bold">{profile.name}</h3>
+                                <p className="text-gray-600">Fitness Trainer</p>
+                            </div>
+
+                            {/* Profile Details Section */}
+                            <div className="flex-1 space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Full Name</label>
                                             {isEditing ? (
                                                 <input
                                                     type="text"
-                                                    name="name"
-                                                    value={trainer.full_name}
-                                                    onChange={handleInputChange}
-                                                    className="text-2xl font-bold text-gray-800 text-center bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none"
+                                                    value={editedProfile.name}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, name: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
                                                 />
                                             ) : (
-                                                <h2 className="text-2xl font-bold text-gray-800 font-mono">{trainer.full_name}</h2>
+                                                <div className="flex items-center">
+                                                    <User className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{profile.name}</span>
+                                                </div>
                                             )}
-                                            <p className="text-gray-500 mb-2 font-mono">ID: GYM-Trainer-{trainer.trainer_id}</p>
                                         </div>
 
-                                        <div className="mt-6 space-y-4 font-medium" style={{ fontFamily: "Segoe UI" }}>
-                                            <div className="flex items-center gap-3 text-gray-600">
-                                                <Phone className="w-5 h-5 flex-shrink-0" />
-                                                <span>{trainer.contact_no}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3 text-gray-600">
-                                                <Mail className="w-5 h-5 flex-shrink-0" />
-                                                <span>{trainer.email}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3 text-gray-600">
-                                                <MapPin className="w-5 h-5 flex-shrink-0" />
-                                                <span>{trainer.address}</span>
-                                            </div>
-                                            {isEditing && (
-                                                <button
-                                                    onClick={() => setIsEditing(false)}
-                                                    className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                                                >
-                                                    Save Changes
-                                                </button>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Email Address</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type="email"
+                                                    value={editedProfile.email}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, email: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center">
+                                                    <Mail className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{profile.email}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Phone Number</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type="tel"
+                                                    value={editedProfile.phone}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, phone: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center">
+                                                    <Phone className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{profile.phone}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Address</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    value={editedProfile.address}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, address: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center">
+                                                    <MapPin className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{profile.address}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Specialization</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    value={editedProfile.specialization}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, specialization: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center">
+                                                    <Award className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{profile.specialization}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Experience</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    value={editedProfile.experience}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, experience: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center">
+                                                    <Book className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{profile.experience}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Working Hours</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    value={editedProfile.workingHours}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, workingHours: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center">
+                                                    <Clock className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{profile.workingHours}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Join Date</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type="date"
+                                                    value={editedProfile.joinDate}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, joinDate: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center">
+                                                    <Calendar className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{new Date(profile.joinDate).toLocaleDateString()}</span>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Trainer Info Section */}
-                                <div className="md:col-span-2 space-y-6">
-                                    <div className="bg-white rounded-xl p-6 border-1 text-left">
-                                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-xl" style={{ fontFamily: "Segoe UI" }}>
-                                            <Star className="w-5 h-5 text-yellow-500" />
-                                            Trainer Details
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-3">
-                                                <div className="flex items-center gap-3">
-                                                    <Calendar className="w-5 h-5 text-blue-600" />
-                                                    <div>
-                                                        <p className="text-gray-500 text-[17px]">Date of Birth</p>
-                                                        <p className="font-medium font-mono">{trainer.dob}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <Clock className="w-5 h-5 text-blue-600" />
-                                                    <div>
-                                                        <p className="text-gray-500 text-[17px]">Age</p>
-                                                        <p className="font-medium font-mono">{trainer.age}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="space-y-3">
-                                                <div className="flex items-center gap-3">
-                                                    <Trophy className="w-5 h-5 text-blue-600" />
-                                                    <div>
-                                                        <p className="text-gray-500 text-[17px]">Specialization</p>
-                                                        <p className="font-medium font-mono">{trainer.specialization || "N/A"}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <Target className="w-5 h-5 text-blue-600" />
-                                                    <div>
-                                                        <p className="text-gray-500 text-[17px]">Registered Date</p>
-                                                        <p className="font-medium font-mono">{trainer.registered_date}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <Divider />
 
-                                    <div className="bg-white rounded-xl border-1 p-6 text-left" style={{ fontFamily: "Segoe UI" }}>
-                                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                            <Flag className="w-5 h-5 text-green-600" />
-                                            Change Password
-                                        </h3>
-
-                                        {!showForm ? (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-500 mb-1">Certifications</label>
+                                    {isEditing ? (
+                                        <div className="space-y-2">
+                                            {editedProfile.certifications.map((cert, index) => (
+                                                <div key={index} className="flex items-center gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={cert}
+                                                        onChange={(e) => handleCertificationChange(index, e.target.value)}
+                                                        className="flex-1 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                    />
+                                                    <button
+                                                        onClick={() => removeCertification(index)}
+                                                        className="bg-red-100 text-red-900 p-2 rounded-lg hover:bg-red-200"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            ))}
                                             <button
-                                                onClick={() => setShowForm(true)}
-                                                className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                                                onClick={addCertification}
+                                                className="mt-2 bg-red-900 text-white px-4 py-2 rounded-lg hover:bg-red-800"
                                             >
-                                                Change Password
+                                                Add Certification
                                             </button>
-                                        ) : (
-                                            <form className="space-y-4 mt-4">
-                                                <div>
-                                                    <label className="block text-sm text-gray-700 mb-1">Current Password</label>
-                                                    <input type="password" className="w-full border rounded-lg px-3 py-2 outline-none focus:border-blue-500" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm text-gray-700 mb-1">New Password</label>
-                                                    <input type="password" className="w-full border rounded-lg px-3 py-2 outline-none focus:border-blue-500" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm text-gray-700 mb-1">Confirm New Password</label>
-                                                    <input type="password" className="w-full border rounded-lg px-3 py-2 outline-none focus:border-blue-500" />
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        type="submit"
-                                                        className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                                                    >
-                                                        Update Password
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setShowForm(false)}
-                                                        className="text-sm text-red-600 hover:underline"
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        )}
-                                    </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-wrap gap-2">
+                                            {profile.certifications.map((cert, index) => (
+                                                <Chip
+                                                    key={index}
+                                                    label={cert}
+                                                    variant="outlined"
+                                                    sx={{
+                                                        borderColor: '#7f1d1d',
+                                                        color: '#7f1d1d',
+                                                        '&:hover': { backgroundColor: 'rgba(127, 29, 29, 0.04)' }
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="md:col-span-3">
-                                {/* Trainer Bio & Achievements */}
-                                <div className="bg-white rounded-xl p-6 border-1 text-left " style={{ fontFamily: "Segoe UI" }}>
-                                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 ">
-                                        <Trophy className="w-5 h-5 text-purple-600" />
-                                        Trainer Bio & Achievements
-                                    </h3>
-                                    <div className="space-y-3 text-gray-700 text-[15px] leading-relaxed">
-                                        <p>
-                                            {trainer.full_name} is a certified fitness trainer with a strong background in health and wellness. With over {trainer.experience || '5'} years of experience, they have helped hundreds of clients achieve their fitness goals through personalized programs and continuous motivation.
-                                        </p>
-                                        <ul className="list-disc list-inside space-y-1">
-                                            <li>🏅 Certified in Advanced Strength & Conditioning</li>
-                                            <li>🎖 Participated in National Fitness Expo 2023</li>
-                                            <li>💼 Trained 150+ clients successfully</li>
-                                            <li>📚 Holds workshops on Nutrition & Mental Health</li>
-                                        </ul>
-                                    </div>
-                                </div>
+
+                                <Divider />
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-500 mb-1">Bio</label>
+                                    {isEditing ? (
+                                        <textarea
+                                            value={editedProfile.bio}
+                                            onChange={(e) => setEditedProfile({...editedProfile, bio: e.target.value})}
+                                            rows={4}
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                        />
+                                    ) : (
+                                        <p className="text-gray-800">{profile.bio}</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                    ))}
+                    </div>
                 </div>
             </div>
         </div>
     );
 }
 
-export default Profile;
+export default TrainerProfile;

@@ -24,36 +24,57 @@ export const addPlan = async (req, res) => {
     db.query(q, [req.body.plan_name], (err, data) => {
         if (err) return res.status(500).json(err);
         if (data.length) return res.status(409).json("Plan already exists!");
-    })
 
-    db.beginTransaction((err) => {
-        const planInsertQuery =
-            "INSERT INTO plans(plan_name, plan_duration, plan_price, features) VALUES (?) ";
+        // Continue with plan creation if no duplicate exists
+        db.beginTransaction((err) => {
+            if (err) return res.status(500).json(err);
 
-        const updateValues = [
-            req.body.plan_name ,
-            req.body.plan_duration,
-            req.body.plan_price ,
-            req.body.features ,
-        ]
+            const planInsertQuery =
+                "INSERT INTO plans(plan_name, plan_duration, plan_price, features) VALUES (?)";
 
-        db.query(planInsertQuery, [updateValues], (err, data) => {
-            if (err) {
-                return db.rollback(() => {
-                    res.status(500).json(err);
+            const updateValues = [
+                req.body.plan_name,
+                req.body.plan_duration,
+                req.body.plan_price,
+                req.body.features,
+            ]
+
+            db.query(planInsertQuery, [updateValues], (err, insertResult) => {
+                if (err) {
+                    return db.rollback(() => {
+                        res.status(500).json(err);
+                    });
+                }
+
+                // Get the ID of the newly inserted plan
+                const newPlanId = insertResult.insertId;
+
+                // Fetch the newly created plan to return it
+                const fetchQuery = "SELECT * FROM plans WHERE plan_id = ?";
+
+                db.query(fetchQuery, [newPlanId], (err, fetchResult) => {
+                    if (err) {
+                        return db.rollback(() => {
+                            res.status(500).json(err);
+                        });
+                    }
+
+                    // Commit the transaction
+                    db.commit((err) => {
+                        if (err) {
+                            return db.rollback(() => {
+                                res.status(500).json(err);
+                            });
+                        }
+                        // Return the newly created plan
+                        res.status(200).json(fetchResult[0]);
+                    });
                 });
-            }
-        })
-        db.commit((err) => {
-            if (err) {
-                return db.rollback(() => {
-                    res.status(500).json(err);
-                });
-            }
-            res.status(200).json("Plan has been created.");
+            });
         });
-    })
-}
+    });
+};
+
 
 export const editPlan = async (req, res) => {
     const planId = req.params.id;
@@ -130,66 +151,6 @@ export const getLoggedInMemberPlan= (req, res) => {
         return res.status(200).json(data);
     });
 };
-
-// export const updatePlanWithPayment = async (req, res) => {
-//     const memberId = req.user.member_id;
-//     const { plan_id } = req.body;
-//
-//     try {
-//         const query = "UPDATE gym_members SET plan_id = ? WHERE member_id = ?";
-//         await db.promise().query(query, [plan_id, memberId]);
-//
-//         res.status(200).json({ message: "Member's plan updated successfully." });
-//     } catch (error) {
-//         console.error("Error updating plan:", error);
-//         res.status(500).json({ error: "Internal server error." });
-//     }
-// };
-
-// export const updatePlanWithPayment = async (req, res) => {
-//     const memberId = req.user.member_id;
-//     const { plan_id, payment_method, payment_amount } = req.body;
-//
-//     try {
-//         // Begin transaction to ensure both operations succeed or fail together
-//         const connection = await db.promise().getConnection();
-//         await connection.beginTransaction();
-//
-//         try {
-//             // 1. Update the member's plan
-//             const updatePlanQuery = "UPDATE gym_members SET plan_id = ? WHERE member_id = ?";
-//             await connection.query(updatePlanQuery, [plan_id, memberId]);
-//
-//             // 2. Insert payment record into plan_payment table
-//             const insertPaymentQuery =
-//                 "INSERT INTO plan_payments (member_id, plan_id, payment_method, amount, payment_date, status) VALUES (?, ?, ?, ?, NOW(),?)";
-//             await connection.query(insertPaymentQuery, [
-//                 memberId,
-//                 plan_id,
-//                 'Credit',
-//                 req.body.plan_price ,
-//                 'Paid',
-//             ]);
-//
-//             // If both operations succeed, commit the transaction
-//             await connection.commit();
-//             connection.release();
-//
-//             res.status(200).json({
-//                 message: "Member's plan and payment information updated successfully."
-//             });
-//         } catch (error) {
-//             // If any operation fails, rollback the transaction
-//             await connection.rollback();
-//             connection.release();
-//             throw error;
-//         }
-//     } catch (error) {
-//         console.error("Error updating plan and payment:", error);
-//         res.status(500).json({ error: "Internal server error." });
-//     }
-// };
-
 
 export const updatePlanWithPayment = async (req, res) => {
     const memberId = req.user.member_id;

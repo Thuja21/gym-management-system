@@ -113,7 +113,7 @@ const TopBar = ({ userName, title, onSearch }) => {
                         <MenuItem
                             onClick={() => {
                                 handleClose();
-                                navigate("/profile"); // replace with your actual route
+                                navigate("/trainerProfile"); // replace with your actual route
                             }}
                         >
                             Profile

@@ -70,9 +70,23 @@ const ManagePlans = () => {
                 if (!response.ok) {
                     throw new Error("Failed to add new plan.");
                 }
+                // Get the newly created plan from the response
+                const createdPlan = await response.json();
+
+                // Update the plans state immediately
+                setPlans(prevPlans => [...prevPlans, createdPlan]);
+
                 alert("Plan added successfully!");
 
                 setOpenDialog(false); // Close the dialog
+
+                // reset the form
+                setNewPlan({
+                    plan_name: "",
+                    plan_price: "",
+                    plan_duration: "",
+                    features: ""
+                });
             } catch (err) {
                 setError(err.message);
             }

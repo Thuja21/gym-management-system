@@ -5,15 +5,23 @@ import Footer from "../../components/Member/Footer.jsx";
 import TrainerCard from "../../components/Member/TrainerCard";
 import {FaDumbbell, FaUsers, FaHeartbeat, FaAppleAlt, FaFacebook, FaInstagram, FaTwitter} from "react-icons/fa";
 import FeatureCard from "../../components/Member/FeatureCard.jsx";
+import BMICalculator from "../../components/Member/BmiCalculator.jsx";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import "./Home.css";
+import trainer1 from "../../assets/images/trainer.png";
+import trainer2 from "../../assets/images/trainer2.png";
+import trainer3 from "../../assets/images/trainer3.png";
+import trainer4 from "../../assets/images/trainer4.png";
+import trainer5 from "../../assets/images/trainer5.png";
+import trainer6 from "../../assets/images/trainer6.png";
+import trainer7 from "../../assets/images/trainer7.png";
+
 const Home = () => {
 
     const [trainers, setTrainers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
 
     // Fetch members from backend
     useEffect(() => {
@@ -60,6 +68,9 @@ const Home = () => {
                 "Customized nutrition plans to complement your fitness goals.",
         },
     ];
+
+    const trainerImages = [trainer1, trainer2, trainer3, trainer4, trainer5, trainer6, trainer7 /* ... */];
+
     return (
         <div className="home-container" >
             <Navbar />
@@ -138,6 +149,8 @@ const Home = () => {
                     </div>
                 </section>
 
+                <BMICalculator/>
+
                 {/* Trainers Section */}
                 <section className="py-16 bg-white">
                     <div className="container mx-auto px-4 md:px-6">
@@ -155,15 +168,17 @@ const Home = () => {
                             {trainers.map((trainer, index) => (
                                 <TrainerCard
                                     key={trainer.trainer_id}
-                                    image={trainer} // Local public folder image
+                                    // Use a unique image for each trainer based on their ID
+                                    image={trainerImages[index] || trainerImages[0]} // Fallback to first
                                     name={trainer.full_name}
                                     specialty={trainer.specialization}
+                                    bio={trainer.bio}
                                     delay={index * 0.1}
                                 />
                             ))}
 
                             <motion.div
-                                className="bg-primary rounded-lg shadow-lg overflow-hidden flex flex-col justify-center items-center text-white p-6"
+                                className="bg-[#FF4500] rounded-lg shadow-lg overflow-hidden flex flex-col justify-center items-center text-white p-6"
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.2 }}
@@ -177,7 +192,7 @@ const Home = () => {
                                 </p>
                                 <Link
                                     to="/contact"
-                                    className="bg-white text-primary font-semibold py-3 px-6 rounded-md hover:bg-gray-100 transition duration-300"
+                                    className="bg-white text-[#FF4500] font-semibold py-3 px-6 rounded-md hover:bg-gray-100 transition duration-300"
                                 >
                                     Join Now
                                 </Link>
@@ -185,6 +200,7 @@ const Home = () => {
                         </div>
                     </div>
                 </section>
+
 
             </div>
             <Footer />

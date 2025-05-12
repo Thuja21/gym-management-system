@@ -30,7 +30,20 @@ export default function ChangePlanCheckout() {
                 withCredentials: true
             });
             console.log(response.data);
-            setMemberData(response.data); // Set the fetched data to state
+            if (response.data.length !== 0) {
+                const member = response.data[0];
+                setMemberData({
+                    full_name: member.full_name,
+                    email: member.email,
+                    phone: member.contact_no,
+                }); // Set the fetched data to state
+                setFormData(prev => ({
+                    ...prev,
+                    name: member.full_name || '',
+                    email: member.email || '',
+                    phone: member.contact_no || '',
+                }));
+            }
         } catch (error) {
             console.error('Error fetching plan data', error);
             setMemberData([]); // <-- This is the fix
@@ -174,11 +187,10 @@ export default function ChangePlanCheckout() {
                                             type="text"
                                             name="name"
                                             value={memberData.full_name}
-                                            onChange={handleInputChange}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition-all"
                                             style={{ focusRing: `${themeColor}40` }}
                                             placeholder="John Doe"
-                                            required
+                                            readOnly
                                         />
                                     </div>
                                     <div>
@@ -188,11 +200,10 @@ export default function ChangePlanCheckout() {
                                         <input
                                             type="email"
                                             name="email"
-                                            value={formData.email}
-                                            onChange={handleInputChange}
+                                            value={memberData.email}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition-all"
                                             placeholder="your@email.com"
-                                            required
+                                            readOnly
                                         />
                                     </div>
                                     <div>
@@ -202,11 +213,10 @@ export default function ChangePlanCheckout() {
                                         <input
                                             type="tel"
                                             name="phone"
-                                            value={formData.phone}
-                                            onChange={handleInputChange}
+                                            value={memberData.phone}
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition-all"
                                             placeholder="+1 (234) 567-8901"
-                                            required
+                                            readOnly
                                         />
                                     </div>
                                 </div>
@@ -347,10 +357,6 @@ export default function ChangePlanCheckout() {
                                                 <div>
                                                     <p className="text-sm text-gray-500">Phone</p>
                                                     <p className="font-medium">{formData.phone || "Not provided"}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm text-gray-500">Address</p>
-                                                    <p className="font-medium">{formData.address || "Not provided"}</p>
                                                 </div>
                                             </div>
                                         </div>

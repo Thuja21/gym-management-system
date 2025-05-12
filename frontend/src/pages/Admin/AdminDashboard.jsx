@@ -20,7 +20,7 @@ function AdminDashboard() {
     const [totalActiveMembers, setTotalActiveMembers] = useState(0);
     const [RecentNotices, setRecentNotices] = useState([]);
     const [RecentSessions, setRecentSessions] = useState([]);
-
+    const [totalAttendance, setTotal] = useState(0);
 
     useEffect(() => {
         axios.get("http://localhost:8800/api/dash/totalRegistration")
@@ -63,35 +63,36 @@ function AdminDashboard() {
             });
     }, []);
 
-                const stats = [
+    useEffect(() => {
+        axios.get('http://localhost:8800/api/attendance/last-week-total')
+            .then(res => setTotal(res.data.total))
+            .catch(err => console.error(err));
+    }, []);
+
+    const attendanceRate = totalActiveMembers > 0
+        ? ((totalAttendance / (totalActiveMembers * 7)) * 100).toFixed(2)
+        : 0;
+
+    const stats = [
         { title: 'Active Members', value: totalActiveMembers, icon: Users, trend: '+12% from last month', color: 'from-violet-500 to-violet-600', lightColor: 'bg-violet-50', textColor: 'text-violet-600' },
         { title: 'Monthly Revenue', value: 'Rs.24,890', icon: DollarSign, trend: '+8.2% from last month', color: 'from-blue-500 to-blue-600', lightColor: 'bg-blue-50', textColor: 'text-blue-600' },
-        { title: 'Class Attendance', value: '89%', icon: Calendar, trend: '+4% from last week', color: 'from-emerald-500 to-emerald-600', lightColor: 'bg-emerald-50', textColor: 'text-emerald-600' },
+        { title: 'Class Attendance', value: attendanceRate + "%", icon: Calendar, trend: '+4% from last week', color: 'from-emerald-500 to-emerald-600', lightColor: 'bg-emerald-50', textColor: 'text-emerald-600' },
         { title: 'New Registrations', value: totalRegistrations, icon: Activity, trend: '+6 from this month',  color: 'from-pink-500 to-pink-600', lightColor: 'bg-pink-50', textColor: 'text-pink-600'},
     ];
 
-    const upcomingClasses = [
-        { id: 1, name: 'CrossFit Basic', time: '10:00 AM', trainer: 'John Smith', attendees: 12 },
-        { id: 2, name: 'Yoga Flow', time: '11:30 AM', trainer: 'Sarah Wilson', attendees: 8 },
-        { id: 3, name: 'HIIT Training', time: '2:00 PM', trainer: 'Mike Johnson', attendees: 15 },
-    ];
+    const formatDuration = (duration) => {
+        if (!duration) return "";
 
-    const topTrainers = [
-        {
-            id: 1,
-            name: 'Emma Davis',
-            specialization: 'Strength Training',
-            rating: 4.9,
-            image: 'https://images.unsplash.com/photo-1534368420009-621bfab424a8?w=150&h=150&fit=crop'
-        },
-        {
-            id: 2,
-            name: 'James Wilson',
-            specialization: 'CrossFit',
-            rating: 4.8,
-            image: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=150&h=150&fit=crop'
-        },
-    ];
+        const [hours, minutes, seconds] = duration.split(":").map(Number);
+
+        if (hours > 0 && minutes > 0) {
+            return `${hours} hour${hours > 1 ? "s" : ""} ${minutes} min${minutes > 1 ? "s" : ""}`;
+        } else if (hours > 0) {
+            return `${hours} hour${hours > 1 ? "s" : ""}`;
+        } else {
+            return `${minutes} min${minutes > 1 ? "s" : ""}`;
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 w-[100vw] ml-[117px]">
@@ -166,7 +167,7 @@ function AdminDashboard() {
                     <div className="bg-white shadow rounded-lg border border-gray-200">
                         <div className="border-b border-gray-200 px-6 py-4">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-medium text-gray-900">Today's Classes</h2>
+                                <h2 className="text-lg font-medium text-gray-900">Upcoming Sessions</h2>
                                 <Clock className="h-5 w-5 text-gray-400" />
                             </div>
                         </div>
@@ -174,23 +175,41 @@ function AdminDashboard() {
                             <div className="space-y-4">
                                 {RecentSessions.map((session) => (
                                     <div key={session.schedule_id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-                                        <div className="flex items-center space-x-4">
-                                            <div className="flex-shrink-0">
-                                                <Calendar className="h-5 w-5 text-indigo-600" />
+                                        <div>
+                                            <div className="flex items-center">
+                                                <div className="bg-blue-50 p-1.5 rounded-md mr-2">
+                                                    <Calendar className="h-4 w-4 text-blue-600" />
+                                                </div>
+                                                <p className="font-medium text-gray-800">{session.title}</p>
                                             </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-900">{session.title}</p>
-                                            </div>
+                                            <p className="text-sm text-gray-500 text-left mt-1 ml-8">
+                                                {new Date(session.schedule_date).toLocaleDateString('en-GB', {
+                                                    weekday: 'short',
+                                                    day: 'numeric',
+                                                    month: 'short'
+                                                })}
+                                            </p>
                                         </div>
-                                        <div className="text-sm font-medium text-indigo-600">
-                                            <p className="text-sm font-medium">
-                                                {new Date(`1970-01-01T${session.schedule_time_slot}`)
-                                                    .toLocaleTimeString("en-US", {
-                                                        hour: "numeric",
-                                                        minute: "2-digit",
-                                                        hour12: true,
-                                                    })
-                                                    .replace(":", ".")}
+                                        <div className="text-right">
+                                            <p className="text-sm font-medium text-gray-800">
+                                                {new Date(`1970-01-01T${session.start_time}Z`)
+                                                        .toLocaleTimeString("en-US", {
+                                                            hour: "numeric",
+                                                            minute: "2-digit",
+                                                            hour12: true,
+                                                        })
+                                                        .replace(":", ".")
+                                                    + " - " +
+                                                    new Date(`1970-01-01T${session.end_time}Z`)
+                                                        .toLocaleTimeString("en-US", {
+                                                            hour: "numeric",
+                                                            minute: "2-digit",
+                                                            hour12: true,
+                                                        })
+                                                        .replace(":", ".") }
+                                            </p>
+                                            <p className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full inline-block mt-1">
+                                                {formatDuration(session.duration)}
                                             </p>
                                         </div>
                                     </div>

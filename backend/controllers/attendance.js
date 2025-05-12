@@ -129,10 +129,6 @@ export const getAttendanceByDate = (req, res) => {
             return res.status(500).json({ error: "Error fetching attendance", details: err });
         }
 
-        if (data.length === 0) {
-            return res.status(404).json({ message: "No attendance records found for this date" });
-        }
-
         return res.status(200).json(data);
     });
 };

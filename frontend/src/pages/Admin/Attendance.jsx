@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Search } from "lucide-react";
 import AdminSideBar from "./AdminSideBar.jsx";
 import axios from "axios";
-import {Paper} from "@mui/material";
+import { Paper, Grid, TextField, Button, Typography, Box, InputAdornment } from "@mui/material";
 
 function Attendance() {
-    const [members, setMembers] = useState([]); // State to store all members data
+    const [members, setMembers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [error, setError] = useState(null);
@@ -22,8 +22,7 @@ function Attendance() {
         const fetchMembers = async () => {
             try {
                 const response = await axios.get(`http://localhost:8800/api/members/all`);
-                setMembers(response.data); // Store all members data in the state
-                setFilteredMembers(response.data); // Initialize filtered members with all members
+                setMembers(response.data);
             } catch (error) {
                 console.error("Failed to fetch members", error);
             }
@@ -31,8 +30,6 @@ function Attendance() {
         fetchMembers();
     }, []);
 
-
-    // Fetch attendance by selected date
     useEffect(() => {
         const fetchAttendanceRecords = async () => {
             if (!selectedDate) {
@@ -49,11 +46,8 @@ function Attendance() {
             }
         };
         fetchAttendanceRecords();
-    }, [selectedDate]); // Fetch attendance every time the selectedDate changes
+    }, [selectedDate]);
 
-
-
-    // Handle the search logic
     const handleSearch = (e) => {
         e.preventDefault();
 
@@ -82,9 +76,38 @@ function Attendance() {
                 date: new Date().toISOString().split('T')[0],
             });
         }
-        console.log("Selected Member:", selectedMember);  // Debugging
+        console.log("Selected Member:", selectedMember);
     };
 
+    // Function to update member attendance info when a member is selected
+    const updateMemberAttendanceInfo = (memberId) => {
+        const member = members.find(m => m.member_id.toString() === memberId);
+
+        if (member) {
+            // Find attendance record for this member on the selected date
+            const attendanceRecord = attendanceRecords.find(record =>
+                record.member_id === member.member_id &&
+                new Date(record.attendance_date).toLocaleDateString() === new Date(selectedDate).toLocaleDateString()
+            );
+
+            setSelectedMember({
+                id: member.member_id,
+                name: member.full_name,
+                checkIn: attendanceRecord?.check_in_time || "Not Check-in",
+                checkOut: attendanceRecord?.check_out_time || "Not Checked Out",
+                date: selectedDate,
+            });
+        } else {
+            // Reset if no member found
+            setSelectedMember({
+                id: '',
+                name: '',
+                checkIn: '',
+                checkOut: '',
+                date: selectedDate,
+            });
+        }
+    };
 
     const handleCheckIn = async () => {
         if (selectedMember.id) {
@@ -99,7 +122,7 @@ function Attendance() {
             try {
                 const response = await axios.post("http://localhost:8800/api/attendance/checkin", checkInData);
 
-                alert(response.data.message); // Show success message
+                alert(response.data.message);
                 setAttendanceRecords(prev => [...prev, { ...checkInData, attendance_id: response.data.attendance_id, full_name: selectedMember.name }]);
                 setSelectedMember(prev => ({ ...prev, checkIn: checkInData.check_in_time}));
 
@@ -124,22 +147,16 @@ function Attendance() {
             console.log(filteredRecord);
 
             try {
-                // Send the check-out data to the server
                 const response = await axios.post(`http://localhost:8800/api/attendance/checkout/${selectedMember.id}`, filteredRecord);
-
-                // Show success message
                 alert(response.data.message);
-
-                // Update the attendance record in the state
                 setAttendanceRecords((prevRecords) => {
                     return prevRecords.map((record) =>
                         record.member_id === selectedMember.id && new Date(record.attendance_date).toLocaleDateString() === new Date(selectedDate).toLocaleDateString()
-                            ? { ...record, check_out_time: currentTime } // Update the check-out time
+                            ? { ...record, check_out_time: currentTime }
                             : record
                     );
                 });
 
-                // Update selected member with the new check-out time
                 setSelectedMember((prev) => ({ ...prev, checkOut: currentTime }));
 
             } catch (error) {
@@ -151,157 +168,231 @@ function Attendance() {
         }
     };
 
-
-
-
-    // Check if selected date is today
     const isToday = selectedDate === new Date().toISOString().split('T')[0];
 
     return (
-        <div className="bg-gray-100" style={{ display: "flex", height: "100vh", width: "103vw", marginTop: "40px", marginLeft: "-43px" }}>
-
+        <div className="bg-gray-100" style={{ display: "flex", height: "100vh", width: "103vw", marginTop: "50px", marginLeft: "-43px" }}>
             <AdminSideBar style={{ flexShrink: 0, width: 250 }} />
-            <div style={{ flexGrow: 1, padding: "20px", height: "100vh", overflowY: "auto" }}>
-
-                <Paper elevation={0.7} className="rounded-lg">
-                <div className="card mt-4">
-                    <div className="card-body p-4 rounded-lg">
-                        <div className="mb-4 flex items-center space-x-2" style={{ paddingBottom: "20px" }}>
-                            <div>
-                                <input
-                                    type="date"
-                                    className="form-control"
-                                    value={selectedDate}
-                                    onChange={handleDateChange}
-                                />
-                            </div>
-                            <div className="relative flex-grow">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <input
-                                    type="text"
-                                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                    placeholder="Search member by ID or name..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    aria-label="Search members"
-                                />
-                            </div>
-                            <button
+            <Box sx={{ flexGrow: 1, p: 3, height: "100vh", overflowY: "auto" }}>
+                <Paper elevation={3} sx={{ p: 3, borderRadius: 2, mb: 3 }}>
+                    {/* Search and Date Section */}
+                    <Grid container spacing={2} alignItems="center" sx={{ mb: 3 }}>
+                        <Grid item xs={12} md={3}>
+                            <TextField
+                                type="date"
+                                fullWidth
+                                variant="outlined"
+                                value={selectedDate}
+                                onChange={handleDateChange}
+                                size="small"
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={7}>
+                            <TextField
+                                fullWidth
+                                placeholder="Search member by ID or name..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                variant="outlined"
+                                size="small"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start" sx={{ alignItems: "flex-start" }}>
+                                            <Search size={20} />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={2}>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                color="primary"
                                 onClick={handleSearch}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
                             >
                                 Search
-                            </button>
-                        </div>
+                            </Button>
+                        </Grid>
+                    </Grid>
 
-                        {/* Member Details */}
-                        {isToday && (
-                            <div className="row g-3">
+                    {/* Divider between sections */}
+                    {isToday && (
+                        <>
+                            <Box sx={{
+                                height: '1px',
+                                bgcolor: 'rgba(0, 0, 0, 0.12)',
+                                width: '100%',
+                                my: 4
+                            }} />
 
-                                <div className="col-md-4 d-flex align-items-center">
-                                    <label htmlFor="memberId" className="form-label me-2" style={{ whiteSpace: "nowrap" }}>
-                                        Member ID:
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        style={{ width: "250px", backgroundColor: "#efefef" }}
-                                        id="memberId"
-                                        value={selectedMember.id}
-                                        onChange={(e) => setSelectedMember({ ...selectedMember, member_id: e.target.value })}
-                                    />
-                                </div>
-                                <div className="col-md-4 d-flex align-items-center">
-                                    <label className="form-label me-2 mb-0" style={{ whiteSpace: "nowrap" }}>
-                                        Check-in Time:
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={selectedMember.checkIn }
-                                        style={{ marginLeft: "10px"}}
-                                        disabled
-                                    />
-                                </div>
-                                <div className="col-md-4 d-flex align-items-center">
-                                    <label htmlFor="date" className="form-label me-2" style={{ marginLeft: "37px" }}>
-                                        Date:
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="date"
-                                        value={selectedDate}
-                                        readOnly
-                                    />
-                                </div>
+                            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}></Typography>
+                            {/* Member Details Section with improved alignment and text clarity */}
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} md={6}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography sx={{
+                                            mr: 1,
+                                            minWidth: '120px',
+                                            fontWeight: 'medium',
+                                            color: 'rgba(0, 0, 0, 0.87)'
+                                        }}>
+                                            Member:
+                                        </Typography>
+                                        <TextField
+                                            select
+                                            fullWidth
+                                            variant="outlined"
+                                            size="small"
+                                            value={selectedMember.id}
+                                            onChange={(e) => {
+                                                const selectedId = e.target.value;
+                                                // Call the function to update member attendance info
+                                                updateMemberAttendanceInfo(selectedId);
+                                            }}
+                                            SelectProps={{
+                                                native: true,
+                                            }}
+                                        >
+                                            <option value="">Select a member</option>
+                                            {members.map((member) => (
+                                                <option key={member.member_id} value={member.member_id}>
+                                                    {member.member_id} - {member.full_name}
+                                                </option>
+                                            ))}
+                                        </TextField>
+                                    </Box>
+                                </Grid>
 
-                                <div className="col-md-4 d-flex align-items-center">
-                                    <label className="form-label me-2">
-                                        Name:
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="name"
-                                        value={selectedMember.name}
-                                        onChange={(e) => setSelectedMember({ ...selectedMember, name: e.target.value })}
-                                        style={{ marginLeft: "37px", width: "250px", backgroundColor: "#efefef" }}
-                                    />
-                                </div>
+                                <Grid item xs={12} md={6}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography sx={{
+                                            mr: 1,
+                                            minWidth: '120px',
+                                            fontWeight: 'medium',
+                                            color: 'rgba(0, 0, 0, 0.87)'
+                                        }}>
+                                            Date:
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            size="small"
+                                            value={selectedDate}
+                                            // disabled
+                                            sx={{ color: 'rgba(0, 0, 0, 0.57)', bgcolor: 'rgba(0, 0, 0, 0.04)'  }}
+                                        />
+                                    </Box>
+                                </Grid>
 
-                                <div className="col-md-4 d-flex align-items-center">
-                                    <label className="form-label me-2 mb-0" style={{ whiteSpace: "nowrap" }}>
-                                        Check-out Time:
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={selectedMember.checkOut || 'Not Checked Out'}
-                                        disabled
-                                    />
-                                </div>
+                                {/* Check-in and Check-out in same vertical line */}
+                                <Grid item xs={12} md={6}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography sx={{
+                                            mr: 1,
+                                            minWidth: '120px',
+                                            fontWeight: 'medium',
+                                            color: 'rgba(0, 0, 0, 0.87)'
+                                        }}>
+                                            Check-in Time:
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            size="small"
+                                            value={selectedMember.checkIn || 'Not Checked In'}
+                                            // disabled
+                                            sx={{ color: 'rgba(0, 0, 0, 0.57)', bgcolor: 'rgba(0, 0, 0, 0.04)' }}
+                                        />
+                                    </Box>
+                                </Grid>
 
-                                <div className="col-md-4 d-flex justify-content-end align-items-center" >
-                                    <button onClick={handleCheckIn} className="btn btn-success me-2" style={{ width: "140px", marginBottom:"-10px"}}>
-                                        Check In
-                                    </button>
-                                    <button onClick={handleCheckOut} className="btn btn-danger" style={{ width: "140px", marginBottom:"-10px" }}>
-                                        Check Out
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                                <Grid item xs={12} md={6}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography sx={{
+                                            mr: 1,
+                                            minWidth: '120px',
+                                            fontWeight: 'medium',
+                                            color: 'rgba(0, 0, 0, 0.87)'
+                                        }}>
+                                            Check-out Time:
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            size="small"
+                                            value={selectedMember.checkOut || 'Not Checked Out'}
+                                            // disabled
+                                            sx={{ color: 'rgba(0, 0, 0, 0.57)', bgcolor: 'rgba(0, 0, 0, 0.04)'  }}
+                                        />
+                                    </Box>
+                                </Grid>
+
+                                {/* Action Buttons */}
+                                <Grid item xs={12}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                                        <Button
+                                            variant="contained"
+                                            color="success"
+                                            onClick={handleCheckIn}
+                                            sx={{ mr: 2, minWidth: '140px' }}
+                                        >
+                                            Check In
+                                        </Button>
+                                        <Button
+                                            variant="contained"
+                                            color="error"
+                                            onClick={handleCheckOut}
+                                            sx={{ minWidth: '140px' }}
+                                        >
+                                            Check Out
+                                        </Button>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </>
+                    )}
                 </Paper>
 
                 {/* Attendance Table */}
-                <div className="overflow-x-auto mt-6 rounded-xl border-2" style={{ overflow: "hidden" }}>
-                    <table className="min-w-full divide-y">
-                        <thead className="bg-gray-200 text-black">
-                        <tr>
-                            <th className="px-6 py-3">Member ID</th>
-                            <th className="px-6 py-3">Name</th>
-                            <th className="px-6 py-3">Check-in Time</th>
-                            <th className="px-6 py-3">Check-out Time</th>
-                            <th className="px-6 py-3">Date</th>
-                        </tr>
-                        </thead>
-                        <tbody className="bg-gray-100 divide-y divide-gray-200">
-                        {attendanceRecords.map((record) => (
-                            <tr key={record.attendance_id}>
-                                <td className="px-6 py-4">{record.member_id}</td>
-                                <td className="px-6 py-4">{record.full_name}</td>
-                                <td className="px-6 py-4">{record.checkIn || record.check_in_time}</td>
-                                <td className="px-6 py-4">{record.check_out_time || 'Not Checked Out'}</td>
-                                <td className="px-6 py-4">{new Date(record.attendance_date).toLocaleDateString()}</td>
+                <Paper elevation={3} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                    <Typography variant="h6" sx={{ p: 2, bgcolor: '#f5f5f5', fontWeight: 'bold' }}>
+                        Attendance Records - {selectedDate}
+                    </Typography>
+                    <Box sx={{ overflowX: 'auto' }}>
+                        <table className="min-w-full divide-y">
+                            <thead className="bg-gray-200 text-black">
+                            <tr>
+                                <th className="px-6 py-3">Member ID</th>
+                                <th className="px-6 py-3">Name</th>
+                                <th className="px-6 py-3">Check-in Time</th>
+                                <th className="px-6 py-3">Check-out Time</th>
+                                <th className="px-6 py-3">Date</th>
                             </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                            </thead>
+                            <tbody className="bg-gray-100 divide-y divide-gray-200">
+                            {attendanceRecords.length > 0 ? (
+                                attendanceRecords.map((record) => (
+                                    <tr key={record.attendance_id}>
+                                        <td className="px-6 py-4">{record.member_id}</td>
+                                        <td className="px-6 py-4">{record.full_name}</td>
+                                        <td className="px-6 py-4">{record.checkIn || record.check_in_time}</td>
+                                        <td className="px-6 py-4">{record.check_out_time || 'Not Checked Out'}</td>
+                                        <td className="px-6 py-4">{new Date(record.attendance_date).toLocaleDateString()}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                                        No records found for {selectedDate}
+                                    </td>
+                                </tr>
+                            )}
+                            </tbody>
+                        </table>
+                    </Box>
+                </Paper>
+            </Box>
         </div>
     );
 }

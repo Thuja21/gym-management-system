@@ -46,6 +46,12 @@ function ViewSchedules() {
         fetchSchedules();
     }, []); // Empty dependency array to fetch data only once on mount
 
+    // Helper function to normalize date format for comparison
+    const formatDateForComparison = (dateString) => {
+        const date = new Date(dateString);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    };
+
     // Filter schedules based on selected filters
     const filteredSchedules = schedules.filter(schedule => {
         // Filter by type
@@ -53,30 +59,57 @@ function ViewSchedules() {
             return false;
         }
 
-        // Filter by date (for one-time schedules)
-        if (filterDate && schedule.schedule_type === 'one-time') {
-            const scheduleDate = new Date(schedule.schedule_date).toISOString().split('T')[0];
-            if (scheduleDate !== filterDate) {
-                return false;
+        // Filter by date
+        if (filterDate) {
+            if (schedule.schedule_type === 'one-time') {
+                // For one-time schedules, normalize both dates before comparing
+                const normalizedScheduleDate = formatDateForComparison(schedule.schedule_date);
+                const normalizedFilterDate = formatDateForComparison(filterDate);
+
+                if (normalizedScheduleDate !== normalizedFilterDate) {
+                    return false;
+                }
+            } else if (schedule.schedule_type === 'weekly') {
+                // For weekly schedules, check if the day of week matches
+                const selectedDate = new Date(filterDate);
+                const dayOfWeek = selectedDate.toLocaleString('en-us', { weekday: 'long' });
+
+                // Check if any weekly slot has the matching day
+                const hasMatchingDay = schedule.weekly_schedule?.some(
+                    slot => slot.day === dayOfWeek
+                );
+
+                if (!hasMatchingDay) {
+                    return false;
+                }
             }
         }
 
         return true;
     });
 
+
     return (
         <div className="bg-gray-50" style={{ display: "flex", height: "100vh", paddingRight: "30px" }}>
             <AdminSideBar />
             <div style={{ flexGrow: 1, padding: "20px", height: "100vh", width: "1300px", overflowY: "auto", scrollbarWidth: "none", marginLeft: "-45px", marginTop: "10px" }}>
-                <Typography variant="h4" gutterBottom sx={{ color: "#4A5568" }}>
+                <Typography variant="h4" gutterBottom sx={{
+                    color: "#2D3748",
+                    fontWeight: 600,
+                    marginBottom: "1.5rem"
+                }}>
                     Announcements
                 </Typography>
 
                 <div
-                    className="bg-white rounded-xl shadow-sm p-4 mb-4"
-                    style={{ marginRight: "-5px", borderLeft: "3px solid #E2E8F0" }}
+                    className="bg-white rounded-xl shadow-sm p-5 mb-5"
+                    style={{
+                        marginRight: "-5px",
+                        borderLeft: "3px solid #3182CE",
+                        transition: "all 0.3s ease"
+                    }}
                 >
-                    <Typography variant="h6" gutterBottom sx={{ color: "#4A5568" }}>
+                    <Typography variant="h6" gutterBottom sx={{ color: "#4A5568", fontWeight: 600 }}>
                         Filter Schedules
                     </Typography>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -105,7 +138,6 @@ function ViewSchedules() {
                             InputLabelProps={{ shrink: true }}
                             size="small"
                             fullWidth
-                            disabled={filterType === "weekly"}
                             sx={{
                                 "& .MuiOutlinedInput-notchedOutline": { borderColor: "#E2E8F0" },
                                 "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#CBD5E0" },
@@ -173,26 +205,51 @@ function ViewSchedules() {
                     }}
                 >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-                        {loading && <p className="p-6 text-gray-500">Loading schedules...</p>}
-                        {error && <p className="p-6 text-red-500">Error: {error}</p>}
+                        {loading && (
+                            <div className="col-span-2 flex justify-center items-center p-10">
+                                <div className="animate-pulse flex space-x-4">
+                                    <div className="rounded-full bg-gray-200 h-12 w-12"></div>
+                                    <div className="flex-1 space-y-4 py-1">
+                                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                        <div className="space-y-2">
+                                            <div className="h-4 bg-gray-200 rounded"></div>
+                                            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {error && <p className="p-6 text-red-500 col-span-2">Error: {error}</p>}
                         {!loading && filteredSchedules.length === 0 && (
-                            <p className="p-6 text-gray-500">No schedules match your filter criteria.</p>
+                            <p className="p-6 text-gray-500 col-span-2">No schedules match your filter criteria.</p>
                         )}
                         {filteredSchedules
                             .sort((a, b) => new Date(a.schedule_date).getTime() - new Date(b.schedule_date).getTime())
                             .map((schedule) => (
                                 <div
                                     key={schedule.schedule_id}
-                                    className="p-6 hover:bg-gray-50 border rounded-lg"
+                                    className="p-6 hover:bg-gray-50 border rounded-lg transition-all duration-200"
                                     style={{
                                         borderColor: "#EDF2F7",
-                                        transition: "all 0.2s ease",
-                                        boxShadow: "0 1px 3px rgba(0,0,0,0.05)"
+                                        boxShadow: "0 2px 4px rgba(0,0,0,0.08)",
+                                        borderLeft: schedule.schedule_type === 'one-time' ? "4px solid #4299E1" : "4px solid #68D391"
                                     }}
                                 >
                                     <div className="flex justify-between items-start">
                                         <div className="w-full text-left">
-                                            <h3 className="text-lg font-semibold" style={{ color: "#2D3748" }}>{schedule.title}</h3>
+                                            <div className="flex items-center mb-2">
+                                                <Chip
+                                                    label={schedule.schedule_type}
+                                                    size="small"
+                                                    sx={{
+                                                        bgcolor: schedule.schedule_type === 'one-time' ? "#EBF8FF" : "#F0FFF4",
+                                                        color: schedule.schedule_type === 'one-time' ? "#3182CE" : "#38A169",
+                                                        fontWeight: 500,
+                                                        marginRight: "8px"
+                                                    }}
+                                                />
+                                                <h3 className="text-lg font-semibold" style={{ color: "#2D3748" }}>{schedule.title}</h3>
+                                            </div>
                                             {schedule.notes && (
                                                 <p className="mt-1 text-sm" style={{ color: "#718096" }}>{schedule.notes}</p>
                                             )}
@@ -200,12 +257,18 @@ function ViewSchedules() {
                                     </div>
                                     {schedule.schedule_type === 'one-time' &&
                                         <div className="mt-4 grid grid-cols-2 gap-4">
-                                            <div className="flex items-center text-sm" style={{ color: "#4A5568" }}>
-                                                <Calendar className="w-4 h-4 mr-2" style={{ color: "#718096" }} />
+                                            <div className="flex items-center text-sm p-2 rounded-md" style={{
+                                                color: "#4A5568",
+                                                backgroundColor: "#F7FAFC"
+                                            }}>
+                                                <Calendar className="w-4 h-4 mr-2" style={{ color: "#4299E1" }} />
                                                 {new Date(schedule.schedule_date).toLocaleDateString()}
                                             </div>
-                                            <div className="flex items-center text-sm" style={{ color: "#4A5568" }}>
-                                                <Clock className="w-4 h-4 mr-2" style={{ color: "#718096" }} />
+                                            <div className="flex items-center text-sm p-2 rounded-md" style={{
+                                                color: "#4A5568",
+                                                backgroundColor: "#F7FAFC"
+                                            }}>
+                                                <Clock className="w-4 h-4 mr-2" style={{ color: "#4299E1" }} />
                                                 {schedule.schedule_time_slot} - {schedule.end_time}
                                             </div>
                                         </div>
@@ -223,8 +286,12 @@ function ViewSchedules() {
                                         };
 
                                         return (
-                                            <div key={idx} className="flex items-center text-sm mt-2" style={{ color: "#4A5568" }}>
-                                                <Clock className="w-4 h-4 mr-2" style={{ color: "#718096" }} />
+                                            <div key={idx} className="flex items-center text-sm mt-2 p-2 rounded-md" style={{
+                                                color: "#4A5568",
+                                                backgroundColor: "#F7FAFC",
+                                                marginTop: idx > 0 ? "8px" : "16px"
+                                            }}>
+                                                <Clock className="w-4 h-4 mr-2" style={{ color: "#68D391" }} />
                                                 <span style={{ fontWeight: 500 }}>{slot.day}</span>: {formatTime(slot.start_time)} to {formatTime(slot.end_time)}
                                             </div>
                                         )

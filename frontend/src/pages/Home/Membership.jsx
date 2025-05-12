@@ -143,7 +143,7 @@ const Membership = () => {
                     <p className="text-xl mb-8 max-w-2xl mx-auto">Join JK Fitness today and take the first step towards a healthier, stronger you.</p>
                     <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
                         <Link to="/contact" className="bg-white text-[#FF4500] font-semibold py-3 px-8 rounded-md hover:bg-gray-100 transition duration-300">Join Now</Link>
-                        <Link to="/contact" className="bg-transparent border-2 border-white text-white font-semibold py-3 px-8 rounded-md hover:bg-white hover:text-[#FF4500] transition duration-300">Schedule a Tour</Link>
+                        {/*<Link to="/contact" className="bg-transparent border-2 border-white text-white font-semibold py-3 px-8 rounded-md hover:bg-white hover:text-[#FF4500] transition duration-300">Schedule a Tour</Link>*/}
                     </div>
                 </div>
             </section>

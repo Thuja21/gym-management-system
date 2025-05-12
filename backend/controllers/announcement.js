@@ -22,25 +22,42 @@ export const addAnnouncement =(req,res)=> {
             new Date(),
            ];
 
-        db.query(userInsertQuery, [userValues], (err, result) => {
+        db.query(userInsertQuery, [userValues], (err, insertResult) => {
             if (err) {
                 return db.rollback(() => {
                     res.status(500).json(err);
                 });
             }
-            // Commit the transaction if both queries succeed
-            db.commit((err) => {
+
+            // Get the ID of the newly inserted announcement
+            const newAnnouncementId = insertResult.insertId;
+            console.log("New announcement ID:", newAnnouncementId);
+
+            // Fetch the newly created announcement to return it
+            const fetchQuery = "SELECT * FROM announcements WHERE announcement_id = ?";
+
+            db.query(fetchQuery, [newAnnouncementId], (err, fetchResult) => {
                 if (err) {
                     return db.rollback(() => {
                         res.status(500).json(err);
                     });
                 }
-                // Send success response
-                res.status(200).json("Announcement has been created.");
+
+                // Commit the transaction if both queries succeed
+                db.commit((err) => {
+                    if (err) {
+                        return db.rollback(() => {
+                            res.status(500).json(err);
+                        });
+                    }
+                    console.log("fetchResult", fetchResult);
+                    // Send the newly created announcement as response
+                    res.status(200).json(fetchResult[0]);
+                });
             });
         });
-    })
-}
+    });
+};
 
 
 export const deleteAnnouncement = (req, res) => {

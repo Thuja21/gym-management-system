@@ -1,8 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import { FaCheck } from "react-icons/fa";
-import {Check} from "lucide-react";
 
 const MembershipCard = ({
                             title,
@@ -13,7 +12,17 @@ const MembershipCard = ({
                             delay = 0,
                         }) => {
 
+    const navigate = useNavigate();
     const isLoggedIn = localStorage.getItem("user") !== null;
+
+    const handlePlanSelection = () => {
+        // You can add any logic here before navigation
+        if (isLoggedIn) {
+            navigate('/changePlan');
+        } else {
+            navigate('/signup');
+        }
+    };
 
     return (
         <motion.div
@@ -44,16 +53,17 @@ const MembershipCard = ({
                         </li>
                     ))}
                 </ul>
-                <Link
-                    to={isLoggedIn ? "../../pages/Member/ChangePlan.jsx" : "../../pages/Signup/Signup.jsx"}
-                    className={`block text-center py-3 px-6 rounded-md font-semibold transition duration-300 ${
+                <button
+                    onClick={handlePlanSelection}
+                    className={`block text-center py-3 px-6 rounded-md font-semibold transition duration-300 w-full border-0 outline-none ${
                         popular
                             ? "bg-[#FF4500] text-white hover:bg-opacity-90"
                             : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                     }`}
+                    style={{ fontFamily: 'inherit', cursor: 'pointer' }}
                 >
                     {isLoggedIn ? "Change Plan" : "Choose Plan"}
-                </Link>
+                </button>
             </div>
         </motion.div>
     );

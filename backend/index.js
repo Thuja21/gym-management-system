@@ -20,7 +20,8 @@ import attendanceRoutes from "./routes/attendance.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import scheduleRoutes from "./routes/schedule.js";
 import reportRoutes from "./routes/report.js";
-import report from "./routes/report.js";
+import progressRoutes from "./routes/progress.js";
+import reservationsRoutes from "./routes/reservations.js";
 
 
 //middlewares
@@ -147,6 +148,8 @@ app.use("/api/attendance", attendanceRoutes)
 app.use("/api/dash", dashboardRoutes)
 app.use("/api/schedules", scheduleRoutes)
 app.use("/api/reports", reportRoutes)
+app.use("/api/progress", progressRoutes)
+app.use("/api/reservations", reservationsRoutes)
 
 
 //listen port

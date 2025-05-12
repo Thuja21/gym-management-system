@@ -34,10 +34,14 @@ import PaymentHistory from "./pages/Member/PaymentHistory.jsx";
 import MemberLogin from "./pages/Member/MemberLogin.jsx";
 import ChangePlan from "@/pages/Member/ChangePlan.jsx";
 import ChangePlanCheckout from "@/pages/Member/ChangePlanCheckout.jsx";
-import Sample from "@/pages/Signup/Sample.jsx";
-import Sample2 from "./pages/Login/Sample2.jsx"
-
 import TrainerProfile from "@/pages/Trainer/TrainerProfile.jsx";
+import NotificationTrainer from "@/pages/Trainer/NotificationTrainer.jsx";
+import ManageSupplementReservation from "@/pages/Admin/ManageSupplementReservation.jsx";
+
+export const ROUTES = {
+  CHANGE_PLAN: "/changePlan",
+  SIGNUP: "/signup",
+};
 
 function App() {
   return (
@@ -56,6 +60,7 @@ function App() {
           <Route path="/plans" element={<ManagePlans />} />
           <Route path="/equipments" element={<GymEquipments />} />
           <Route path="/managesupplements" element={<ManageSupplements />} />
+          <Route path="/managereservation" element={<ManageSupplementReservation />} />
           <Route path="/schedules" element={<ViewSchedules />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/report" element={<Report />} />
@@ -83,10 +88,7 @@ function App() {
           <Route path="/members2" element={<ViewMembers1 />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/trainerProfile" element={<TrainerProfile />} />
-
-
-          <Route path="/sample" element={<Sample />} />
-          <Route path="/sample2" element={<Sample2 />} />
+          <Route path="/trainernotification" element={<NotificationTrainer />} />
         </Routes>
       </Router>
   );

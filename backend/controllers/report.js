@@ -1,5 +1,3 @@
-//Keela keela
-
 import {db} from "../config/connectDatabase.js";
 // import PDFDocument from 'pdfkit';
 import PDFDocument from 'pdfkit-table';
@@ -118,19 +116,6 @@ export const getRecentReports = (req, res) => {
         res.status(500).json({ error: 'Failed to fetch recent reports' });
     }
 };
-
-// ------------------------------------
-// Data Fetching Functions (Callback-based)
-// ------------------------------------
-// function getAttendanceData(startDate, endDate, callback) {
-//     // Replace with DB query as needed
-//     const data = [
-//         { id: 1, name: "John Doe", date: "2025-05-01", status: "Present" },
-//         { id: 2, name: "Jane Smith", date: "2025-05-01", status: "Absent" },
-//         { id: 3, name: "Mike Johnson", date: "2025-05-02", status: "Present" }
-//     ];
-//     callback(null, data);
-// }
 
 function getAttendanceData(startDate, endDate, callback) {
     const query = `SELECT attendance.attendance_date, gym_members.member_id, users.full_name, attendance.attended

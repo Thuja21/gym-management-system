@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./signup.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { UserCircle2, Users, ArrowLeft, CreditCard ,Lock, Building, CheckCircle, CreditCard as CreditCardIcon} from 'lucide-react';
+import { UserCircle2, Users, Lock, CheckCircle } from 'lucide-react';
 import PaymentPage from "@/components/Member/PaymentPage.jsx";
 import Bill from "@/components/Member/BillPreview.jsx";
 
@@ -14,8 +14,6 @@ const Signup = () => {
   const [age, setAge] = useState("");
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [paymentCompleted, setPaymentCompleted] = useState(false);
-  const [processingPayment, setProcessingPayment] = useState(false);
   const [loadingToPayment, setLoadingToPayment] = useState(false);
 
   const [showBill, setShowBill] = useState(false);
@@ -37,7 +35,6 @@ const Signup = () => {
       const savedFormData = localStorage.getItem('tempFormData');
       if (savedFormData) {
         setFormData(JSON.parse(savedFormData));
-        setPaymentCompleted(true);
         setFormStep(2); // Move to fitness information step
 
         // If user was at payment step, move them back to form
@@ -209,9 +206,8 @@ const Signup = () => {
         newErrors.dob = "Date of Birth is required.";
         isValid = false;
       }
-    } else if (step === 1) {
       // Validate second step fields for MEMBER
-      ["gender", "bloodGroup", "height", "weight", "currentFitnessLevel", "fitnessGoal", "healthIssues", "plan_id"].forEach(field => {
+      ["gender", "bloodGroup", "height", "weight", "currentFitnessLevel", "fitnessGoal", "healthIssues"].forEach(field => {
         const error = validateForm(field, formData[field]);
         if (error) {
           newErrors[field] = error;
@@ -238,42 +234,7 @@ const Signup = () => {
     }, 1000); // Simulated delay — you can remove or shorten this if unnecessary
   };
 
-
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //
-  //   // For members, validate step 2
-  //   if (userType === "MEMBER" && !validateFormStep(2)) {
-  //     return;
-  //   }
-  //   // For customers, validate step 1
-  //   if (userType === "CUSTOMER" && !validateFormStep(1)) {
-  //     return;
-  //   }
-  //   try {
-  //     const response = await axios.post(
-  //         "http://localhost:8800/api/auth/register",
-  //         { ...formData, userType: userType, dob: dob, age: age },
-  //     );
-  //     alert(response.data); // Success message
-  //     navigate("/login"); // Redirect to login
-  //   } catch (error) {
-  //     alert(error.response?.data || "Registration failed.");
-  //   }
-  // };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    // For members, validate step 2
-    if (userType === "MEMBER" && !validateFormStep(2)) {
-      return;
-    }
-    // For customers, validate step 1
-    if (userType === "CUSTOMER" && !validateFormStep(1)) {
-      return;
-    }
-
+  const completeRegistration = async () => {
     try {
       // Create the data object to send to the backend
       const dataToSubmit = {
@@ -286,7 +247,7 @@ const Signup = () => {
       // Generate a payment ID
       const paymentId = "TRX" + Date.now();
 
-      // Add payment details for members when completing registration
+      // Add payment details for members
       if (userType === "MEMBER" && selectedPlan) {
         const paymentData = {
           amount: selectedPlan.plan_price,
@@ -300,44 +261,32 @@ const Signup = () => {
         setPaymentDetails(paymentData);
       }
 
-      const response = await axios.post(
+      await axios.post(
           "http://localhost:8800/api/auth/register",
           dataToSubmit
       );
 
-      // For members, show the bill instead of redirecting immediately
-      if (userType === "MEMBER") {
-        setShowBill(true);
-      } else {
-        alert(response.data); // Success message
-        navigate("/login"); // Redirect to login
-      }
+      return true;
     } catch (error) {
       alert(error.response?.data || "Registration failed.");
+      return false;
     }
   };
 
-  const handlePaymentSubmit = async (e) => {
-    e.preventDefault();
-    setProcessingPayment(true);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-    // Simulate validation
-    const { card_type, cardNumber, expiryMonth, expiryYear, cvv } = formData;
-
-    if (!card_type || !cardNumber || !expiryMonth || !expiryYear || !cvv) {
-      alert("Please fill in all required fields.");
-      setProcessingPayment(false);
-      return;
+    // For customers, register directly
+    if (userType === "CUSTOMER") {
+      const response = await registerUser();
+      if (response) {
+        alert(response.data); // Success message
+        navigate("/login"); // Redirect to login
+      }
+    } else {
+      // For members, just show the bill (registration already happened after payment)
+      setShowBill(true);
     }
-
-    // Simulate API/payment success
-    setTimeout(() => {
-      setProcessingPayment(false);
-      alert("✅ Payment successful!");
-
-      // Proceed to next step (e.g., registration form)
-      setFormStep(3);
-    }, 1500); // 1.5 sec fake delay
   };
 
   const handleProceedToPay = () => {
@@ -716,7 +665,6 @@ const Signup = () => {
                                   <CheckCircle className="h-8 w-8 text-green-600" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-gray-900">Payment Successful!</h3>
-                                <p className="text-gray-600 mt-2">Your membership is now pending approval.</p>
                               </div>
 
                               {selectedPlan && (
@@ -759,7 +707,12 @@ const Signup = () => {
                       <PaymentPage
                           selectedPlan={selectedPlan}
                           onBack={() => setFormStep(1.5)}
-                          onPaymentSuccess={() => setFormStep(3)}
+                          onPaymentSuccess={async () => {
+                            const registrationSuccess = await completeRegistration();
+                            if (registrationSuccess) {
+                              setFormStep(3);
+                            }
+                          }}
                       />
                     </div>
 

@@ -13,6 +13,7 @@ const routeConfig = [
     { title: "Announcements", path: "/announcements", icon: "CampaignOutlined", color: "#3f51b5" },
     { title: "Gym Equipments", path: "/equipments", icon: "FitnessCenterOutlined", color: "#00bcd4" },
     { title: "Manage Supplements", path: "/managesupplements", icon: "LocalPharmacyOutlined", color: "#8bc34a" },
+    { title: "Manage Reservations", path: "/managereservation", icon: "EventNoteOutlined", color: "#9c2323" },
     { title: "View Schedules", path: "/schedules", icon: "EventOutlined", color: "#ffc107" },
     { title: "Payments", path: "/payments", icon: "PaymentOutlined", color: "#e91e63" },
     { title: "Report", path: "/report", icon: "AssessmentOutlined", color: "#009688" },

@@ -1,204 +1,262 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { User, Mail, Phone, MapPin, Building, Calendar, Edit, Camera, Save } from "lucide-react";
 import AdminSideBar from "./AdminSideBar.jsx";
-import { Plus, Search, Edit as EditIcon, Trash as DeleteIcon, ChevronDown, ChevronRight } from "lucide-react";
-import {
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Button, Dialog, DialogActions,
-    DialogContent, DialogTitle, TextField, IconButton, Grid, MenuItem, Select, InputLabel, FormControl, Collapse, Box,
-    CircularProgress, Alert, InputAdornment
-} from "@mui/material";
+import { Paper, Typography, Avatar, Divider } from "@mui/material";
 
-const ManageEquipments = () => {
-    // ... (keep all your existing state declarations)
+function AdminProfile() {
+    const [profile, setProfile] = useState({
+        name: "John Doe",
+        email: "john.doe@example.com",
+        phone: "+1 (555) 123-4567",
+        address: "123 Admin Street, City, Country",
+        department: "IT Administration",
+        joinDate: "2023-01-15",
+        bio: "Experienced administrator with over 8 years in system management and team leadership. Passionate about optimizing workflows and implementing efficient solutions."
+    });
 
-    // Fetch item details when manage button is clicked
-    const handleOpenItemManagement = async (item) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedProfile, setEditedProfile] = useState({...profile});
+    const [loading, setLoading] = useState(false);
+
+    // Function to handle profile update
+    const handleUpdateProfile = async () => {
+        setLoading(true);
         try {
-            setItemLoading(true);
-            // Call your backend API to get the specific item details
-            const response = await fetch(`http://localhost:8800/api/equipment-items/${item.variant_db_id}`);
-            if (!response.ok) {
-                throw new Error("Failed to fetch item details");
-            }
-            const data = await response.json();
+            // Mock API call - replace with actual implementation
+            // await fetch("http://localhost:8800/api/admin/profile/update", {
+            //     method: "PUT",
+            //     headers: { "Content-Type": "application/json" },
+            //     body: JSON.stringify(editedProfile),
+            // });
 
-            setSelectedItem({
-                ...data.data,  // Assuming your API returns { success: true, data: {...} }
-                variant_id: item.variant_id,  // Keep the frontend ID
-                purchase_date: data.data.purchase_date.split('T')[0]  // Format date for date input
-            });
-            setItemManagementDialog(true);
-        } catch (err) {
-            setError(err.message);
-            alert(`Error loading item: ${err.message}`);
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 800));
+
+            setProfile(editedProfile);
+            setIsEditing(false);
+            alert("Profile updated successfully!");
+        } catch (error) {
+            console.error("Failed to update profile:", error);
+            alert("Failed to update profile. Please try again.");
         } finally {
-            setItemLoading(false);
+            setLoading(false);
         }
     };
 
-    // Save changes to the item
-    const handleSaveItemChanges = async () => {
-        if (!selectedItem) return;
-
-        try {
-            setItemLoading(true);
-
-            // Prepare the update data
-            const updateData = {
-                brand: selectedItem.brand,
-                purchase_date: selectedItem.purchase_date,
-                price: selectedItem.price,
-                status: selectedItem.status
-            };
-
-            // Call your backend API to update the item
-            const response = await fetch(`http://localhost:8800/api/equipment-items/${selectedItem.variant_id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(updateData)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to update item");
+    const handlePhotoUpload = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Handle file upload logic here
+                console.log("File selected:", file.name);
+                // You would typically upload this to your server
             }
-
-            // Update local state
-            const updatedItems = equipmentItems.map(item =>
-                item.variant_id === selectedItem.variant_id ? { ...item, ...updateData } : item
-            );
-
-            const updatedEquipments = equipments.map(equipment => {
-                if (equipment.equipment_id === selectedItem.equipment_id) {
-                    const updatedVariants = equipment.variants.map(variant => {
-                        if (variant.variant_id.toString() === selectedItem.variant_id.toString()) {
-                            return { ...variant, ...updateData };
-                        }
-                        return variant;
-                    });
-                    return { ...equipment, variants: updatedVariants };
-                }
-                return equipment;
-            });
-
-            setEquipmentItems(updatedItems);
-            setEquipments(updatedEquipments);
-
-            alert("Item updated successfully!");
-            setItemManagementDialog(false);
-        } catch (err) {
-            setError(err.message);
-            alert(`Error updating item: ${err.message}`);
-        } finally {
-            setItemLoading(false);
-        }
+        };
+        input.click();
     };
-
-    // ... (keep all your other existing functions)
 
     return (
         <div className="bg-gray-100" style={{ display: "flex", height: "100vh", paddingRight: "30px" }}>
-            {/* ... (keep all your existing JSX until the Item Management Dialog) */}
+            <AdminSideBar style={{ flexShrink: 0, width: 250 }} />
+            <div style={{ flexGrow: 1, padding: "20px", height: "100vh", width: "1300px", overflowY: "auto", scrollbarWidth: "none", marginLeft: "-45px", marginTop: "10px" }}>
+                <Typography variant="h4" gutterBottom>
+                    Admin Profile
+                </Typography>
 
-            {/* Item Management Dialog */}
-            <Dialog open={itemManagementDialog} onClose={() => !itemLoading && setItemManagementDialog(false)} fullWidth maxWidth="sm">
-                <DialogTitle>Manage Equipment Item</DialogTitle>
-                <DialogContent>
-                    {itemLoading ? (
-                        <Box display="flex" justifyContent="center" p={4}>
-                            <CircularProgress />
-                        </Box>
-                    ) : (
-                        <>
-                            {error && (
-                                <Alert severity="error" sx={{ mb: 2 }}>
-                                    {error}
-                                </Alert>
-                            )}
-                            {selectedItem && (
-                                <Grid container spacing={2} sx={{ mt: 1 }}>
-                                    <Grid item xs={12}>
-                                        <Typography variant="subtitle1" gutterBottom>
-                                            <strong>Equipment:</strong> {selectedItem.equipment_name}
-                                        </Typography>
-                                        <Typography variant="subtitle1" gutterBottom>
-                                            <strong>Item ID:</strong> {selectedItem.variant_id}
-                                        </Typography>
+                <Paper elevation={1} className="p-4 mb-6 rounded-lg" style={{ marginRight: "-5px" }}>
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-semibold text-gray-800">Personal Information</h2>
+                        {!isEditing ? (
+                            <button
+                                className="bg-red-900 text-white px-4 py-2 rounded-lg flex items-center shadow-md hover:bg-red-800 transition"
+                                onClick={() => setIsEditing(true)}
+                            >
+                                <Edit className="w-5 h-5 mr-2" />
+                                Edit Profile
+                            </button>
+                        ) : (
+                            <div className="flex space-x-2">
+                                <button
+                                    className="bg-gray-500 text-white px-4 py-2 rounded-lg flex items-center shadow-md hover:bg-gray-600 transition"
+                                    onClick={() => {
+                                        setIsEditing(false);
+                                        setEditedProfile({...profile});
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center shadow-md hover:bg-green-700 transition"
+                                    onClick={handleUpdateProfile}
+                                    disabled={loading}
+                                >
+                                    <Save className="w-5 h-5 mr-2" />
+                                    {loading ? "Saving..." : "Save Changes"}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </Paper>
 
-                                        <TextField
-                                            margin="dense"
-                                            label="Brand"
-                                            fullWidth
-                                            variant="outlined"
-                                            value={selectedItem.brand || ""}
-                                            onChange={(e) => setSelectedItem({...selectedItem, brand: e.target.value})}
-                                            sx={{ mb: 2 }}
+                <div className="bg-white rounded-xl shadow-sm" style={{ marginTop: "-10px", marginRight: "-5px", height: "auto" }}>
+                    <div className="p-6">
+                        <div className="flex flex-col md:flex-row gap-8">
+                            {/* Profile Photo Section */}
+                            <div className="flex flex-col items-center">
+                                <div className="relative">
+                                    <Avatar
+                                        sx={{ width: 150, height: 150 }}
+                                        src="/path-to-profile-image.jpg" // Replace with actual image path
+                                        alt={profile.name}
+                                    />
+                                    {isEditing && (
+                                        <button
+                                            onClick={handlePhotoUpload}
+                                            className="absolute bottom-0 right-0 bg-red-900 text-white p-2 rounded-full hover:bg-red-800"
+                                        >
+                                            <Camera size={20} />
+                                        </button>
+                                    )}
+                                </div>
+                                <h3 className="mt-4 text-xl font-bold">{profile.name}</h3>
+                                <p className="text-gray-600">Administrator</p>
+                            </div>
+
+                            {/* Profile Details Section */}
+                            <div className="flex-1 space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Full Name</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    value={editedProfile.name}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, name: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center">
+                                                    <User className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{profile.name}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Email Address</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type="email"
+                                                    value={editedProfile.email}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, email: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center">
+                                                    <Mail className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{profile.email}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Phone Number</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type="tel"
+                                                    value={editedProfile.phone}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, phone: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center">
+                                                    <Phone className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{profile.phone}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Address</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    value={editedProfile.address}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, address: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center">
+                                                    <MapPin className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{profile.address}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Department</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    value={editedProfile.department}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, department: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center">
+                                                    <Building className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{profile.department}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 mb-1">Join Date</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type="date"
+                                                    value={editedProfile.joinDate}
+                                                    onChange={(e) => setEditedProfile({...editedProfile, joinDate: e.target.value})}
+                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center">
+                                                    <Calendar className="w-5 h-5 text-red-900 mr-2" />
+                                                    <span className="text-gray-800">{new Date(profile.joinDate).toLocaleDateString()}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <Divider />
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-500 mb-1">Bio</label>
+                                    {isEditing ? (
+                                        <textarea
+                                            value={editedProfile.bio}
+                                            onChange={(e) => setEditedProfile({...editedProfile, bio: e.target.value})}
+                                            rows={4}
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
                                         />
-
-                                        <TextField
-                                            margin="dense"
-                                            label="Purchase Date"
-                                            fullWidth
-                                            variant="outlined"
-                                            type="date"
-                                            value={selectedItem.purchase_date || ""}
-                                            onChange={(e) => setSelectedItem({...selectedItem, purchase_date: e.target.value})}
-                                            InputLabelProps={{ shrink: true }}
-                                            sx={{ mb: 2 }}
-                                        />
-
-                                        <TextField
-                                            margin="dense"
-                                            label="Price"
-                                            fullWidth
-                                            variant="outlined"
-                                            type="number"
-                                            value={selectedItem.price || ""}
-                                            onChange={(e) => setSelectedItem({...selectedItem, price: e.target.value})}
-                                            sx={{ mb: 2 }}
-                                            InputProps={{
-                                                startAdornment: <InputAdornment position="start">Rs.</InputAdornment>,
-                                            }}
-                                        />
-
-                                        <FormControl fullWidth sx={{ mb: 2 }}>
-                                            <InputLabel>Status</InputLabel>
-                                            <Select
-                                                value={selectedItem.status}
-                                                label="Status"
-                                                onChange={(e) => setSelectedItem({...selectedItem, status: e.target.value})}
-                                            >
-                                                <MenuItem value="Available">Available</MenuItem>
-                                                <MenuItem value="In Use">In Use</MenuItem>
-                                                <MenuItem value="Under Maintenance">Under Maintenance</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-                                </Grid>
-                            )}
-                        </>
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        onClick={() => setItemManagementDialog(false)}
-                        color="primary"
-                        disabled={itemLoading}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={handleSaveItemChanges}
-                        color="primary"
-                        disabled={itemLoading}
-                    >
-                        {itemLoading ? "Saving..." : "Save Changes"}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                                    ) : (
+                                        <p className="text-gray-800">{profile.bio}</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
-};
+}
 
-export default ManageEquipments;
+export default AdminProfile;

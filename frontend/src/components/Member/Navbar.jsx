@@ -203,7 +203,7 @@ const Navbar = () => {
                                                                     <div className="flex justify-between items-center text-xs text-gray-500 mt-1">
                                                                         <span>{notif.timeAgo}</span>
                                                                         <span className="text-blue-500 cursor-pointer text-sm"
-                                                                              onClick={() => navigate(`/notification/${notif.announcement_id}`)}>
+                                                                              onClick={() => navigate(`/notification`)}>
                                                     View full notification
                                                 </span>
                                                                     </div>
@@ -266,7 +266,7 @@ const Navbar = () => {
                         ) : (
                             <Link
                                 to="/login"
-                                className="bg-[#E64100] text-white px-3 py-2 rounded-md text-sm font-semibold transition duration-300 hover:bg-[#6e0404]"
+                                className="bg-[#E64100] text-white px-3 py-2 rounded-md text-sm font-semibold transition duration-300 hover:bg-[#E03E00]"
                                 style={{ fontFamily: "Montserrat" }}
                             >
                                 Login

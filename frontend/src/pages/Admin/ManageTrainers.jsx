@@ -104,6 +104,7 @@ const ManageTrainers = () => {
             error.password = "Password must be at least 6 characters";
         }
         if (!trainer.specialization) error.specialization = "Specialization is required";
+        if (!trainer.dob) error.dob = "Date of Birth is required";
 
 
         setErrors(error);
@@ -438,6 +439,7 @@ const ManageTrainers = () => {
                                 helperText={errors[field]}
                                 type={field === "dob" ? "date" : "text"}
                                 InputLabelProps={field === "dob" ? { shrink: true } : {}}
+                                inputProps={field === "dob" ? { max: new Date().toISOString().split('T')[0] } : {}}
                             />
                         ))}
                     </Grid>
