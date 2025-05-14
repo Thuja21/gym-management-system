@@ -22,6 +22,7 @@ const Navbar = () => {
         '/memberProfile',
         '/changePlan',
         '/checkout',
+        '/progress',
     ];
 
     const isSolidBackground = scrolled || alwaysDarkBackground.includes(location.pathname);
@@ -252,6 +253,9 @@ const Navbar = () => {
                                             </Link>
                                             <Link to="/attendanceHistory" className="block px-4 py-3 text-gray-800 text-sm hover:bg-gray-100 transition">
                                                 Attendance History
+                                            </Link>
+                                            <Link to="/progress" className="block px-4 py-3 text-gray-800 text-sm hover:bg-gray-100 transition">
+                                                Progress History
                                             </Link>
                                             <Link to="/paymentHistory" className="block px-4 py-3 text-gray-800 text-sm hover:bg-gray-100 transition">
                                                 Payment History

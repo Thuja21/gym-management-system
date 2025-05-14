@@ -118,7 +118,8 @@ const Payment = () => {
                             <TableHead style={{ position: "sticky", top: 0, zIndex: 10 }}>
                                 <TableRow className="bg-gray-300  text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
                                     <th className="px-6 py-3 text-center">ID</th>
-                                    <th className="px-6 py-3 text-center">Member Name</th>
+                                    <th className="px-6 py-3 text-center">Member Id</th>
+                                    <th className="px-6 py-3 text-center">Member</th>
                                     <th className="pl-14 py-3">Plan</th>
                                     <th className="pl-32 py-3">Amount</th>
                                     <th className="pl-24 py-3">Due Date</th>
@@ -144,6 +145,7 @@ const Payment = () => {
                                         <TableRow key={payment.payment_id || index}>
                                             {/*<td className="px-6 py-3 text-center">{index + 1}</td>  /!* Auto incremented ID *!/*/}
                                             <td className="px-6 py-3 text-center">{payment.payment_id}</td>  {/* Auto incremented ID */}
+                                            <td className="px-6 py-3 text-center">{payment.member_id}</td>
                                             <td className="px-6 py-3 text-center">{payment.full_name}</td>
                                             <td className="pl-6 py-3">
                                                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">

@@ -256,7 +256,7 @@ export const login = (req, res) => {
             secure: false,
             sameSite: "Lax",
             path: "/",
-            maxAge: 60 * 60 * 1000,
+            maxAge: 24 * 60 * 60 * 1000,
           })
           .status(200)
           .json({ ...others, role });
@@ -271,7 +271,8 @@ export const login = (req, res) => {
 
       const token = jwt.sign(
           { id: userId, [idKey]: roleData[0][idKey], role },
-          "secretkey"
+          "secretkey",
+      { expiresIn: "24h" } // Changed from default 1h to 24h
       );
 
       const { password, ...others } = user;
@@ -281,7 +282,7 @@ export const login = (req, res) => {
             secure: false,
             sameSite: "Lax",
             path: "/",
-            maxAge: 60 * 60 * 1000,
+            maxAge: 24 * 60 * 60 * 1000,
           })
           .status(200)
           .json({ ...others, [idKey]: roleData[0][idKey], role });

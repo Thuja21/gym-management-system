@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect, useContext} from "react";
 import { Box, Drawer, List, ListItem, ListItemText, Divider, Typography, Badge } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import * as Icons from "@mui/icons-material";
 import TopBar from "../../components/TrainerTopbar.jsx";
+import { NotificationContext } from "./NotificationTrainer.jsx"; // Import the context
 
 const routeConfig = [
     { title: "Dashboard", path: "/trainerDashboard", icon: "HomeOutlined", color: "#4caf50" },
@@ -14,40 +15,81 @@ const routeConfig = [
 const TrainerSideBar = () => {
     const location = useLocation();
     const currentRoute = routeConfig.find(r => r.path === location.pathname) || routeConfig[0];
-    const currentTitle = currentRoute.title || "Dashboard";
+    const [currentTitle, setCurrentTitle] = useState("");
     const IconComponent = Icons[currentRoute.icon || "HomeOutlined"];
+    const contextValue = useContext(NotificationContext);
     const [notificationCount, setNotificationCount] = useState(0);
+
+    const isProfilePage = location.pathname === "/trainerProfile";
+
+    useEffect(() => {
+        if (isProfilePage) {
+            setCurrentTitle("Profile");
+        } else {
+            const route = routeConfig.find(r => r.path === location.pathname);
+            setCurrentTitle(route ? route.title : "Dashboard");
+        }
+    }, [location.pathname, isProfilePage]);
 
     useEffect(() => {
         const fetchNotificationCount = async () => {
             try {
                 const res = await fetch("http://localhost:8800/api/announcements/all");
                 const data = await res.json();
-                if (location.pathname !== '/trainernotification') {
-                    setNotificationCount(data.length);
-                    localStorage.setItem("notificationCount", data.length);
-                    console.log("######",data.length);
-                } else {
-                    setNotificationCount(0);
-                    localStorage.setItem("notificationCount", "0");
-                }
+
+                // Filter notifications from today
+                const today = new Date().setHours(0, 0, 0, 0);
+                const newNotifications = data.filter(notification => {
+                    const notifDate = new Date(notification.created_at).setHours(0, 0, 0, 0);
+                    return notifDate >= today;
+                });
+
+                const newCount = newNotifications.length;
+
+                // Store the count and the date it was calculated
+                const notificationData = {
+                    count: newCount,
+                    lastChecked: new Date().toISOString(),
+                    date: new Date().toDateString()
+                };
+
+                localStorage.setItem("notificationData", JSON.stringify(notificationData));
+                setNotificationCount(newCount);
             } catch (err) {
                 console.error("Error fetching notification count:", err);
             }
         };
 
-        const stored = localStorage.getItem("notificationCount");
-        if (stored && location.pathname !== '/trainernotification') {
-            setNotificationCount(parseInt(stored));
+        // Get stored notification data
+        const storedData = localStorage.getItem("notificationData");
+        if (storedData) {
+            const parsedData = JSON.parse(storedData);
+
+            // Check if the stored data is from today
+            const today = new Date().toDateString();
+            if (parsedData.date === today) {
+                setNotificationCount(parsedData.count);
+            } else {
+                // If not from today, fetch fresh data
+                fetchNotificationCount();
+            }
         } else {
             fetchNotificationCount();
         }
 
-        if (location.pathname === '/trainernotification') {
-            setNotificationCount(0);
-            localStorage.setItem("notificationCount", "0");
+        // Set up polling to check for new notifications
+        const interval = setInterval(fetchNotificationCount, 5 * 60 * 1000); // Check every 5 minutes
+
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        if (typeof contextValue === 'number' && location.pathname === '/trainernotification') {
+            // When on notification page, we can still show the count from context
+            // This allows the badge to remain visible even on the notification page
+            setNotificationCount(contextValue);
         }
-    }, [location.pathname]);
+    }, [contextValue, location.pathname]);
 
     const styles = {
         sidebarBg: "#1a1b23",
@@ -63,7 +105,8 @@ const TrainerSideBar = () => {
     const Item = ({ title, path, icon, color }) => {
         const isActive = location.pathname === path;
         const IconComponent = Icons[icon];
-        const showBadge = title === "Notification" && notificationCount > 0 && !isActive;
+        // Always show badge if there are notifications, regardless of whether it's active
+        const showBadge = title === "Notification" && notificationCount > 0;
 
         return (
             <ListItem
@@ -113,7 +156,7 @@ const TrainerSideBar = () => {
 
     return (
         <>
-            <TopBar userName="Trainer" title={currentTitle} icon={IconComponent} />
+            <TopBar userName="Trainer" title={currentTitle} icon={IconComponent}  setCurrentTitle={setCurrentTitle}/>
             <Box sx={{ display: "flex" }}>
                 <Drawer
                     variant="permanent"

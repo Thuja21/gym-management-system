@@ -222,7 +222,8 @@ const TrackMemberProgress = () => {
 
     const filteredMembers = members.filter(member =>
         member.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.contact_no?.includes(searchTerm)
+        member.contact_no?.includes(searchTerm) ||
+        member.member_id?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Calculate progress changes
@@ -371,6 +372,7 @@ const TrackMemberProgress = () => {
                             <Table stickyHeader>
                                 <StyledTableHead>
                                     <TableRow className = "text-[10px] font-medium uppercase">
+                                        <TableCell align="center">Id</TableCell>
                                         <TableCell align="center">Member</TableCell>
                                         <TableCell align="center">Phone</TableCell>
                                         <TableCell align="center">Age</TableCell>
@@ -392,6 +394,7 @@ const TrackMemberProgress = () => {
                                     ) : (
                                         filteredMembers.map((member) => (
                                             <StyledTableRow key={member.member_id}>
+                                                <TableCell align="center">{member.member_id}</TableCell>
                                                 <TableCell>
                                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                         <Avatar

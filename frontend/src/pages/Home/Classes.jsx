@@ -282,12 +282,12 @@ const Classes = () => {
                         >
                             Become a Member
                         </Link>
-                        <Link
-                            to="/contact"
-                            className="bg-transparent border-2 border-white text-white font-semibold py-3 px-8 rounded-md hover:bg-white hover:text-primary transition duration-300"
-                        >
-                            Try a Free Class
-                        </Link>
+                        {/*<Link*/}
+                        {/*    to="/contact"*/}
+                        {/*    className="bg-transparent border-2 border-white text-white font-semibold py-3 px-8 rounded-md hover:bg-white hover:text-primary transition duration-300"*/}
+                        {/*>*/}
+                        {/*    Try a Free Class*/}
+                        {/*</Link>*/}
                     </div>
                 </div>
             </section>

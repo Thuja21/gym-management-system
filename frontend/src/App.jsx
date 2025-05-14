@@ -31,6 +31,7 @@ import Notification from "./pages/Member/Notification.jsx";
 import AttendanceHistory from "./pages/Member/AttendanceHistory.jsx";
 import MemberProfile from "./pages/Member/MemberProfile.jsx";
 import PaymentHistory from "./pages/Member/PaymentHistory.jsx";
+import ProgressHistory from "./pages/Member/ProgressHistory.jsx";
 import MemberLogin from "./pages/Member/MemberLogin.jsx";
 import ChangePlan from "@/pages/Member/ChangePlan.jsx";
 import ChangePlanCheckout from "@/pages/Member/ChangePlanCheckout.jsx";
@@ -78,6 +79,7 @@ function App() {
           <Route path="/memberProfile" element={<MemberProfile />} />
           <Route path="/memberLogin" element={<MemberLogin />} />
           <Route path="/paymentHistory" element={<PaymentHistory />} />
+          <Route path="/progress" element={<ProgressHistory />} />
           <Route path="/changePlan" element={<ChangePlan />} />
 
           <Route path="/checkout" element={<ChangePlanCheckout />} />

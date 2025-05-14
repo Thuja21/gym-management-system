@@ -32,6 +32,8 @@ function TrainerNotification() {
         return `${yearsAgo} years ago`;
     };
 
+    // In TrainerNotification.jsx, update the useEffect that fetches notifications:
+
     useEffect(() => {
         const fetchNotifications = async () => {
             setLoading(true);
@@ -48,8 +50,25 @@ function TrainerNotification() {
                     }));
 
                 setNotifications(data);
-                // Set unread count to total number of notifications
-                setUnreadCount(data.length);
+
+                // Calculate today's notifications
+                const today = new Date().setHours(0, 0, 0, 0);
+                const todayNotifications = data.filter(notification => {
+                    const notifDate = new Date(notification.created_at).setHours(0, 0, 0, 0);
+                    return notifDate >= today;
+                });
+
+                // Set unread count to today's notifications
+                setUnreadCount(todayNotifications.length);
+
+                // Update localStorage with today's count
+                const notificationData = {
+                    count: todayNotifications.length,
+                    lastChecked: new Date().toISOString(),
+                    date: new Date().toDateString()
+                };
+                localStorage.setItem("notificationData", JSON.stringify(notificationData));
+
             } catch (err) {
                 setError("Failed to load notifications.");
                 console.error("Error fetching notifications:", err);
@@ -60,6 +79,7 @@ function TrainerNotification() {
 
         fetchNotifications();
     }, []);
+
 
     const deleteNotification = (id) => {
         const updatedNotifications = notifications.filter(

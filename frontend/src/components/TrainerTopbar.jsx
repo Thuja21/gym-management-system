@@ -6,7 +6,7 @@ import "../pages/Admin/Admin.css";
 import { useNavigate } from "react-router-dom";
 
 
-const TopBar = ({ userName, title, onSearch }) => {
+const TopBar = ({ userName, title, onSearch, setCurrentTitle }) => {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const navigate = useNavigate();
@@ -18,6 +18,16 @@ const TopBar = ({ userName, title, onSearch }) => {
     const handleClose = () => {
         setAnchorEl(null);
     };
+
+    const handleProfileClick = () => {
+        handleClose();
+        // Update the title when navigating to profile
+        if (setCurrentTitle) {
+            setCurrentTitle("Profile");
+        }
+        navigate("/trainerProfile");
+    };
+
 
     return (
         <AppBar
@@ -110,15 +120,9 @@ const TopBar = ({ userName, title, onSearch }) => {
                             }
                         }}
                     >
-                        <MenuItem
-                            onClick={() => {
-                                handleClose();
-                                navigate("/trainerProfile"); // replace with your actual route
-                            }}
-                        >
+                        <MenuItem onClick={handleProfileClick}>
                             Profile
                         </MenuItem>
-
                         <MenuItem
                             onClick={() => {
                                 handleClose();

@@ -502,7 +502,7 @@ const Supplements = () => {
             {/* Category Filter */}
             <section className="py-8 bg-[#F8F8F8]">
                 <div className="container mx-auto px-4 md:px-6">
-                    <div className="flex flex-wrap items-center justify-between mb-4">
+                    <div className="flex flex-wrap items-center justify-between mb-4 mt-4">
                         <div className="flex flex-wrap gap-4">
                             {categories.map((cat) => (
                                 <button
@@ -519,7 +519,7 @@ const Supplements = () => {
                             ))}
                         </div>
 
-                        <div className="flex items-center gap-4 mt-4 md:mt-0">
+                        <div className="flex items-center gap-4  md:mt-0">
                             <select
                                 className="p-2 rounded bg-white border"
                                 onChange={(e) => setSortBy(e.target.value)}
@@ -546,7 +546,7 @@ const Supplements = () => {
                     </div>
 
                     {/* Reservation Info Banner */}
-                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mt-[50px]">
                         <div className="flex">
                             <div className="ml-3">
                                 <p className="text-sm text-blue-700">

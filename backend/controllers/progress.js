@@ -31,48 +31,6 @@ export const viewAllProgress = (req, res) => {
     });
 };
 
-
-// export const addProgress = async (req, res) => {
-//     const memberId = req.params.id;
-//
-//     const insertQuery = `
-//         INSERT INTO progress
-//         (member_id, date, weight, body_fat, chest_size, waist_size, arm_size, leg_size, notes)
-//         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-//     `;
-//
-//     const {
-//         date,
-//         weight,
-//         bodyFat,
-//         chestSize,
-//         waistSize,
-//         armSize,
-//         legSize,
-//         notes
-//     } = req.body;
-//
-//     const values = [
-//         memberId,
-//         date,
-//         weight,
-//         bodyFat,
-//         chestSize,
-//         waistSize,
-//         armSize,
-//         legSize,
-//         notes
-//     ];
-//
-//     db.query(insertQuery, values, (err, result) => {
-//         if (err) {
-//             console.error("Error adding progress:", err);
-//             return res.status(500).json("Failed to add progress.");
-//         }
-//         return res.status(200).json("Progress added successfully.");
-//     });
-// };
-
 export const addProgress = async (req, res) => {
     const memberId = req.params.id;
 
@@ -125,5 +83,37 @@ export const addProgress = async (req, res) => {
             }
             return res.status(200).json("Progress added successfully.");
         });
+    });
+};
+
+export const getLoggedInMemberProgress= (req, res) => {
+    const memberId = req.user.member_id;
+    console.log(memberId);
+
+    const query = `
+        SELECT 
+            id,
+            member_id,
+            date,
+            weight,
+            body_fat AS bodyFat,
+            chest_size AS chestSize,
+            waist_size AS waistSize,
+            arm_size AS armSize,
+            leg_size AS legSize,
+            notes,
+            created_at AS createdAt
+        FROM progress
+        WHERE member_id = ?
+        ORDER BY date DESC
+    `;
+
+    db.query(query, [memberId], (err, results) => {
+        if (err) {
+            console.error("Error fetching progress:", err);
+            return res.status(500).json({ message: "Failed to fetch progress data." });
+        }
+
+        return res.status(200).json(results);
     });
 };
