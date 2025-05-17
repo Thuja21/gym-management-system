@@ -1,6 +1,27 @@
 import { db } from "../config/connectDatabase.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
+import crypto from "crypto"; // For generating reset token
+import dotenv from "dotenv";
+dotenv.config();
+
+// Configure Nodemailer for sending emails
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com', // Gmail SMTP server
+  port: 465,
+  secure: true, // Use TLS (STARTTLS) for port 587
+  auth: {
+    user: 'jkfitnessppt@gmail.com', // Hardcoded email address
+    pass: 'cyhubhjxgfjmsabs', // Replace with your actual password or App Password
+  },
+  timeout: 60000, // Increased timeout to 60 seconds to handle slow connections
+});
+
+// Function to generate a 6-digit code
+const generateSixDigitCode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // Generates a random 6-digit number between 100000 and 999999
+};
 
 export const register = (req, res) => {
   // Check if user already exists
@@ -223,7 +244,7 @@ export const register = (req, res) => {
 };
 
 export const login = (req, res) => {
-  const q = "SELECT * FROM users WHERE user_name = ?";
+  const q = "SELECT * FROM users WHERE user_name = ? AND is_deleted = 0";
   db.query(q, [req.body.username], (err, data) => {
     if (err) return res.status(500).json(err);
     if (data.length === 0) return res.status(404).json("User not found!");
@@ -241,7 +262,7 @@ export const login = (req, res) => {
     let idKey = "";
 
     if (role === "MEMBER") {
-      query = "SELECT member_id FROM gym_members WHERE user_id = ?";
+      query = "SELECT member_id FROM gym_members WHERE user_id = ? AND is_deleted = 0";
       idKey = "member_id";
     } else if (role === "TRAINER") {
       query = "SELECT trainer_id FROM trainers WHERE user_id = ?";
@@ -301,4 +322,155 @@ export const logout = (req, res) => {
     .json("User has been logged out.");
 };
 
+// Forgot Password Handler (Callback-based)
+export const forgotPassword = (req, res) => {
+  const { email } = req.body;
 
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  // Check if user exists using callback
+  db.query(
+      'SELECT * FROM users WHERE email = ?',
+      [email],
+      (err, rows) => {
+        if (err) {
+          console.error('Error in forgot password (query):', err);
+          return res.status(500).json({ error: 'Internal server error. Please try again' });
+        }
+
+        if (rows.length === 0) {
+          return res.status(404).json({ error: 'No user found with this email' });
+        }
+
+        // Generate reset token
+        const resetCode = generateSixDigitCode(); // 6-digit code for email
+        const resetCodeExpiry = new Date(Date.now() + 3600000); // Token expires in 1 hour
+
+        // Save token and expiry to user record using callback
+        db.query(
+            'UPDATE users SET reset_code= ?, reset_code_expiry = ? WHERE email = ?',
+            [resetCode, resetCodeExpiry, email],
+            (updateErr) => {
+              if (updateErr) {
+                console.error('Error in forgot password (update):', updateErr);
+                return res.status(500).json({ error: 'Internal server error. Please try again' });
+              }
+
+              // Create reset URL
+              const resetUrl = `${'http://localhost:5173 || http://localhost:5174'}/reset-password?token=${resetCode}`;
+
+              // Email content
+              const mailOptions = {
+                from: 'jkfitnessppt@gmail.com',
+                to: email,
+                subject: 'Password Reset Request',
+                text: `You requested a password reset. Use the following token to reset your password:\n\nCode: ${resetCode}\n\nAlternatively, click the link below:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email.`,
+                html: `<p>You requested a password reset. Use the following token to reset your password:</p><p><strong>Code: ${resetCode}</strong></p><p>Alternatively, click the link below:</p><p><a href="${resetUrl}">Reset Password</a></p><p>If you did not request this, please ignore this email.</p>`,
+              };
+
+              // Send email (nodemailer supports callbacks)
+              transporter.sendMail(mailOptions, (mailErr, info) => {
+                if (mailErr) {
+                  console.error('Error sending email:', mailErr);
+                  return res.status(500).json({ error: 'Internal server error. Please try again' });
+                }
+
+                res.status(200).json({ message: 'Password reset email sent successfully' });
+              });
+            }
+        );
+      }
+  );
+};
+
+// Verify Reset Code Controller
+export const verifyCode = (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({ success: false, error: 'Email and code are required' });
+    }
+
+    // Check if the code matches and hasn't expired using callback
+    db.query(
+        'SELECT * FROM users WHERE email = ? AND reset_code = ? AND reset_code_expiry > NOW()',
+        [email, code],
+        (error, rows) => {
+          if (error) {
+            console.error('Error verifying reset code:', error);
+            return res.status(500).json({ success: false, error: 'Internal server error. Please try again.' });
+          }
+
+          if (rows.length === 0) {
+            return res.status(400).json({ success: false, error: 'Invalid or expired code' });
+          }
+
+          res.status(200).json({ success: true, message: 'Code verified successfully', code: rows[0].reset_code });
+        }
+    );
+  } catch (error) {
+    console.error('Error verifying reset code:', error);
+    res.status(500).json({ success: false, error: 'Internal server error. Please try again.' });
+  }
+};
+
+// Reset Password Controller with Hashing and Length Validation
+export const resetPassword = (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ success: false, error: 'Email, code, and new password are required' });
+    }
+
+    // Validate password length (minimum 6 characters)
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, error: 'Password must be at least 6 characters long' });
+    }
+
+    // Check if the token is valid and hasn't expired using callback
+    db.query(
+        'SELECT * FROM users WHERE email = ? AND reset_code = ? AND reset_code_expiry > NOW()',
+        [email, code],
+        (error, rows) => {
+          if (error) {
+            console.error('Error checking reset code:', error);
+            return res.status(500).json({ success: false, error: 'Internal server error. Please try again.' });
+          }
+
+          if (rows.length === 0) {
+            return res.status(400).json({ success: false, error: 'Invalid or expired code' });
+          }
+
+          // Hash the new password before storing
+          bcrypt.hash(newPassword, 10, (hashError, hashedPassword) => {
+            if (hashError) {
+              console.error('Error hashing password:', hashError);
+              return res.status(500).json({ success: false, error: 'Internal server error. Please try again.' });
+            }
+
+            // Update the password using callback
+            db.query(
+                'UPDATE users SET password = ?, reset_code = NULL, reset_code_expiry = NULL WHERE email = ?',
+                [hashedPassword, email],
+                (updateError) => {
+                  if (updateError) {
+                    console.error('Error updating password:', updateError);
+                    return res.status(500).json({ success: false, error: 'Internal server error. Please try again.' });
+                  }
+
+                  console.log('Password updated successfully for email:', email);
+                  res.status(200).json({ success: true, message: 'Password updated successfully' });
+                }
+            );
+          });
+        }
+    );
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ success: false, error: 'Internal server error. Please try again.' });
+  }
+};

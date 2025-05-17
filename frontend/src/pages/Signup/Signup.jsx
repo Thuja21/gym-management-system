@@ -574,7 +574,7 @@ const Signup = () => {
                             <div className="mt-6">
                               <button
                                   type="submit"
-                                  className="bg-[#FF4500] text-white rounded-md text-base w-[200px] h-[45px] hover:bg-[#6e0404] font-semibold transition"
+                                  className="bg-[#FF4500] text-white rounded-md text-base w-[200px] h-[45px] hover:bg-orange-700 font-semibold transition"
                               >
                                 Register
                               </button>
@@ -584,7 +584,7 @@ const Signup = () => {
                               <button
                                   type="button"
                                   onClick={proceedToPayment}
-                                  className="bg-[#FF4500] text-white rounded-md text-base w-[200px] h-[45px] hover:bg-[#6e0404] font-semibold transition"
+                                  className="bg-[#FF4500] text-white rounded-md text-base w-[200px] h-[45px] hover:bg-orange-700 font-semibold transition"
                               >
                                 Next &gt;
                               </button>

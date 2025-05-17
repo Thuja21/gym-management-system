@@ -14,7 +14,7 @@ export function ProgressForm({ member, onSave }) {
             memberId: member.id,
             date: new Date().toISOString(),
             weight: Number(formData.get('weight')),
-            bodyFatPercentage: Number(formData.get('bodyFat')),
+            height: Number(formData.get('height')),
             muscleMass: Number(formData.get('muscleMass')),
             bmi: Number(formData.get('bmi')),
             customMeasurements,
@@ -48,10 +48,10 @@ export function ProgressForm({ member, onSave }) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Body Fat %</label>
+                        <label className="block text-sm font-medium text-gray-700">Height (cm)</label>
                         <input
                             type="number"
-                            name="bodyFat"
+                            name="height"
                             step="0.1"
                             required
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"

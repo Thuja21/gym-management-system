@@ -4,6 +4,7 @@ export const totalActiveMembers = (req, res) => {
     const query = `
     SELECT COUNT(*) AS total_active_members
     FROM gym_members
+        where is_deleted = 0
   `;
     db.query(query, (err, results) => {
         if (err) {
@@ -19,7 +20,7 @@ export const totalRegistration = (req, res) => {
     SELECT COUNT(*) AS total_registrations
     FROM gym_members
     WHERE MONTH(registered_date) = MONTH(CURRENT_DATE)
-      AND YEAR(registered_date) = YEAR(CURRENT_DATE)
+      AND YEAR(registered_date) = YEAR(CURRENT_DATE) 
   `;
 
     db.query(query, (err, results) => {
@@ -250,3 +251,55 @@ export const getRecentSessions = (req, res) => {
         return res.status(200).json(data);
     });
 };
+
+export const getLastWeekCompletedSessionsByTrainer = (req, res) => {
+    const trainerId = req.user.trainerId; // or req.user.trainer_id if using auth
+
+    const query = `
+        WITH one_time_sessions AS (
+            SELECT schedule_id, schedule_date
+            FROM schedules
+            WHERE schedule_type = 'one-time'
+              AND trainer_id = 14
+              AND schedule_date >= DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE()) + 7) DAY)
+              AND schedule_date < DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+        ),
+
+             weekly_sessions AS (
+                 SELECT
+                     s.schedule_id,
+                     ws.day,
+                     -- Calculate the actual date that day occurred last week
+                     DATE_ADD(
+                             DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) + 7 DAY),
+                             INTERVAL (FIELD(ws.day, 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday') - 1) DAY
+        ) AS schedule_date
+                 FROM schedules s
+                          JOIN weekly_schedule ws ON s.schedule_id = ws.schedule_id
+                 WHERE s.schedule_type = 'weekly'
+                   AND s.trainer_id = 14
+             ),
+
+-- Filter to only sessions that happened last week
+             filtered_weekly AS (
+                 SELECT *
+                 FROM weekly_sessions
+                 WHERE schedule_date >= DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE()) + 7) DAY)
+                   AND schedule_date < DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+             )
+
+-- Final count
+        SELECT
+            (SELECT COUNT(*) FROM one_time_sessions) +
+            (SELECT COUNT(*) FROM filtered_weekly) AS completed_sessions;
+    `;
+
+    db.query(query, [trainerId, trainerId], (err, results) => {
+        if (err) {
+            console.error("Database Error:", err);
+            return res.status(500).json({ error: "Error fetching completed sessions" });
+        }
+        res.status(200).json({ completed_sessions: results[0].completed_sessions || 0 });
+    });
+};
+

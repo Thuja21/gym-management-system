@@ -155,16 +155,16 @@ const ManagePlans = () => {
 
     // Handle Delete button click
     const handleDelete = async (planId) => {
-        if (window.confirm("Are you sure you want to delete this plan?")) {
+        if (window.confirm("Are you sure you want to discontinue this plan?")) {
             try {
                 const response = await fetch(`http://localhost:8800/api/plans/delete/${planId}`, {
-                    method: "DELETE", // Use appropriate method for your backend
+                    method: "PUT", // Use appropriate method for your backend
                 });
                 if (!response.ok) {
-                    throw new Error("Failed to delete plan.");
+                    throw new Error("Failed to discontinue plan.");
                 }
                 setPlans((prevPlans) => prevPlans.filter((plan) => plan.plan_id !== planId));
-                alert("Plan deleted successfully!");
+                alert("Plan discontinued successfully!");
             } catch (err) {
                 setError(err.message);
             }
@@ -233,7 +233,7 @@ const ManagePlans = () => {
                                                 onClick={() => handleDelete(plan.plan_id)}
                                                 className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                                             >
-                                                <Delete className="w-5 h-5 mr-2" /> Delete Plan
+                                                <Delete className="w-5 h-5 mr-2" /> Discontinue Plan
                                             </button>
                                         </div>
                                     )}

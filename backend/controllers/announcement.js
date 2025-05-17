@@ -1,6 +1,5 @@
 import {db} from "../config/connectDatabase.js";
 
-
 export const viewAllAnnouncements =(req,res)=> {
     const q = "SELECT * FROM announcements";
 
@@ -9,7 +8,6 @@ export const viewAllAnnouncements =(req,res)=> {
         return res.status(200).json(data);
     } )
 }
-
 
 export const addAnnouncement =(req,res)=> {
     db.beginTransaction((err) => {
@@ -58,7 +56,6 @@ export const addAnnouncement =(req,res)=> {
         });
     });
 };
-
 
 export const deleteAnnouncement = (req, res) => {
     const announcementId = req.params.id;

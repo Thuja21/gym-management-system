@@ -1,19 +1,20 @@
 import TrainerSideBar from "../Trainer/TrainerSideBar.jsx"
 import React, {useEffect, useState} from 'react';
-import { Activity, Users, Calendar, TrendingUp, Clock } from 'lucide-react';
+import {Activity, Users, Calendar, TrendingUp, Clock, CheckCircle} from 'lucide-react';
 import axios from "axios";
 
 const TrainerDashboard = () => {
     const [RecentSessions, setRecentSessions] = useState([]);
     const [totalActiveMembers, setTotalActiveMembers] = useState(0);
     const [totalSessions, setTotalSessions] = useState(0);
+    const [completedSessions, setCompletedSessions] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [count, setCount] = useState(0);
 
     const stats = [
         { title: 'Active Members', value: totalActiveMembers, icon: Users, color: 'bg-blue-500', lightColor: 'bg-blue-50', textColor: 'text-blue-600' },
         { title: 'Sessions Today', value: count, icon: Calendar, color: 'bg-green-500', lightColor: 'bg-green-50', textColor: 'text-green-600' },
-        { title: 'Total Hours', value: '156', icon: Clock, color: 'bg-purple-500', lightColor: 'bg-purple-50', textColor: 'text-purple-600' },
+        { title: 'Sessions Last Week', value: completedSessions, icon: CheckCircle, color: 'bg-orange-500', lightColor: 'bg-orange-50', textColor: 'text-orange-600' },
         { title: 'Client Progress', value: '87%', icon: TrendingUp, color: 'bg-yellow-500', lightColor: 'bg-yellow-50', textColor: 'text-yellow-600' },
     ];
 
@@ -37,6 +38,20 @@ const TrainerDashboard = () => {
             .then(data => {
                 // Make sure to extract the sessionCount property
                 setCount(data.sessionCount)
+            })
+            .catch(err => console.error(err));
+    }, []);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        fetch('http://localhost:8800/api/dash/completed-sessions', {
+            headers: { 'Authorization': `Bearer ${token}` },
+            credentials: 'include'
+        })
+            .then(res => res.json())
+            .then(data => {
+                // Make sure to extract the sessionCount property
+                setCompletedSessions(data.completed_sessions)
             })
             .catch(err => console.error(err));
     }, []);

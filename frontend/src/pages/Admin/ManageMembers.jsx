@@ -3,7 +3,8 @@ import AdminSideBar from "./AdminSideBar.jsx";
 import { Edit as EditIcon, Trash as DeleteIcon } from "lucide-react";
 import { Search, MoreVertical, Plus } from "lucide-react";
 import "./Admin.css";
-import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Box, IconButton, Grid, MenuItem, Select, InputLabel, FormControl
+import {
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Box, IconButton, Grid, MenuItem, Select, InputLabel, FormControl
 } from "@mui/material";
 import axios from "axios";
 
@@ -13,22 +14,28 @@ const ManageMembers = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
-    const [plans, setPlans] = useState([]); // State to store membership types
+    const [plans, setPlans] = useState([]);
     const [errors, setErrors] = useState({});
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
+    const [paymentDetails, setPaymentDetails] = useState({
+        amount: "",
+        paymentMethod: "",
+    });
+    const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
     const [newMember, setNewMember] = useState({
-        username: "",  fullname: "", email: "", contactNo: "", address: "", age: "", gender: "", height: "", weight: "",
+        username: "", fullname: "", email: "", contactNo: "", address: "", age: "", gender: "", height: "", weight: "",
         bloodGroup: "", currentFitnessLevel: "", fitnessGoal: "", healthIssues: "", dob: "", registered_date: "", plan_id: "",
+        password: "",
     });
 
     useEffect(() => {
         const fetchPlans = async () => {
             try {
                 const response = await axios.get("http://localhost:8800/api/members/plans");
-                setPlans(response.data); // Store membership plans in the state
+                setPlans(response.data);
             } catch (error) {
                 console.error("Error fetching membership plans:", error);
             }
@@ -36,18 +43,16 @@ const ManageMembers = () => {
         fetchPlans();
     }, []);
 
-
-    // Fetch members from backend
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await fetch("http://localhost:8800/api/members/all"); // Update with your backend URL
+                const response = await fetch("http://localhost:8800/api/members/all");
                 if (!response.ok) {
                     throw new Error("Failed to fetch members.");
                 }
                 const data = await response.json();
                 setMembers(data);
-                setFilteredMembers(data); // Initialize filtered members with all members
+                setFilteredMembers(data);
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -57,14 +62,12 @@ const ManageMembers = () => {
         fetchMembers();
     }, [loading]);
 
-    // Search functionality
     useEffect(() => {
         if (searchTerm.trim() === "") {
             setFilteredMembers(members);
         } else {
             const lowercasedTerm = searchTerm.toLowerCase();
             const filtered = members.filter(member => {
-                // Search through multiple fields
                 return (
                     (member.member_id && member.member_id.toString().includes(searchTerm)) ||
                     (member.user_name && member.user_name.toLowerCase().includes(lowercasedTerm)) ||
@@ -80,16 +83,12 @@ const ManageMembers = () => {
         }
     }, [searchTerm, members]);
 
-    // Handle search input change
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
     };
 
-
-    // Input validation
     const validateFields = (member) => {
         const error = {};
-        // Required fields
         if (!member.username) error.username = "Username is required";
         if (!member.fullname) error.fullname = "Full name is required";
         if (!member.contactNo || !/^\d{10}$/.test(member.contactNo)) {
@@ -108,7 +107,6 @@ const ManageMembers = () => {
             error.height = "Valid height is required";
         }
         if (!member.bloodGroup) error.bloodGroup = "Blood group is required";
-
         if (!member.password || member.password.length < 6) {
             error.password = "Password must be at least 6 characters";
         }
@@ -116,40 +114,43 @@ const ManageMembers = () => {
         if (!member.plan_id) {
             error.plan_id = "Membership plan is required";
         }
+        if (!paymentDetails.paymentMethod && member.plan_id) {
+            error.paymentMethod = "Payment method is required";
+        }
 
         setErrors(error);
         return Object.keys(error).length === 0;
     };
 
-    // Handle Delete button click
     const handleDelete = async (memberId) => {
         if (window.confirm("Are you sure you want to delete this member?")) {
             try {
                 const response = await fetch(`http://localhost:8800/api/members/delete/${memberId}`, {
-                    method: "DELETE", // Use appropriate method for your backend
+                    method: "PUT",
                 });
                 if (!response.ok) {
                     throw new Error("Failed to delete member.");
                 }
                 setMembers((prevMembers) => prevMembers.filter((member) => member.member_id !== memberId));
-                alert("Member deleted successfully!");
+                alert("Member soft deleted successfully!");
             } catch (err) {
                 setError(err.message);
             }
         }
     };
 
-
-    // Handle Add Member dialog submission
     const handleAddMember = async () => {
-        if (validateFields(newMember)) {
+        if (validateFields(newMember) && paymentConfirmed) {
             try {
                 const response = await fetch("http://localhost:8800/api/members/add", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(newMember),
+                    body: JSON.stringify({
+                        ...newMember,
+                        payment: paymentDetails,
+                    }),
                 });
 
                 if (!response.ok) {
@@ -157,18 +158,34 @@ const ManageMembers = () => {
                 }
                 alert("Member added successfully!");
                 setLoading(true);
-                setOpenDialog(false); // Close the dialog
+                setOpenDialog(false);
+                setPaymentDetails({ amount: "", paymentMethod: "" });
+                setPaymentConfirmed(false);
+                setNewMember({
+                    username: "", fullname: "", email: "", contactNo: "", address: "", age: "", gender: "", height: "", weight: "",
+                    bloodGroup: "", currentFitnessLevel: "", fitnessGoal: "", healthIssues: "", dob: "", registered_date: "", plan_id: "",
+                    password: "",
+                });
             } catch (err) {
                 setError(err.message);
             }
+        } else if (!paymentConfirmed) {
+            alert("Please confirm payment before adding the member.");
         }
     };
 
-    // Handle form input change with real-time validation
+    const handleConfirmPayment = () => {
+        if (paymentDetails.paymentMethod) {
+            setPaymentConfirmed(true);
+            alert("Payment confirmed!");
+        } else {
+            setErrors((prev) => ({ ...prev, paymentMethod: "Payment method is required" }));
+        }
+    };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
 
-        // Calculate age if dob is changed
         if (name === "dob") {
             const today = new Date();
             const birthDate = new Date(value);
@@ -178,7 +195,6 @@ const ManageMembers = () => {
                 age--;
             }
 
-            // Update dob and calculated age
             if (newMember) {
                 setNewMember((prev) => ({
                     ...prev,
@@ -193,6 +209,23 @@ const ManageMembers = () => {
                     age: age.toString(),
                 }));
             }
+        } else if (name === "plan_id") {
+            const selectedPlan = plans.find((plan) => plan.plan_id === parseInt(value));
+            setNewMember((prev) => ({
+                ...prev,
+                plan_id: value,
+            }));
+            setPaymentDetails((prev) => ({
+                ...prev,
+                amount: selectedPlan?.plan_price ? selectedPlan.plan_price.toString() : "",
+            }));
+            setPaymentConfirmed(false); // Reset payment confirmation when plan changes
+            setErrors((prev) => ({ ...prev, plan_id: undefined, paymentMethod: undefined }));
+        } else if (name === "paymentMethod") {
+            setPaymentDetails((prev) => ({
+                ...prev,
+                paymentMethod: value,
+            }));
         } else {
             if (newMember) {
                 setNewMember((prev) => ({
@@ -208,7 +241,6 @@ const ManageMembers = () => {
             }
         }
 
-        // Validate and update errors
         setErrors((prevErrors) => {
             const newErrors = { ...prevErrors };
 
@@ -242,6 +274,10 @@ const ManageMembers = () => {
                     if (!isNaN(value) && value > 0) delete newErrors[name];
                     else newErrors[name] = "Valid value is required";
                     break;
+                case "paymentMethod":
+                    if (value) delete newErrors.paymentMethod;
+                    else newErrors.paymentMethod = "Payment method is required";
+                    break;
                 default:
                     break;
             }
@@ -250,29 +286,21 @@ const ManageMembers = () => {
         });
     };
 
-
-
-    // Handle Edit button click
     const handleEdit = (memberId) => {
         const memberToEdit = members.find((member) => member.member_id === memberId);
         if (!memberToEdit) {
             console.error("Error: Member not found.");
             return;
         }
-        console.log("Editing Member:", memberToEdit);
-        setSelectedMember({ ...memberToEdit }); // Ensure a fresh state copy
+        setSelectedMember({ ...memberToEdit });
         setEditDialogOpen(true);
     };
 
-
-// Function to handle saving changes
     const handleSaveChanges = async () => {
         if (!selectedMember || !selectedMember.member_id) {
             console.error("Error: No member selected for update.");
             return;
         }
-
-        console.log("Updated Member Data:", selectedMember);
 
         try {
             const response = await fetch(`http://localhost:8800/api/members/edit/${selectedMember.member_id}`, {
@@ -287,32 +315,23 @@ const ManageMembers = () => {
                 throw new Error(`Failed to update member: ${response.statusText}`);
             }
 
-            const updatedMember = await response.json();
-            console.log("Member successfully updated:", updatedMember);
-
             setLoading(true);
-            // Close the dialog
             setEditDialogOpen(false);
         } catch (error) {
             console.error("Error updating member:", error);
         }
     };
 
-
     return (
-
         <div className="bg-gray-100" style={{ display: "flex", height: "100vh" }}>
             <AdminSideBar style={{ flexShrink: 0, width: 250 }} />
-            <div style={{ flexGrow: 1, padding: "20px", height: "100vh", width:"1300px" ,overflowY: "auto" , marginLeft: "-45px", marginTop: "10px" }}>
-                {/* <TopBar /> */}
+            <div style={{ flexGrow: 1, padding: "20px", height: "100vh", width: "1300px", overflowY: "auto", marginLeft: "-45px", marginTop: "10px" }}>
                 <Typography variant="h4" gutterBottom>
                     GYM MEMBERS
                 </Typography>
 
                 <Paper elevation={1} className="p-4 mb-6 rounded-lg">
                     <div className="flex flex-col md:flex-row md:items-center gap-4 rounded-xl">
-                    {/*<div className="flex items-center">*/}
-                        {/* Search Input */}
                         <div className="relative flex-1">
                             <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                             <input
@@ -324,165 +343,157 @@ const ManageMembers = () => {
                             />
                         </div>
 
-                        {/* Filters */}
                         <div className="ml-4 flex space-x-2">
-                                {/* Add Member Button */}
-                            <button className="bg-red-900 text-white w-40  rounded-lg flex items-center shadow-md hover:bg-red-800 transition h-[40px] "
-                                    onClick={() => setOpenDialog(true)}>
+                            <button
+                                className="bg-red-900 text-white w-40 rounded-lg flex items-center shadow-md hover:bg-red-800 transition h-[40px]"
+                                onClick={() => setOpenDialog(true)}
+                            >
                                 <Plus className="w-5 h-5 mr-2 ml-3" />
                                 Add Member
                             </button>
                         </div>
-                    {/*</div>*/}
-                </div>
+                    </div>
                 </Paper>
-
-
 
                 {loading && <Typography>Loading members...</Typography>}
                 {error && <Typography color="error">{error}</Typography>}
 
                 {!loading && !error && (
                     <Paper elevation={1} className="rounded-lg">
-                    <div className="bg-white rounded-xl shadow-sm overflow-x-auto" >
-                        <TableContainer
-                            component={Paper} className="table-container"
-                            sx={{height: "calc(100vh - 230px)",
-                                width:"calc(100vw - 305px)",
-                                marginLeft: "13px",
-                                scrollbarWidth: "none", // Hide scrollbar for Firefox
-                                "&::-webkit-scrollbar": {
-                                    display: "none", // Hide scrollbar for Webkit-based browsers (Chrome, Edge, etc.)
-                                },}}
-                        >
-                            <Table className="w-full border-collapse">
-                                <TableHead style={{ position: "sticky", top: 0,zIndex: 10 }}>
-                                    <TableRow className="bg-gray-200 text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
-
-                                        <th className="px-6 py-3 text-center">ID</th>
-                                        <th className="px-6 py-3 text-center">Name</th>
-                                        <th className="px-6 py-3 text-center">Username</th>
-                                        <th className="px-6 py-3 text-center">Email</th>
-                                        <th className="px-6 py-3 text-center">Phone</th>
-                                        <th className="px-6 py-3 text-center">Address</th>
-                                        <th className="px-6 py-3 text-center">DOB</th>
-                                        <th className="px-6 py-3 text-center">Age</th>
-                                        <th className="px-6 py-3 text-center">Gender</th>
-                                        <th className="px-6 py-3 text-center">Height</th>
-                                        <th className="px-6 py-3 text-center">Weight</th>
-                                        <th className="px-6 py-3 text-center">Blood Group</th>
-                                        <th className="px-6 py-3 text-center">Fitness Level</th>
-                                        <th className="px-6 py-3 text-center">Fitness Goal</th>
-                                        <th className="px-6 py-3 text-center">Plan</th>
-                                        {/*<th className="px-6 py-3 text-center">Schedule</th>*/}
-                                        <th className="px-6 py-3 text-center">Health Issues</th>
-                                        <th className="px-6 py-3 text-center">Registered Date</th>
-                                        <th className="px-6 py-3 text-center">Status</th>
-
-                                        <th className="px-6 py-3 text-center">
-                                            Actions
-                                        </th>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody className="divide-y divide-gray-200">
-                                    {filteredMembers.map((member, index) => (
-                                        <TableRow
-                                            key={member.member_id} className="table-row"
-                                            sx={{
-                                                backgroundColor: index % 2 === 0 ? "#f5f5f5" : "#ffffff", // Alternate row colors
-                                                "&:hover": {
-                                                    backgroundColor: "#e0e0e0", // Highlight on hover
-                                                },
-
-                                            }}
-                                        >
-                                            <TableCell>{member.member_id}</TableCell>
-                                            <TableCell>{member.full_name}</TableCell>
-                                            <TableCell>{member.user_name}</TableCell>
-                                            <TableCell>{member.email}</TableCell>
-                                            <TableCell>{member.contact_no}</TableCell>
-                                            <TableCell>{member.address}</TableCell>
-                                            <TableCell>{(new Date(member.dob).toLocaleDateString())}</TableCell>
-                                            <TableCell>{member.age}</TableCell>
-                                            <TableCell>{member.gender}</TableCell>
-                                            <TableCell>{member.height}</TableCell>
-                                            <TableCell>{member.weight}</TableCell>
-                                            <TableCell>{member.blood_group}</TableCell>
-                                            <TableCell>{member.current_fitness_level}</TableCell>
-                                            <TableCell>{member.fitness_goal}</TableCell>
-                                            <TableCell>{member.plan_name}</TableCell>
-                                            {/*<TableCell>{member.schedule_id}</TableCell>*/}
-                                            <TableCell>{member.health_issues}</TableCell>
-                                            <TableCell>{(new Date(member.registered_date).toLocaleDateString())}</TableCell>
-                                            <TableCell><span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                    member.status == 1
-                                                        ? "bg-green-100 text-green-800"
-                                                        : "bg-red-100 text-red-800"
-                                                }`}
-                                            >{member.status == 1 ? "ACTIVE" : "EXPIRED"}
-                                            </span>
-                                            </TableCell>
-                                            <TableCell className="table-cell-actions1"
-                                                       sx={{
-                                                           display: "flex",
-                                                           justifyContent: "center",
-                                                           gap: "10px", // Space between the two buttons
-                                                       }}
-                                            >
-                                                {/* Edit Button */}
-                                                <IconButton
-                                                    sx={{
-                                                        backgroundColor: "#4A90E2", // Blue background
-                                                        color: "#ffffff", // White icon color
-                                                        borderRadius: "4px", // Slightly rounded corners for a square-like shape
-                                                        width: "40px", // Set fixed width
-                                                        height: "40px", // Set fixed height
-                                                        padding: "8px", // Add padding for better spacing
-                                                        "&:hover": {
-                                                            backgroundColor: "#357ABD", // Darker blue on hover
-                                                        },
-                                                    }}
-                                                    onClick={() => handleEdit(member.member_id)}
-                                                >
-                                                    <EditIcon />
-                                                </IconButton>
-
-                                                {/* Delete Button */}
-                                                <IconButton
-                                                    sx={{
-                                                        backgroundColor: "#E94E4E", // Red background
-                                                        color: "#ffffff", // White icon color
-                                                        borderRadius: "4px", // Slightly rounded corners for a square-like shape
-                                                        width: "40px", // Set fixed width
-                                                        height: "40px", // Set fixed height
-                                                        padding: "8px", // Add padding for better spacing
-                                                        "&:hover": {
-                                                            backgroundColor: "#C33C3C", // Darker red on hover
-                                                        },
-                                                    }}
-                                                    onClick={() => handleDelete(member.member_id)}
-                                                >
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            </TableCell>
+                        <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
+                            <TableContainer
+                                component={Paper}
+                                className="table-container"
+                                sx={{
+                                    height: "calc(100vh - 230px)",
+                                    width: "calc(100vw - 305px)",
+                                    marginLeft: "13px",
+                                    scrollbarWidth: "none",
+                                    "&::-webkit-scrollbar": {
+                                        display: "none",
+                                    },
+                                }}
+                            >
+                                <Table className="w-full border-collapse">
+                                    <TableHead style={{ position: "sticky", top: 0, zIndex: 10 }}>
+                                        <TableRow className="bg-gray-200 text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
+                                            <th className="px-6 py-3 text-center">ID</th>
+                                            <th className="px-6 py-3 text-center">Name</th>
+                                            <th className="px-6 py-3 text-center">Username</th>
+                                            <th className="px-6 py-3 text-center">Email</th>
+                                            <th className="px-6 py-3 text-center">Phone</th>
+                                            <th className="px-6 py-3 text-center">Address</th>
+                                            <th className="px-6 py-3 text-center">DOB</th>
+                                            <th className="px-6 py-3 text-center">Age</th>
+                                            <th className="px-6 py-3 text-center">Gender</th>
+                                            <th className="px-6 py-3 text-center">Height</th>
+                                            <th className="px-6 py-3 text-center">Weight</th>
+                                            <th className="px-6 py-3 text-center">Blood Group</th>
+                                            <th className="px-6 py-3 text-center">Fitness Level</th>
+                                            <th className="px-6 py-3 text-center">Fitness Goal</th>
+                                            <th className="px-6 py-3 text-center">Plan</th>
+                                            <th className="px-6 py-3 text-center">Health Issues</th>
+                                            <th className="px-6 py-3 text-center">Registered Date</th>
+                                            <th className="px-6 py-3 text-center">Status</th>
+                                            <th className="px-6 py-3 text-center">Actions</th>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-
-                    </div>
+                                    </TableHead>
+                                    <TableBody className="divide-y divide-gray-200">
+                                        {filteredMembers.map((member, index) => (
+                                            <TableRow
+                                                key={member.member_id}
+                                                className="table-row"
+                                                sx={{
+                                                    backgroundColor: index % 2 === 0 ? "#f5f5f5" : "#ffffff",
+                                                    "&:hover": {
+                                                        backgroundColor: "#e0e0e0",
+                                                    },
+                                                }}
+                                            >
+                                                <TableCell>{member.member_id}</TableCell>
+                                                <TableCell>{member.full_name}</TableCell>
+                                                <TableCell>{member.user_name}</TableCell>
+                                                <TableCell>{member.email}</TableCell>
+                                                <TableCell>{member.contact_no}</TableCell>
+                                                <TableCell>{member.address}</TableCell>
+                                                <TableCell>{(new Date(member.dob).toLocaleDateString())}</TableCell>
+                                                <TableCell>{member.age}</TableCell>
+                                                <TableCell>{member.gender}</TableCell>
+                                                <TableCell>{member.height}</TableCell>
+                                                <TableCell>{member.weight}</TableCell>
+                                                <TableCell>{member.blood_group}</TableCell>
+                                                <TableCell>{member.current_fitness_level}</TableCell>
+                                                <TableCell>{member.fitness_goal}</TableCell>
+                                                <TableCell>{member.plan_name}</TableCell>
+                                                <TableCell>{member.health_issues}</TableCell>
+                                                <TableCell>{(new Date(member.registered_date).toLocaleDateString())}</TableCell>
+                                                <TableCell>
+                          <span
+                              className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                  member.status == 1
+                                      ? "bg-green-100 text-green-800"
+                                      : "bg-red-100 text-red-800"
+                              }`}
+                          >
+                            {member.status == 1 ? "ACTIVE" : "EXPIRED"}
+                          </span>
+                                                </TableCell>
+                                                <TableCell
+                                                    className="table-cell-actions1"
+                                                    sx={{
+                                                        display: "flex",
+                                                        justifyContent: "center",
+                                                        gap: "10px",
+                                                    }}
+                                                >
+                                                    <IconButton
+                                                        sx={{
+                                                            backgroundColor: "#4A90E2",
+                                                            color: "#ffffff",
+                                                            borderRadius: "4px",
+                                                            width: "40px",
+                                                            height: "40px",
+                                                            padding: "8px",
+                                                            "&:hover": {
+                                                                backgroundColor: "#357ABD",
+                                                            },
+                                                        }}
+                                                        onClick={() => handleEdit(member.member_id)}
+                                                    >
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                    <IconButton
+                                                        sx={{
+                                                            backgroundColor: "#E94E4E",
+                                                            color: "#ffffff",
+                                                            borderRadius: "4px",
+                                                            width: "40px",
+                                                            height: "40px",
+                                                            padding: "8px",
+                                                            "&:hover": {
+                                                                backgroundColor: "#C33C3C",
+                                                            },
+                                                        }}
+                                                        onClick={() => handleDelete(member.member_id)}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </div>
                     </Paper>
                 )}
             </div>
-
 
             {/* Add Member Dialog */}
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="md">
                 <DialogTitle>Add New Member</DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2}>
-                        {/* Left Column */}
                         <Grid item xs={6}>
                             {["username", "fullname", "contactNo", "dob", "weight"].map((field) => (
                                 <TextField
@@ -500,7 +511,6 @@ const ManageMembers = () => {
                                     InputLabelProps={field === "dob" ? { shrink: true } : {}}
                                 />
                             ))}
-
                             <FormControl fullWidth margin="dense">
                                 <InputLabel>Gender</InputLabel>
                                 <Select
@@ -515,7 +525,6 @@ const ManageMembers = () => {
                                     <MenuItem value="Other">Other</MenuItem>
                                 </Select>
                             </FormControl>
-
                             <FormControl fullWidth margin="dense">
                                 <InputLabel>Current Fitness Level</InputLabel>
                                 <Select
@@ -529,7 +538,6 @@ const ManageMembers = () => {
                                     <MenuItem value="Advanced">Advanced</MenuItem>
                                 </Select>
                             </FormControl>
-
                             <TextField
                                 margin="dense"
                                 label="Health Issues"
@@ -542,8 +550,6 @@ const ManageMembers = () => {
                                 helperText={errors.healthIssues}
                             />
                         </Grid>
-
-                        {/* Right Column */}
                         <Grid item xs={6}>
                             {["password", "email", "address", "age", "height"].map((field) => (
                                 <TextField
@@ -560,7 +566,6 @@ const ManageMembers = () => {
                                     disabled={field === "age"}
                                 />
                             ))}
-
                             <FormControl fullWidth margin="dense">
                                 <InputLabel>Blood Group</InputLabel>
                                 <Select
@@ -575,7 +580,6 @@ const ManageMembers = () => {
                                     ))}
                                 </Select>
                             </FormControl>
-
                             <TextField
                                 margin="dense"
                                 label="Fitness Goal"
@@ -587,7 +591,6 @@ const ManageMembers = () => {
                                 error={!!errors.fitnessGoal}
                                 helperText={errors.fitnessGoal}
                             />
-
                             <FormControl fullWidth margin="dense">
                                 <InputLabel>Membership Plan</InputLabel>
                                 <Select
@@ -598,11 +601,54 @@ const ManageMembers = () => {
                                     error={!!errors.plan_id}
                                 >
                                     {plans.map((type) => (
-                                        <MenuItem value={type.plan_id}>{type.plan_name}</MenuItem>
+                                        <MenuItem key={type.plan_id} value={type.plan_id}>
+                                            {type.plan_name}
+                                        </MenuItem>
                                     ))}
                                 </Select>
                             </FormControl>
-
+                            {newMember.plan_id && (
+                                <Box mt={2} p={2} border={1} borderRadius={4} borderColor="grey.300">
+                                    <Typography variant="h6">Payment Details</Typography>
+                                    <TextField
+                                        margin="dense"
+                                        label="Plan Amount (Rs)"
+                                        fullWidth
+                                        variant="outlined"
+                                        Macquarie University
+                                        name="amount"
+                                        value={paymentDetails.amount }
+                                        disabled
+                                    />
+                                    <FormControl fullWidth margin="dense">
+                                        <InputLabel>Payment Method</InputLabel>
+                                        <Select
+                                            label="Payment Method"
+                                            name="paymentMethod"
+                                            value={paymentDetails.paymentMethod}
+                                            onChange={handleInputChange}
+                                            error={!!errors.paymentMethod}
+                                        >
+                                            <MenuItem value="Cash">Cash</MenuItem>
+                                            <MenuItem value="Credit Card">Credit Card</MenuItem>
+                                            <MenuItem value="UPI">UPI</MenuItem>
+                                            <MenuItem value="Bank Transfer">Bank Transfer</MenuItem>
+                                        </Select>
+                                        {errors.paymentMethod && (
+                                            <Typography color="error" variant="caption">{errors.paymentMethod}</Typography>
+                                        )}
+                                    </FormControl>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleConfirmPayment}
+                                        disabled={paymentConfirmed}
+                                        sx={{ mt: 2 }}
+                                    >
+                                        {paymentConfirmed ? "Payment Confirmed" : "Confirm Payment"}
+                                    </Button>
+                                </Box>
+                            )}
                         </Grid>
                     </Grid>
                 </DialogContent>
@@ -610,12 +656,11 @@ const ManageMembers = () => {
                     <Button onClick={() => setOpenDialog(false)} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={handleAddMember} color="primary">
+                    <Button onClick={handleAddMember} color="primary" disabled={!paymentConfirmed}>
                         Add Member
                     </Button>
                 </DialogActions>
             </Dialog>
-
 
             {/* Edit Dialog */}
             <Dialog
@@ -628,7 +673,6 @@ const ManageMembers = () => {
                 <DialogContent>
                     {selectedMember && (
                         <Grid container spacing={2}>
-                            {/* Left Column */}
                             <Grid item xs={6}>
                                 {["user_name", "email"].map((field) => (
                                     <TextField
@@ -698,7 +742,7 @@ const ManageMembers = () => {
                                     <Select
                                         label="Membership Plan"
                                         name="plan_id"
-                                        value={selectedMember.plan_id || ''} // Fallback to an empty string
+                                        value={selectedMember.plan_id || ''}
                                         onChange={handleInputChange}
                                     >
                                         {plans.map((type) => (
@@ -709,8 +753,6 @@ const ManageMembers = () => {
                                     </Select>
                                 </FormControl>
                             </Grid>
-
-                            {/* Right Column */}
                             <Grid item xs={6}>
                                 {["full_name", "contact_no", "age", "weight"].map((field) => (
                                     <TextField
@@ -773,7 +815,7 @@ const ManageMembers = () => {
                 </DialogActions>
             </Dialog>
 
-            <AdminSideBar/>
+            <AdminSideBar />
         </div>
     );
 };

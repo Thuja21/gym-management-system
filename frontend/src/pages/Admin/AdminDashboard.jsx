@@ -74,10 +74,10 @@ function AdminDashboard() {
         : 0;
 
     const stats = [
-        { title: 'Active Members', value: totalActiveMembers, icon: Users, trend: '+12% from last month', color: 'from-violet-500 to-violet-600', lightColor: 'bg-violet-50', textColor: 'text-violet-600' },
-        { title: 'Monthly Revenue', value: 'Rs.24,890', icon: DollarSign, trend: '+8.2% from last month', color: 'from-blue-500 to-blue-600', lightColor: 'bg-blue-50', textColor: 'text-blue-600' },
-        { title: 'Class Attendance', value: attendanceRate + "%", icon: Calendar, trend: '+4% from last week', color: 'from-emerald-500 to-emerald-600', lightColor: 'bg-emerald-50', textColor: 'text-emerald-600' },
-        { title: 'New Registrations', value: totalRegistrations, icon: Activity, trend: '+6 from this month',  color: 'from-pink-500 to-pink-600', lightColor: 'bg-pink-50', textColor: 'text-pink-600'},
+        { title: 'Active Members', value: totalActiveMembers, icon: Users, trend: ' from last month', color: 'from-violet-500 to-violet-600', lightColor: 'bg-violet-50', textColor: 'text-violet-600' },
+        { title: 'Monthly Revenue', value: 'Rs.24,890', icon: DollarSign, trend: ' from last month', color: 'from-blue-500 to-blue-600', lightColor: 'bg-blue-50', textColor: 'text-blue-600' },
+        { title: 'Class Attendance', value: attendanceRate + "%", icon: Calendar, trend: ' from last week', color: 'from-emerald-500 to-emerald-600', lightColor: 'bg-emerald-50', textColor: 'text-emerald-600' },
+        { title: 'New Registrations', value: totalRegistrations, icon: Activity, trend: ' from this month',  color: 'from-pink-500 to-pink-600', lightColor: 'bg-pink-50', textColor: 'text-pink-600'},
     ];
 
     const formatDuration = (duration) => {

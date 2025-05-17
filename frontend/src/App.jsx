@@ -3,6 +3,7 @@ import "./App.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Login from "./pages/Login/Login";
+import ForgotPassword from "./pages/Login/ForgotPassword.jsx";
 import Signup from "./pages/Signup/Signup";
 import Home from "./pages/Home/Home";
 import CustomerDashboard from "./pages/Customer/CustomerDashboard.jsx";
@@ -49,6 +50,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/home" element={<Home />} />
           <Route path="/customerDashboard" element={<CustomerDashboard />} />

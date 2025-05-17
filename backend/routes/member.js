@@ -14,7 +14,7 @@ router.put("/edit/:id", editMember);
 
 
 // Delete a member by ID
-router.delete("/delete/:id", deleteMember);
+router.put("/delete/:id", deleteMember);
 
 router.get("/member", verifyToken, getLoggedInMemberDetails); // use middleware here
 

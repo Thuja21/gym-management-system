@@ -6,7 +6,7 @@ const router = express.Router();
 router.get("/all" , viewAllPlans);
 router.put("/edit/:id", editPlan);
 router.post("/add", addPlan);
-router.delete("/delete/:id", deletePlan);
+router.put("/delete/:id", deletePlan);
 
 router.get("/member", verifyToken, getLoggedInMemberPlan); // use middleware here
 router.put('/update-plan-with-payment', verifyToken, updatePlanWithPayment);

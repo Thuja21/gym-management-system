@@ -13,8 +13,6 @@ import  {ChartJSNodeCanvas} from 'chartjs-node-canvas';
 import tmp from 'tmp';
 import fs from 'fs';
 
-
-
 let totalActiveMembers = 0;
 
 axios.get("http://localhost:8800/api/dash/totalActiveMember")
@@ -119,10 +117,12 @@ export const getRecentReports = (req, res) => {
 
 function getAttendanceData(startDate, endDate, callback) {
     const query = `SELECT attendance.attendance_date, gym_members.member_id, users.full_name, attendance.attended
-               FROM attendance
-                JOIN gym_members ON gym_members.member_id = attendance.member_id
-                JOIN users ON gym_members.user_id = users.id
-               WHERE DATE(attendance.attendance_date)  BETWEEN ? AND ? `;
+                   FROM attendance
+                            JOIN gym_members ON gym_members.member_id = attendance.member_id
+                            JOIN users ON gym_members.user_id = users.id
+                   WHERE DATE(attendance.attendance_date) BETWEEN ? AND ?
+                   ORDER BY attendance.attendance_date ASC;
+    `;
 
     db.query(query, [startDate, endDate], (err, results) => {
         if (err) {
@@ -237,129 +237,218 @@ async function generatePDF(res, data, title, startDate, endDate, gymName, logoPa
     doc.fontSize(10).font('Helvetica').text(`Period: ${startDate} to ${endDate}`, 50, titleY + 20, { align: 'center' });
     doc.moveDown(2);
 
-    // Add summary section with enhanced styling
+    // Add summary section with a card-like design
     if (data && data.length > 0) {
         if (title === 'Membership Report') {
-            // For membership report, calculate active vs expired
             const activeMembers = data.filter(item => item.status === 'Active').length;
             const expiredMembers = data.filter(item => item.status === 'Expired').length;
+            const summaryY = doc.y + 20;
+            const cardWidth = 160;
+            const cardHeight = 70;
+            const spacing = 20;
 
-            // Summary box with proper spacing
-            const summaryY = doc.y + 10;
+            // Card 1: Total Members
+            doc.save()
+                .rect(50 + 2, summaryY + 2, cardWidth, cardHeight)
+                .fillOpacity(0.1)
+                .fill('#000000')
+                .restore(); // Shadow effect
+            doc.rect(50, summaryY, cardWidth, cardHeight).fill('#FFFFFF').stroke('#CCCCCC');
+            doc.rect(50, summaryY, cardWidth, 10).fill('#3F51B5'); // Colored header strip
+            doc.font('Helvetica-Bold').fontSize(10).fillColor('#FFFFFF')
+                .text('TOTAL MEMBERS', 60, summaryY + 2);
+            doc.font('Helvetica-Bold').fontSize(14).fillColor('#333333')
+                .text(totalActiveMembers, 60, summaryY + 25);
+            doc.font('Helvetica').fontSize(9).fillColor('#666666')
+                .text('All Members', 60, summaryY + 45);
 
-// Create the box
-            doc.roundedRect(50, summaryY, doc.page.width - 100, 40, 5).fillAndStroke('#f8f8f8', '#cfcfcf');
+            // Card 2: Active Members
+            doc.save()
+                .rect(50 + cardWidth + spacing + 2, summaryY + 2, cardWidth, cardHeight)
+                .fillOpacity(0.1)
+                .fill('#000000')
+                .restore();
+            doc.rect(50 + cardWidth + spacing, summaryY, cardWidth, cardHeight).fill('#FFFFFF').stroke('#CCCCCC');
+            doc.rect(50 + cardWidth + spacing, summaryY, cardWidth, 10).fill('#4CAF50');
+            doc.font('Helvetica-Bold').fontSize(10).fillColor('#FFFFFF')
+                .text('ACTIVE', 60 + cardWidth + spacing, summaryY + 2);
+            doc.font('Helvetica-Bold').fontSize(14).fillColor('#333333')
+                .text(activeMembers, 60 + cardWidth + spacing, summaryY + 25);
+            doc.font('Helvetica').fontSize(9).fillColor('#666666')
+                .text('Current Members', 60 + cardWidth + spacing, summaryY + 45);
 
-// Title with emphasis
-            doc.font('Helvetica-Bold').fontSize(12).fillColor('#333333')
-                .text('MEMBERSHIP SUMMARY', 70, summaryY + 14);
+            // Card 3: Expired Members
+            doc.save()
+                .rect(50 + 2 * (cardWidth + spacing) + 2, summaryY + 2, cardWidth, cardHeight)
+                .fillOpacity(0.1)
+                .fill('#000000')
+                .restore();
+            doc.rect(50 + 2 * (cardWidth + spacing), summaryY, cardWidth, cardHeight).fill('#FFFFFF').stroke('#CCCCCC');
+            doc.rect(50 + 2 * (cardWidth + spacing), summaryY, cardWidth, 10).fill('#F44336');
+            doc.font('Helvetica-Bold').fontSize(10).fillColor('#FFFFFF')
+                .text('EXPIRED', 60 + 2 * (cardWidth + spacing), summaryY + 2);
+            doc.font('Helvetica-Bold').fontSize(14).fillColor('#333333')
+                .text(expiredMembers, 60 + 2 * (cardWidth + spacing), summaryY + 25);
+            doc.font('Helvetica').fontSize(9).fillColor('#666666')
+                .text('Past Members', 60 + 2 * (cardWidth + spacing), summaryY + 45);
 
-// Use explicit positioning for each metric instead of continued: true
-            const x_total = 240;
-            const x_active = x_total + 120;  // 120 units after total
-            const x_expired = x_active + 80;  // 80 units after active
+            doc.moveDown(6);
+        } else {
+            // Attendance Report Summary with Cards
+            const checkedIn = data.length;
+            const attendanceRate = Math.round((checkedIn / (totalActiveMembers * 30)) * 100);
+            const summaryY = doc.y + 20;
+            const cardWidth = 150;
+            const cardHeight = 70;
+            const spacing = 20;
 
-            doc.fontSize(11).fillColor('#555555')
-                .text(`Total Members: ${totalActiveMembers}`, x_total, summaryY + 14);
-            doc.text(`Active: ${activeMembers}`, x_active, summaryY + 14);
-            doc.text(`Expired: ${expiredMembers}`, x_expired, summaryY + 14);
+            // Card 1: Total Members
+            doc.save()
+                .rect(50 + 2, summaryY + 2, cardWidth, cardHeight)
+                .fillOpacity(0.1)
+                .fill('#000000')
+                .restore();
+            doc.rect(50, summaryY, cardWidth, cardHeight).fill('#FFFFFF').stroke('#CCCCCC');
+            doc.rect(50, summaryY, cardWidth, 10).fill('#234a71');
+            doc.font('Helvetica-Bold').fontSize(10).fillColor('#FFFFFF')
+                .text('TOTAL MEMBERS', 60, summaryY + 2);
+            doc.font('Helvetica-Bold').fontSize(14).fillColor('#333333')
+                .text(totalActiveMembers, 60, summaryY + 25);
+            doc.font('Helvetica').fontSize(9).fillColor('#666666')
+                .text('All Members', 60, summaryY + 45);
 
-            doc.moveDown(2);
+            // Card 2: Checked In
+            doc.save()
+                .rect(50 + cardWidth + spacing + 2, summaryY + 2, cardWidth, cardHeight)
+                .fillOpacity(0.1)
+                .fill('#000000')
+                .restore();
+            doc.rect(50 + cardWidth + spacing, summaryY, cardWidth, cardHeight).fill('#FFFFFF').stroke('#CCCCCC');
+            doc.rect(50 + cardWidth + spacing, summaryY, cardWidth, 10).fill('#234a71');
+            doc.font('Helvetica-Bold').fontSize(10).fillColor('#FFFFFF')
+                .text('CHECKED IN', 60 + cardWidth + spacing, summaryY + 2);
+            doc.font('Helvetica-Bold').fontSize(14).fillColor('#333333')
+                .text(checkedIn, 60 + cardWidth + spacing, summaryY + 25);
+            doc.font('Helvetica').fontSize(9).fillColor('#666666')
+                .text('Attendance Count', 60 + cardWidth + spacing, summaryY + 45);
 
-            // Generate pie chart for membership data
-            const chartJSNodeCanvas = new ChartJSNodeCanvas({
-                type: 'png',
-                width: 400,
-                height: 300,
-                backgroundColour: 'white'
+            // Card 3: Attendance Rate
+            doc.save()
+                .rect(50 + 2 * (cardWidth + spacing) + 2, summaryY + 2, cardWidth, cardHeight)
+                .fillOpacity(0.1)
+                .fill('#000000')
+                .restore();
+            doc.rect(50 + 2 * (cardWidth + spacing), summaryY, cardWidth, cardHeight).fill('#FFFFFF').stroke('#CCCCCC');
+            doc.rect(50 + 2 * (cardWidth + spacing), summaryY, cardWidth, 10).fill('#234a71');
+            doc.font('Helvetica-Bold').fontSize(10).fillColor('#FFFFFF')
+                .text('ATTENDANCE RATE', 60 + 2 * (cardWidth + spacing), summaryY + 2);
+            doc.font('Helvetica-Bold').fontSize(14).fillColor('#333333')
+                .text(`${attendanceRate}%`, 60 + 2 * (cardWidth + spacing), summaryY + 25);
+            doc.font('Helvetica').fontSize(9).fillColor('#666666')
+                .text('Monthly Rate', 60 + 2 * (cardWidth + spacing), summaryY + 45);
+
+            doc.moveDown(6);
+        }
+    }
+
+    // Add Attendance Trend Chart below the cards for Attendance Report
+    if (title === 'Attendance Report') {
+        try {
+            // Initialize ChartJSNodeCanvas for server-side chart rendering
+            const width = 500; // Canvas width in pixels
+            const height = 300; // Canvas height in pixels
+            const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height, backgroundColour: 'white' });
+
+            // Process data to create labels and counts for the chart
+            const attendanceByDate = {};
+            data.forEach(item => {
+                if (item && item.attendance_date && item.attended) {
+                    const date = new Date(item.attendance_date).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short'
+                    });
+                    attendanceByDate[date] = attendanceByDate[date] || 0;
+                    if (item.attended === 'Present') {
+                        attendanceByDate[date]++;
+                    }
+                }
             });
 
-// Chart configuration
-            const chartConfig = {
-                type: 'pie',
+            // Ensure all dates in the range are included, defaulting to 0 if no attendance
+            const startDate = new Date();
+            const endDate = new Date();
+            const labels = [];
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+                labels.push(dateStr);
+                if (!attendanceByDate[dateStr]) {
+                    attendanceByDate[dateStr] = 0;
+                }
+            }
+
+            const attendanceCounts = labels.map(date => attendanceByDate[date]);
+
+            // Chart configuration for a line chart with darker color
+            const configuration = {
+                type: 'line',
                 data: {
-                    labels: ['Active', 'Expired'],
+                    labels: labels,
                     datasets: [{
-                        data: [activeMembers, expiredMembers],
-                        backgroundColor: ['#4caf50', '#f44336'],
-                        borderWidth: 1
+                        label: 'Daily Attendance',
+                        data: attendanceCounts,
+                        fill: false,
+                        borderColor: 'rgba(0, 0, 139, 1)', // Darker blue (e.g., DarkBlue)
+                        borderWidth: 2,
+                        tension: 0.1,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
                     }]
                 },
                 options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Attendees'
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                max: Math.max(...attendanceCounts, 1) // Adjust max based on data
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    },
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Membership Status',
-                            font: { size: 16 }
-                        },
-                        legend: {
-                            position: 'bottom'
+                            text: 'Attendance Trend Over Time'
                         }
                     }
                 }
             };
 
-// Generate and save chart image
-            const imageBuffer = await chartJSNodeCanvas.renderToBuffer(chartConfig);
-            const tempImg = tmp.fileSync({ postfix: ".png" });
-            fs.writeFileSync(tempImg.name, imageBuffer);
+            // Render chart to buffer (PNG image)
+            const chartBuffer = await chartJSNodeCanvas.renderToBuffer(configuration);
 
-// Define box dimensions and position
-            const chartBoxX = 50;
-            const chartBoxWidth = doc.page.width - 100;
-            const chartBoxHeight = 190; // Enough space for the image and padding
-            const chartBoxY = doc.y + 10;
+            // Add chart title and image to PDF below the cards
+            const chartY = doc.y + 20;
+            doc.fontSize(14).font('Helvetica-Bold').fillColor('#333333').text('Attendance Trend', 50, chartY, { align: 'center' });
+            doc.image(chartBuffer, 50, chartY + 20, { width: 500, height: 300 });
 
-// Draw the bordered box
-            doc.roundedRect(chartBoxX, chartBoxY, chartBoxWidth, chartBoxHeight, 5)
-                .fillAndStroke('#F5F9FC', '#cfcfcf');
-
-// Define image dimensions and centered position inside the box
-            const imageWidth = 220;
-            const imageHeight = 150;
-            const imageX = chartBoxX + (chartBoxWidth - imageWidth) / 2;
-            const imageY = chartBoxY + 20; // padding from top of the box
-
-// Insert the image
-            doc.image(tempImg.name, imageX, imageY, {
-                fit: [imageWidth, imageHeight]
-            });
-
-// Move down after the chart section
-            doc.moveDown(18);
-
-        } else {
-            // For attendance report
-            const checkedIn = data.length;
-            const attendanceRate = Math.round((checkedIn / totalActiveMembers) * 100);
-
-            // Summary box with enhanced styling
-            const summaryY = doc.y + 10;
-
-// Add a shadow effect first (optional)
-            doc.rect(52, summaryY + 2, doc.page.width - 100, 40).fill('#e0e0e0');
-
-// Main box with rounded corners
-            doc.roundedRect(50, summaryY, doc.page.width - 100, 40, 5).fillAndStroke('#f8f8f8', '#aaaaaa');
-
-// Title with more emphasis
-            doc.font('Helvetica-Bold').fontSize(11).fillColor('#333333')
-                .text('ATTENDANCE SUMMARY', 70, summaryY + 14);
-
-// Data with better spacing and slightly larger font
-            const x_total = 220;
-            const x_checkedIn = x_total + 115;
-            const x_attendanceRate = x_checkedIn + 100;
-
-            doc.fontSize(10).fillColor('#555555')
-                .text(`Total Members: ${totalActiveMembers}`, x_total, summaryY + 14);
-            doc.text(`Checked In: ${checkedIn}`, x_checkedIn, summaryY + 14);
-            doc.text(`Attendance Rate: ${attendanceRate}%`, x_attendanceRate, summaryY + 14);
-
-            doc.moveDown(3);
-
+            doc.moveDown(6);
+        } catch (chartError) {
+            console.error('Error generating chart:', chartError);
+            doc.fontSize(10).fillColor('#FF0000').text('Unable to generate attendance chart.', 50, doc.y + 20);
+            doc.moveDown(2);
         }
     }
+    doc.moveDown(15);
 
     // Style customization for table
     const columnSpacing = 10;
@@ -449,7 +538,7 @@ async function generatePDF(res, data, title, startDate, endDate, gymName, logoPa
     const totalSpacing = (formattedHeaders.length - 1) * columnSpacing;
     const finalTableWidth = totalColumnWidth + totalSpacing;
 
-    // Render table
+    // Render table with modern grid design
     if (formattedHeaders.length > 0) {
         const table = {
             headers: formattedHeaders,
@@ -492,6 +581,7 @@ async function generatePDF(res, data, title, startDate, endDate, gymName, logoPa
 
     doc.end();
 }
+
 
 
 function generateExcel(res, data, title, startDate, endDate, type) {

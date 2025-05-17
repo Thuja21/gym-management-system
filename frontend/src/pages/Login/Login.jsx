@@ -6,15 +6,13 @@ import { useNavigate } from "react-router-dom";
 function App() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [user, setUser] = useState(null); // ✅ Defined useState for setUser
-  const [errorMessage, setErrorMessage] = useState(""); // For error messages
+  const [user, setUser] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
-  // Handle login logic
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Basic validation
     if (!username || !password) {
       setErrorMessage("Username and Password are required.");
       return;
@@ -24,22 +22,20 @@ function App() {
       const response = await axios.post(
           "http://localhost:8800/api/auth/login",
           { username, password },
-          { withCredentials: true } // ✅ Important for receiving cookies
+          { withCredentials: true }
       );
 
-      // Check if login is successful
       if (response.status === 200) {
-        const userType = response.data.user_type; // Assuming 'userType' is sent from the backend
-        localStorage.setItem("userType", userType); // Store user type in localStorage
-        localStorage.setItem("user", JSON.stringify(response.data)); // Store user data
-        setUser(response.data); // Update React state
-        // Redirect based on user type
+        const userType = response.data.user_type;
+        localStorage.setItem("userType", userType);
+        localStorage.setItem("user", JSON.stringify(response.data));
+        setUser(response.data);
         switch (userType) {
           case "CUSTOMER":
             navigate("/customerDashboard");
             break;
           case "MEMBER":
-            navigate("/home"); // Redirect to Home
+            navigate("/home");
             break;
           case "TRAINER":
             navigate("/trainerDashboard");
@@ -56,17 +52,27 @@ function App() {
       }
     } catch (error) {
       console.error("Error during login:", error);
-      setErrorMessage("An error occurred while logging in.");
+      // Improved error message handling
+      setErrorMessage(
+          error.response?.data?.message || "An error occurred while logging in."
+      );
     }
   };
 
-  // Redirect to signup page
   const handleSignupRedirect = () => {
-    navigate("/signup"); // Replace with the actual route for signup
+    navigate("/signup");
+  };
+
+  const handleForgotpassword = (e) => {
+    e.preventDefault();
+    navigate("/forgotpassword");
   };
 
   return (
-      <div className="min-h-screen relative bg-slate-900 flex items-center justify-center overflow-hidden" style={{width: "100vw"}}>
+      <div
+          className="min-h-screen relative bg-slate-900 flex items-center justify-center overflow-hidden"
+          style={{ width: "100vw" }}
+      >
         {/* Geometric patterns */}
         <div
             className="absolute inset-0 opacity-20"
@@ -80,10 +86,22 @@ function App() {
         <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-blue-500/20" />
 
         {/* Diagonal stripes */}
-        <div className="absolute inset-0" style={{
-          backgroundImage: `linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.05) 75%, transparent 75%, transparent)`,
-          backgroundSize: '100px 100px',
-        }} />
+        <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `linear-gradient(
+            45deg,
+            rgba(255, 255, 255, 0.05) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255, 255, 255, 0.05) 50%,
+            rgba(255, 255, 255, 0.05) 75%,
+            transparent 75%,
+            transparent
+          )`,
+              backgroundSize: '100px 100px',
+            }}
+        />
 
         {/* Login Form */}
         <div className="relative w-full max-w-md mx-4 p-8 rounded-3xl bg-white/20 backdrop-blur-sm border border-[#FF4500]/20">
@@ -95,6 +113,13 @@ function App() {
 
           <h2 className="text-3xl font-bold text-white text-center mb-2">JK FITNESS</h2>
           <p className="text-gray-300 text-center mb-8">Train Hard, Live Better</p>
+
+          {/* Error Message Display */}
+          {errorMessage && (
+              <div className="text-red-500 text-sm text-center mb-4">
+                {errorMessage}
+              </div>
+          )}
 
           <form className="space-y-6">
             <div className="space-y-4">
@@ -120,17 +145,11 @@ function App() {
             </div>
 
             <div className="flex items-center justify-between text-gray-300">
-              {/*<div className="flex items-center">*/}
-              {/*  <input*/}
-              {/*      type="checkbox"*/}
-              {/*      id="remember-me"*/}
-              {/*      className="w-4 h-4 rounded border-[#FF4500]/30 bg-black/40 text-[#FF4500] focus:ring-[#FF4500] focus:ring-offset-0"*/}
-              {/*  />*/}
-              {/*  <label htmlFor="remember-me" className="ml-2 text-sm">*/}
-              {/*    Remember me*/}
-              {/*  </label>*/}
-              {/*</div>*/}
-              <a href="#" className="text-sm text-[#FF4500] hover:text-[#FF4500]/80 transition duration-200">
+              <a
+                  href="#"
+                  onClick={handleForgotpassword}
+                  className="text-sm text-[#FF4500] hover:text-[#FF4500]/80 transition duration-200"
+              >
                 Forgot Password?
               </a>
             </div>
@@ -145,7 +164,11 @@ function App() {
             <div className="text-center text-gray-300">
               <p className="text-sm">
                 Don't have an account?{' '}
-                <a href="#" onClick={handleSignupRedirect} className="text-[#FF4500] hover:text-[#FF4500]/80 transition duration-200">
+                <a
+                    href="#"
+                    onClick={handleSignupRedirect}
+                    className="text-[#FF4500] hover:text-[#FF4500]/80 transition duration-200"
+                >
                   Register
                 </a>
               </p>
@@ -153,7 +176,6 @@ function App() {
           </form>
         </div>
       </div>
-
   );
 }
 

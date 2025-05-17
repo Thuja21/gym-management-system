@@ -34,7 +34,9 @@ export const viewAllMembers = (req, res) => {
         LEFT JOIN
             plans p
             ON
-                gm.plan_id = p.plan_id;
+                gm.plan_id = p.plan_id
+        WHERE
+            gm.is_deleted = 0 AND u.is_deleted = 0;
     `;
 
     db.query(q, (err, data) => {
@@ -46,7 +48,7 @@ export const viewAllMembers = (req, res) => {
 };
 
 export const addMember = (req, res) => {
-    const q = "SELECT * FROM users WHERE user_name = ?";
+    const q = "SELECT * FROM users WHERE user_name = ? AND is_deleted = 0";
 
     db.query(q, [req.body.username], (err, data) => {
         if (err) return res.status(500).json(err);
@@ -62,7 +64,7 @@ export const addMember = (req, res) => {
 
             // Insert into users table
             const userInsertQuery =
-                "INSERT INTO users (`user_name`,`full_name`,`password`, `email`,  `contact_no`, `user_type` , `address` ) VALUES (?)";
+                "INSERT INTO users (`user_name`,`full_name`,`password`, `email`, `contact_no`, `user_type`, `address`, `is_deleted`) VALUES (?)";
             const userValues = [
                 req.body.username,
                 req.body.fullname,
@@ -71,6 +73,7 @@ export const addMember = (req, res) => {
                 req.body.contactNo,
                 "MEMBER",
                 req.body.address,
+                0,
             ];
 
             db.query(userInsertQuery, [userValues], (err, result) => {
@@ -80,12 +83,27 @@ export const addMember = (req, res) => {
                     });
                 }
 
+                const userId = result.insertId;
 
-                console.log("##33",req.body);
-
+                // Insert into gym_members table
                 const subTableInsertQuery =
-                    "INSERT INTO gym_members (`user_id`, `age`, `gender`, `dob`, `status`,`registered_date`, `height`, `weight`, `blood_group`, `current_fitness_level`, `fitness_goal`, `health_issues`, `plan_id`) VALUES (?)";
-                const subTableValues = [result.insertId, req.body.age, req.body.gender, req.body.dob, 1, new Date(), req.body.height, req.body.weight, req.body.bloodGroup, req.body.currentFitnessLevel, req.body.fitnessGoal, req.body.healthIssues, req.body.plan_id];
+                    "INSERT INTO gym_members (`user_id`, `age`, `gender`, `dob`, `status`, `registered_date`, `height`, `weight`, `blood_group`, `current_fitness_level`, `fitness_goal`, `health_issues`, `plan_id`, `is_deleted`) VALUES (?)";
+                const subTableValues = [
+                    userId,
+                    req.body.age,
+                    req.body.gender,
+                    req.body.dob,
+                    1,
+                    new Date(),
+                    req.body.height,
+                    req.body.weight,
+                    req.body.bloodGroup,
+                    req.body.currentFitnessLevel,
+                    req.body.fitnessGoal,
+                    req.body.healthIssues,
+                    req.body.plan_id,
+                    0,
+                ];
 
                 db.query(subTableInsertQuery, [subTableValues], (err, result) => {
                     if (err) {
@@ -94,22 +112,46 @@ export const addMember = (req, res) => {
                         });
                     }
 
-                    // Commit the transaction if both queries succeed
-                    db.commit((err) => {
+                    const memberId = result.insertId;
+                    const paymentId = 'PAY-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+                    // Insert into plan_payments table
+                    const paymentInsertQuery =
+                        "INSERT INTO plan_payments (`payment_id`, `member_id`, `plan_id`, `amount`, `payment_date`, `status`,payment_method) VALUES (?)";
+                    const paymentValues = [
+                        paymentId,
+                        memberId,
+                        req.body.plan_id,
+                        req.body.payment.amount,
+                        new Date(),
+                        "paid", // Adjust based on your payment status logic
+                        req.body.payment.paymentMethod
+                    ];
+
+                    db.query(paymentInsertQuery, [paymentValues], (err, result) => {
                         if (err) {
                             return db.rollback(() => {
                                 res.status(500).json(err);
                             });
                         }
 
-                        // Send success response
-                        res.status(200).json("Member has been created.");
+                        // Commit the transaction if all queries succeed
+                        db.commit((err) => {
+                            if (err) {
+                                return db.rollback(() => {
+                                    res.status(500).json(err);
+                                });
+                            }
+
+                            // Send success response
+                            res.status(200).json("Member and payment have been created.");
+                        });
                     });
                 });
             });
         });
     });
-}
+};
 
 export const editMember = async (req, res) => {
     const memberId = req.params.id;
@@ -190,7 +232,7 @@ export const editMember = async (req, res) => {
 
     export const getAllMembershipTypes = async (req, res) => {
     try {
-        const q = "SELECT plan_id, plan_name, features, plan_price, plan_duration FROM plans";
+        const q = "SELECT plan_id, plan_name, features, plan_price, plan_duration FROM plans WHERE is_deleted = 0";
 
         db.query(q, (err, data) => {
             if (err) return res.status(500).json(err);
@@ -213,7 +255,7 @@ export const deleteMember = (req, res) => {
         if (err) return res.status(500).json(err);
 
         // Step 1: Get the user_id from gym_members table
-        const getUserIdQuery = `SELECT user_id FROM gym_members WHERE member_id = ?`;
+        const getUserIdQuery = `SELECT user_id FROM gym_members WHERE member_id = ? AND is_deleted = 0`;
         db.query(getUserIdQuery, [memberId], (err, result) => {
             if (err) {
                 return db.rollback(() => {
@@ -231,8 +273,8 @@ export const deleteMember = (req, res) => {
             const userId = result[0].user_id; // Retrieve the user_id from the result
 
             // Step 2: Delete from gym_members table
-            const deleteGymMemberQuery = `DELETE FROM gym_members WHERE member_id = ?`;
-            db.query(deleteGymMemberQuery, [memberId], (err, result) => {
+            const softDeleteGymMember = `UPDATE gym_members SET is_deleted = 1 WHERE member_id = ?`;
+            db.query(softDeleteGymMember, [memberId], (err, result) => {
                 if (err) {
                     return db.rollback(() => {
                         res.status(500).json(err);
@@ -247,8 +289,8 @@ export const deleteMember = (req, res) => {
                 }
 
                 // Step 3: Delete from users table using user_id from gym_members
-                const deleteUserQuery = `DELETE FROM users WHERE id = ?`;
-                db.query(deleteUserQuery, [userId], (err, result) => {
+                const softDeleteUser = `UPDATE users SET is_deleted = 1 WHERE id = ?`;
+                db.query(softDeleteUser, [userId], (err, result) => {
                     if (err) {
                         return db.rollback(() => {
                             res.status(500).json(err);
@@ -271,7 +313,7 @@ export const deleteMember = (req, res) => {
                         }
 
                         // Send success response
-                        res.status(200).json("Member and associated user deleted successfully!");
+                        res.status(200).json("Member soft-deleted successfully!");
                     });
                 });
             });

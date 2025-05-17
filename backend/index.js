@@ -7,6 +7,9 @@ import * as path from "node:path";
 import {db} from "./config/connectDatabase.js";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 import authRoutes from "./routes/auth.js";
 import membersRoutes from "./routes/member.js";
@@ -151,9 +154,9 @@ app.use("/api/reports", reportRoutes)
 app.use("/api/progress", progressRoutes)
 app.use("/api/reservations", reservationsRoutes)
 
-
+const PORT = process.env.PORT || 8800;
 //listen port
-app.listen(8800, () => {
+    app.listen(PORT, () => {
     console.log("API working!!!");
 });
 

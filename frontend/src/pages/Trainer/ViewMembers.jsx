@@ -91,7 +91,8 @@ const TrackMemberProgress = () => {
 
     const [newProgress, setNewProgress] = useState({
         weight: "",
-        bodyFat: "",
+        // bodyFat: "",
+        height: "",
         chestSize: "",
         waistSize: "",
         armSize: "",
@@ -135,7 +136,7 @@ const TrackMemberProgress = () => {
         setProgressHistory([]);
         setNewProgress({
             weight: "",
-            bodyFat: "",
+            height: "",
             chestSize: "",
             waistSize: "",
             armSize: "",
@@ -184,7 +185,7 @@ const TrackMemberProgress = () => {
             // Reset form
             setNewProgress({
                 weight: "",
-                bodyFat: "",
+                height: "",
                 chestSize: "",
                 waistSize: "",
                 armSize: "",
@@ -201,7 +202,7 @@ const TrackMemberProgress = () => {
             // Reset form
             setNewProgress({
                 weight: "",
-                bodyFat: "",
+                height: "",
                 chestSize: "",
                 waistSize: "",
                 armSize: "",
@@ -243,7 +244,7 @@ const TrackMemberProgress = () => {
             change,
             percentChange,
             isPositive:
-                (metric === 'weight' || metric === 'bodyFat' || metric === 'waistSize')
+                (metric === 'weight' || metric === 'height' || metric === 'waistSize')
                     ? change < 0
                     : change > 0
         };
@@ -263,7 +264,7 @@ const TrackMemberProgress = () => {
             datasets: [
                 {
                     label: metric === 'weight' ? 'Weight (kg)' :
-                        metric === 'bodyFat' ? 'Body Fat %' :
+                        metric === 'height' ? 'Height (cm)' :
                             metric === 'chestSize' ? 'Chest (cm)' :
                                 metric === 'waistSize' ? 'Waist (cm)' :
                                     metric === 'armSize' ? 'Arms (cm)' : 'Legs (cm)',
@@ -573,17 +574,17 @@ const TrackMemberProgress = () => {
                                             <Grid item xs={12} md={6}>
                                                 <TextField
                                                     fullWidth
-                                                    label="Body Fat (%)"
+                                                    label="Height (cm)"
                                                     type="number"
-                                                    name="bodyFat"
-                                                    value={newProgress.bodyFat}
+                                                    name="height"
+                                                    value={newProgress.height}
                                                     onChange={handleInputChange}
                                                     variant="outlined"
                                                     inputProps={{
                                                         min: 0,
                                                     }}
                                                     InputProps={{
-                                                        endAdornment: <Typography color="text.secondary">%</Typography>
+                                                        endAdornment: <Typography color="text.secondary">cm</Typography>
                                                     }}
                                                 />
                                             </Grid>
@@ -754,19 +755,19 @@ const TrackMemberProgress = () => {
                                                                 <MetricCard>
                                                                     <CardContent>
                                                                         <Typography color="text.secondary" gutterBottom>
-                                                                            Body Fat
+                                                                            Height
                                                                         </Typography>
                                                                         <Typography variant="h5" component="div" fontWeight="bold">
-                                                                            {latestMetrics.bodyFat}%
+                                                                            {latestMetrics.height}cm
                                                                         </Typography>
-                                                                        {getProgressChange('bodyFat') && (
+                                                                        {getProgressChange('height') && (
                                                                             <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                                                                                 <Chip
                                                                                     size="small"
-                                                                                    label={`${getProgressChange('bodyFat').change.toFixed(1)}%`}
-                                                                                    color={getProgressChange('bodyFat').isPositive ? "success" : "error"}
+                                                                                    label={`${getProgressChange('height').change.toFixed(1)}%`}
+                                                                                    color={getProgressChange('height').isPositive ? "success" : "error"}
                                                                                     icon={
-                                                                                        getProgressChange('bodyFat').isPositive ?
+                                                                                        getProgressChange('height').isPositive ?
                                                                                             <TrendingUp size={14} /> :
                                                                                             <TrendingUp size={14} style={{ transform: 'rotate(180deg)' }} />
                                                                                     }
@@ -898,7 +899,7 @@ const TrackMemberProgress = () => {
                                                             <TableRow>
                                                                 <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
                                                                 <TableCell sx={{ fontWeight: 'bold' }}>Weight (kg)</TableCell>
-                                                                <TableCell sx={{ fontWeight: 'bold' }}>Body Fat (%)</TableCell>
+                                                                <TableCell sx={{ fontWeight: 'bold' }}>Height (cm)</TableCell>
                                                                 <TableCell sx={{ fontWeight: 'bold' }}>Chest (cm)</TableCell>
                                                                 <TableCell sx={{ fontWeight: 'bold' }}>Waist (cm)</TableCell>
                                                                 <TableCell sx={{ fontWeight: 'bold' }}>Arms (cm)</TableCell>
@@ -915,7 +916,7 @@ const TrackMemberProgress = () => {
                                                                             {new Date(record.date).toLocaleDateString()}
                                                                         </TableCell>
                                                                         <TableCell>{record.weight}</TableCell>
-                                                                        <TableCell>{record.bodyFat}</TableCell>
+                                                                        <TableCell>{record.height}</TableCell>
                                                                         <TableCell>{record.chestSize}</TableCell>
                                                                         <TableCell>{record.waistSize}</TableCell>
                                                                         <TableCell>{record.armSize}</TableCell>
@@ -1020,12 +1021,12 @@ const TrackMemberProgress = () => {
                                                         sx={{ p: 2, height: '100%', borderRadius: 2 }}
                                                     >
                                                         <Typography variant="h6" gutterBottom sx={{ fontWeight: 'medium' }}>
-                                                            Body Fat Progress
+                                                            Height Progress
                                                         </Typography>
                                                         <Divider sx={{ mb: 2 }} />
                                                         <Box sx={{ height: 300 }}>
                                                             <Line
-                                                                data={getChartData('bodyFat')}
+                                                                data={getChartData('height')}
                                                                 options={{
                                                                     responsive: true,
                                                                     maintainAspectRatio: false,
@@ -1043,7 +1044,7 @@ const TrackMemberProgress = () => {
                                                                         y: {
                                                                             title: {
                                                                                 display: true,
-                                                                                text: 'Body Fat (%)'
+                                                                                text: 'Height (cm)'
                                                                             }
                                                                         },
                                                                         x: {

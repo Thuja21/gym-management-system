@@ -4,7 +4,6 @@ import { CreditCard, Wallet, Building2, Check, ChevronRight, ChevronLeft, Shoppi
 import Navbar from "@/components/Member/Navbar.jsx";
 import axios from "axios";
 
-
 const steps = [
     { title: 'Information', description: 'Your details', icon: 'user' },
     { title: 'Payment', description: 'Choose payment method', icon: 'credit-card' },
@@ -14,15 +13,14 @@ const steps = [
 export default function ChangePlanCheckout() {
     const { planId } = useParams();
     const navigate = useNavigate();
-    // const plan = plans.find((p) => p.id === planId);
     const [currentStep, setCurrentStep] = useState(0);
     const [selectedPayment, setSelectedPayment] = useState('card');
     const location = useLocation();
     const selectedPlan = location.state?.plan;
-    const token = localStorage.getItem('token'); // or from state/context
+    const token = localStorage.getItem('token');
     const [memberData, setMemberData] = useState([]);
 
-    console.log("selected plan",selectedPlan)
+    console.log("selected plan", selectedPlan);
 
     const fetchMemberDetails = async () => {
         try {
@@ -36,7 +34,7 @@ export default function ChangePlanCheckout() {
                     full_name: member.full_name,
                     email: member.email,
                     phone: member.contact_no,
-                }); // Set the fetched data to state
+                });
                 setFormData(prev => ({
                     ...prev,
                     name: member.full_name || '',
@@ -46,15 +44,14 @@ export default function ChangePlanCheckout() {
             }
         } catch (error) {
             console.error('Error fetching plan data', error);
-            setMemberData([]); // <-- This is the fix
+            setMemberData([]);
         }
     };
+
     useEffect(() => {
         fetchMemberDetails();
     }, []);
 
-
-    // Default fallback plan (if none selected)
     const plan = selectedPlan || {
         title: "Monthly Plan",
         price: 500,
@@ -77,6 +74,30 @@ export default function ChangePlanCheckout() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const formatCardNumber = (number) => {
+        const numberWithoutSpaces = number.replace(/\s+/g, '');
+        if (numberWithoutSpaces.length > 16) return number.slice(0, -1); // Limit to 16 digits
+        return numberWithoutSpaces.replace(/(\d{4})/g, '$1 ').trim();
+    };
+
+    const handleCardNumberChange = (e) => {
+        const formattedValue = formatCardNumber(e.target.value);
+        setFormData(prev => ({ ...prev, cardNumber: formattedValue }));
+    };
+
+    const handleCVVChange = (e) => {
+        const value = e.target.value.replace(/[^0-9]/g, ''); // Allow only digits
+        if (value.length > 3) return; // Limit to 3 digits
+        setFormData(prev => ({ ...prev, cvv: value }));
+    };
+
+    const handleExpiryDateChange = (e) => {
+        let value = e.target.value.replace(/[^0-9/]/g, ''); // Allow only digits and '/'
+        if (value.length > 5) return; // Limit to 5 characters (MM/YY)
+        if (value.length === 2 && value.indexOf('/') === -1) value += '/';
+        setFormData(prev => ({ ...prev, expiryDate: value }));
+    };
+
     const handleNextStep = () => {
         if (currentStep < steps.length - 1) {
             setCurrentStep(prev => prev + 1);
@@ -91,9 +112,7 @@ export default function ChangePlanCheckout() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
-            // Create payment data object
             const paymentData = {
                 plan_id: selectedPlan.plan_id,
                 price: selectedPlan.price,
@@ -104,14 +123,11 @@ export default function ChangePlanCheckout() {
                     cvv: formData.cvv
                 } : {}
             };
-
-            // Update both plan and payment data
             const response = await axios.put(
                 'http://localhost:8800/api/plans/update-plan-with-payment',
                 paymentData,
                 { withCredentials: true }
             );
-
             alert('Payment successful!');
             setCurrentStep(2);
             navigate('/changePlan');
@@ -125,8 +141,6 @@ export default function ChangePlanCheckout() {
         }
     };
 
-
-    // Main theme color
     const themeColor = '#FF4500';
     const themeColor1 = '#FF6333';
 
@@ -134,12 +148,9 @@ export default function ChangePlanCheckout() {
         <div className="min-h-screen bg-gray-50" style={{ width: '100vw' }}>
             <Navbar />
             <div className="max-w-[1370px] mx-auto px-4 py-10 bg-o">
-
-                {/* Header for Membership Plans */}
                 <div className="mb-4 mt-[60px] text-left">
                     <h1 className="text-3xl font-bold" style={{ fontFamily: "Segoe UI" }}>Complete Your Purchase</h1>
                 </div>
-
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
                     <div className="lg:col-span-2">
                         <div className="mb-10">
@@ -148,7 +159,7 @@ export default function ChangePlanCheckout() {
                                     <div key={step.title} className="flex flex-col items-center relative z-10 w-full">
                                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                                             index <= currentStep
-                                                ? `text-white`
+                                                ? 'text-white'
                                                 : 'text-gray-400 bg-gray-100'
                                         }`} style={{
                                             backgroundColor: index <= currentStep ? themeColor1 : '',
@@ -164,8 +175,6 @@ export default function ChangePlanCheckout() {
                                         <div className="text-xs text-gray-500">{step.description}</div>
                                     </div>
                                 ))}
-
-                                {/* Progress bar */}
                                 <div className="absolute top-5 h-0.5 w-full bg-gray-200 -z-0">
                                     <div className="h-full transition-all duration-300" style={{
                                         width: `${currentStep * 50}%`,
@@ -174,7 +183,6 @@ export default function ChangePlanCheckout() {
                                 </div>
                             </div>
                         </div>
-
                         <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
                             {currentStep === 0 && (
                                 <div className="space-y-6">
@@ -221,7 +229,6 @@ export default function ChangePlanCheckout() {
                                     </div>
                                 </div>
                             )}
-
                             {currentStep === 1 && (
                                 <div>
                                     <h2 className="text-2xl font-semibold mb-6" style={{ color: themeColor }}>Payment Method</h2>
@@ -255,7 +262,6 @@ export default function ChangePlanCheckout() {
                                                 )}
                                             </div>
                                         </div>
-
                                         <div
                                             className={`p-5 border rounded-lg cursor-pointer transition-all hover:border-gray-400 ${
                                                 selectedPayment === 'bank'
@@ -285,7 +291,6 @@ export default function ChangePlanCheckout() {
                                                 )}
                                             </div>
                                         </div>
-
                                         {selectedPayment === 'card' && (
                                             <div className="mt-8 space-y-6 p-6 border border-gray-200 rounded-lg bg-gray-50">
                                                 <div>
@@ -296,7 +301,7 @@ export default function ChangePlanCheckout() {
                                                         type="text"
                                                         name="cardNumber"
                                                         value={formData.cardNumber}
-                                                        onChange={handleInputChange}
+                                                        onChange={handleCardNumberChange}
                                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition-all"
                                                         placeholder="1234 5678 9012 3456"
                                                         required
@@ -311,7 +316,7 @@ export default function ChangePlanCheckout() {
                                                             type="text"
                                                             name="expiryDate"
                                                             value={formData.expiryDate}
-                                                            onChange={handleInputChange}
+                                                            onChange={handleExpiryDateChange}
                                                             placeholder="MM/YY"
                                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition-all"
                                                             required
@@ -325,7 +330,7 @@ export default function ChangePlanCheckout() {
                                                             type="text"
                                                             name="cvv"
                                                             value={formData.cvv}
-                                                            onChange={handleInputChange}
+                                                            onChange={handleCVVChange}
                                                             placeholder="123"
                                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none transition-all"
                                                             required
@@ -337,11 +342,9 @@ export default function ChangePlanCheckout() {
                                     </div>
                                 </div>
                             )}
-
                             {currentStep === 2 && (
                                 <div>
                                     <h2 className="text-2xl font-semibold mb-6" style={{ color: themeColor }}>Order Confirmation</h2>
-
                                     <div className="space-y-6">
                                         <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
                                             <h3 className="text-lg font-medium mb-4" style={{ color: themeColor }}>Personal Information</h3>
@@ -360,7 +363,6 @@ export default function ChangePlanCheckout() {
                                                 </div>
                                             </div>
                                         </div>
-
                                         <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
                                             <h3 className="text-lg font-medium mb-4" style={{ color: themeColor }}>Payment Details</h3>
                                             <div>
@@ -375,14 +377,11 @@ export default function ChangePlanCheckout() {
                                                         {selectedPayment === 'card' ? 'Credit Card' : 'Bank Transfer'}
                                                     </p>
                                                 </div>
-
                                                 {selectedPayment === 'card' && (
                                                     <div className="mt-4">
                                                         <p className="text-sm text-gray-500">Card Number</p>
                                                         <p className="font-medium">
-                                                            {formData.cardNumber ?
-                                                                `**** **** **** ${formData.cardNumber.slice(-4)}` :
-                                                                "Not provided"}
+                                                            {formData.cardNumber ? `**** **** **** ${formData.cardNumber.slice(-4)}` : "Not provided"}
                                                         </p>
                                                     </div>
                                                 )}
@@ -391,7 +390,6 @@ export default function ChangePlanCheckout() {
                                     </div>
                                 </div>
                             )}
-
                             <div className="mt-10 flex justify-between items-center">
                                 {currentStep > 0 ? (
                                     <button
@@ -403,9 +401,8 @@ export default function ChangePlanCheckout() {
                                         Back
                                     </button>
                                 ) : (
-                                    <div></div> // Empty div for spacing
+                                    <div></div>
                                 )}
-
                                 <button
                                     type="button"
                                     onClick={
@@ -422,18 +419,15 @@ export default function ChangePlanCheckout() {
                                     {currentStep === steps.length - 1 ? 'Complete Purchase' : 'Continue'}
                                     <ChevronRight className="h-4 w-4 ml-2" />
                                 </button>
-
                             </div>
                         </form>
                     </div>
-
                     <div className="lg:col-span-1 mt-[40px]">
                         <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-6 shadow-sm">
                             <div className="flex items-center mb-6">
                                 <ShoppingBag className="h-5 w-5 mr-2" style={{ color: themeColor }} />
                                 <h2 className="text-xl font-semibold" style={{ color: themeColor }}>Order Summary</h2>
                             </div>
-
                             <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: `${themeColor}10` }}>
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="font-medium text-lg">{plan.title}</h3>
@@ -448,9 +442,7 @@ export default function ChangePlanCheckout() {
                                     ))}
                                 </ul>
                             </div>
-
                             <div className="space-y-3 pb-4"></div>
-
                             <div className="border-t pt-4 mt-4">
                                 <div className="flex justify-between items-center">
                                     <span className="font-bold text-gray-800">Total</span>
@@ -459,7 +451,6 @@ export default function ChangePlanCheckout() {
                                     </div>
                                 </div>
                             </div>
-
                             <div className="mt-8 pt-4 border-t border-dashed">
                                 <div className="flex items-center mb-2">
                                     <Check className="h-4 w-4 mr-2" style={{ color: themeColor }} />

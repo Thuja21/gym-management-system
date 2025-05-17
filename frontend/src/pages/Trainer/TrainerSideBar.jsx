@@ -8,7 +8,7 @@ import { NotificationContext } from "./NotificationTrainer.jsx"; // Import the c
 const routeConfig = [
     { title: "Dashboard", path: "/trainerDashboard", icon: "HomeOutlined", color: "#4caf50" },
     { title: "Schedule", path: "/schedule", icon: "EventOutlined", color: "#9c27b0" },
-    { title: "View Members", path: "/members1", icon: "PeopleOutlined", color: "#2196f3" },
+    { title: "Track Progress", path: "/members1", icon: "PeopleOutlined", color: "#2196f3" },
     { title: "Notification", path: "/trainernotification", icon: "NotificationsOutlined", color: "#ff5722" }
 ];
 

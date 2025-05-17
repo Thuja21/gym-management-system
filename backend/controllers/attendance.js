@@ -51,7 +51,6 @@ export const checkIn = (req, res) => {
     });
 };
 
-
 export const checkOut = (req, res) => {
     const memberId = req.params.id;
     const { attendance_id, check_in_time, attendance_date } = req.body;
@@ -132,7 +131,6 @@ export const getAttendanceByDate = (req, res) => {
         return res.status(200).json(data);
     });
 };
-
 
 export const getLoggedInMemberAttendance = (req, res) => {
     const memberId = req.user.member_id;

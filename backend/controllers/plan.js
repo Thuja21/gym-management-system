@@ -3,7 +3,7 @@ import Op from "sequelize";
 
 export const viewAllPlans = async (req, res) => {
     try {
-        const q = "SELECT * FROM plans";
+        const q = "SELECT * FROM plans WHERE is_deleted = 0";
 
         db.query(q, (err, data) => {
             if (err) return res.status(500).json(err);
@@ -112,11 +112,11 @@ export const deletePlan = (req, res) => {
     }
 
     // Delete query
-    const deleteQuery = "DELETE FROM plans WHERE plan_id = ?";
+    const deleteQuery = "UPDATE plans SET is_deleted = 1 WHERE plan_id = ?";
 
     db.query(deleteQuery, [planId], (err, result) => {
         if (err) {
-            console.error("Error deleting plan:", err);
+            console.error("Error discontinuing plan:", err);
             return res.status(500).json({ message: "Internal server error" });
         }
 
@@ -124,7 +124,7 @@ export const deletePlan = (req, res) => {
             return res.status(404).json({ message: "Plan not found" });
         }
 
-        res.status(200).json({ message: "Plan deleted successfully!" });
+        res.status(200).json({ message: "Plan discontinue successfully!" });
     });
 };
 
