@@ -8,6 +8,7 @@ export const getPaymentDetails = (req, res) => {
     FROM plan_payments
     JOIN plans ON plans.plan_id = plan_payments.plan_id
     WHERE plan_payments.member_id = ?
+    ORDER BY plan_payments.payment_date DESC
   `;
 
     db.query(q, [memberId], (err, data) => {
@@ -30,7 +31,7 @@ export const getAllPaymentDetails =(req,res)=> {
                  JOIN plans ON plans.plan_id = plan_payments.plan_id
                  JOIN gym_members ON gym_members.member_id = plan_payments.member_id
                  JOIN users ON users.id = gym_members.user_id
-        ORDER BY plan_payments.payment_id DESC
+        ORDER BY plan_payments.payment_date DESC
     `;
 
     db.query(q, (err, data) => {
@@ -64,6 +65,7 @@ export const getSuppmentPaymentDetails = (req, res) => {
              JOIN users ON users.id = supplement_payments.user_id
              JOIN gym_members ON gym_members.user_id = users.id
     WHERE gym_members.member_id = ?
+    ORDER BY supplement_payments.payment_date DESC
   `;
 
     db.query(q, [memberId], (err, data) => {

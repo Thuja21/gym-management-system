@@ -201,11 +201,17 @@ const ManageReservations = () => {
         }
     };
 
-    // Format date
     const formatDate = (dateString) => {
-        const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-        return new Date(dateString).toLocaleDateString('en-US', options);
+        const isoString = dateString.replace(' ', 'T'); // No 'Z' since we don't care about time
+        const options = {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        };
+        return new Date(isoString).toLocaleDateString('en-US', options);
     };
+
+
 
     return (
         <div className="bg-gray-100" style={{ display: "flex", height: "100vh" }}>

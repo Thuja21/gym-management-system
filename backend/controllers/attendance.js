@@ -141,6 +141,7 @@ export const getLoggedInMemberAttendance = (req, res) => {
     JOIN gym_members ON gym_members.member_id = attendance.member_id
     JOIN users ON gym_members.user_id = users.id
     WHERE attendance.member_id = ?
+    ORDER BY attendance.attendance_date DESC
   `;
 
     db.query(q, [memberId], (err, data) => {
