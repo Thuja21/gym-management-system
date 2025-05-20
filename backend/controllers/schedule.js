@@ -1,4 +1,9 @@
 import { db } from "../config/connectDatabase.js";
+import nodemailer from "nodemailer";
+import crypto from "crypto"; // For generating reset token
+import dotenv from "dotenv";
+dotenv.config();
+
 
 // View all schedules
 export const viewAllSchedules = (req, res) => {
@@ -34,12 +39,75 @@ export const viewAllSchedules = (req, res) => {
 };
 
 // Add a new schedule
-export const addSchedule = (req, res) => {
+// export const addSchedule = (req, res) => {
+//
+//     db.beginTransaction((err) => {
+//         if (err) return res.status(500).json(err);
+//
+//         const { title, notes, schedule_date, schedule_time_slot,end_time, weekly_schedule, schedule_type } = req.body;
+//         const trainerId = req.user.trainer_id;
+//
+//         const insertScheduleQuery = "INSERT INTO schedules (`title`, `schedule_date`, `schedule_time_slot`, `end_time`, `notes`, `trainer_id`, `schedule_type`) VALUES (?)";
+//         const scheduleValues = [title, schedule_date, schedule_time_slot, end_time, notes, trainerId, schedule_type];
+//
+//         db.query(insertScheduleQuery, [scheduleValues], (err, result) => {
+//             if (err) {
+//                 return db.rollback(() => {
+//                     res.status(500).json(err);
+//                 });
+//             }
+//
+//             const scheduleId = result.insertId;
+//
+//             // Prepare the weekly slots insertion
+//             const insertWeeklyQuery = "INSERT INTO weekly_schedule (`schedule_id`, `day`, `start_time`, `end_time`) VALUES ?";
+//             const weeklyValues = weekly_schedule.map(slot => [
+//                 scheduleId,
+//                 slot.day,
+//                 slot.start_time,
+//                 slot.end_time
+//             ]);
+//
+//
+//             if (schedule_type === "weekly") {
+//                 db.query(insertWeeklyQuery, [weeklyValues], (err) => {
+//                     if (err) {
+//                         return db.rollback(() => {
+//                             res.status(500).json(err);
+//                         });
+//                     }
+//
+//                     db.commit((err) => {
+//                         if (err) {
+//                             return db.rollback(() => {
+//                                 res.status(500).json(err);
+//                             });
+//                         }
+//
+//                         res.status(200).json("Schedule with weekly slots has been created.");
+//                     });
+//                 });
+//             } else {
+//                 db.commit((err) => {
+//                     if (err) {
+//                         return db.rollback(() => {
+//                             res.status(500).json(err);
+//                         });
+//                     }
+//
+//                     res.status(200).json("Schedule (one-time) has been created.");
+//                 });
+//             }
+//
+//         });
+//     });
+// };
 
+export const addSchedule = (req, res) => {
     db.beginTransaction((err) => {
         if (err) return res.status(500).json(err);
 
-        const { title, notes, schedule_date, schedule_time_slot,end_time, weekly_schedule, schedule_type } = req.body;
+        const { title, notes, schedule_date, schedule_time_slot, end_time, weekly_schedule, schedule_type } = req.body;
         const trainerId = req.user.trainer_id;
 
         const insertScheduleQuery = "INSERT INTO schedules (`title`, `schedule_date`, `schedule_time_slot`, `end_time`, `notes`, `trainer_id`, `schedule_type`) VALUES (?)";
@@ -63,7 +131,6 @@ export const addSchedule = (req, res) => {
                 slot.end_time
             ]);
 
-
             if (schedule_type === "weekly") {
                 db.query(insertWeeklyQuery, [weeklyValues], (err) => {
                     if (err) {
@@ -79,6 +146,17 @@ export const addSchedule = (req, res) => {
                             });
                         }
 
+                        // After successful commit, send emails to all members
+                        sendScheduleEmailToMembers({
+                            title,
+                            schedule_date,
+                            schedule_time_slot,
+                            end_time,
+                            notes,
+                            schedule_type: "weekly",
+                            weekly_schedule
+                        });
+
                         res.status(200).json("Schedule with weekly slots has been created.");
                     });
                 });
@@ -90,13 +168,79 @@ export const addSchedule = (req, res) => {
                         });
                     }
 
+                    // After successful commit, send emails to all members
+                    sendScheduleEmailToMembers({
+                        title,
+                        schedule_date,
+                        schedule_time_slot,
+                        end_time,
+                        notes,
+                        schedule_type: "one-time"
+                    });
+
                     res.status(200).json("Schedule (one-time) has been created.");
                 });
             }
-
         });
     });
 };
+
+// Function to send emails to all gym members
+const sendScheduleEmailToMembers = (scheduleData) => {
+    // Fetch all gym members' emails
+    db.query('SELECT email FROM users where user_type= "MEMBER"', (err, results) => {
+        if (err) {
+            console.error('Error fetching emails:', err);
+            return;
+        }
+
+        const emails = results.map(row => row.email);
+
+        // Setup nodemailer transporter
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com', // Gmail SMTP server
+            port: 465,
+            secure: true, // Use TLS (STARTTLS) for port 587
+            auth: {
+                user: 'jkfitnessppt@gmail.com', // Hardcoded email address
+                pass: 'cyhubhjxgfjmsabs', // Replace with your actual password or App Password
+            },
+            timeout: 60000, // Increased timeout to 60 seconds to handle slow connections
+        });
+
+        // Create email content based on schedule type
+        let emailText = `Dear member,\n\nA new schedule has been created:\nTitle: ${scheduleData.title}\n`;
+
+        if (scheduleData.schedule_type === "one-time") {
+            emailText += `Date: ${scheduleData.schedule_date}\nTime: ${scheduleData.schedule_time_slot} - ${scheduleData.end_time}\n`;
+        } else {
+            emailText += "Weekly Schedule:\n";
+            scheduleData.weekly_schedule.forEach(slot => {
+                emailText += `- ${slot.day}: ${slot.start_time} - ${slot.end_time}\n`;
+            });
+        }
+
+        emailText += `\nNotes: ${scheduleData.notes || 'N/A'}\n\nBest regards,\nYour Gym Team`;
+
+        // Email options
+        const mailOptions = {
+            from: 'jkfitnessppt@gmail.com',
+            bcc: emails,  // Using BCC for privacy
+            subject: `New Gym Schedule: ${scheduleData.title}`,
+            text: emailText
+        };
+
+        // Send email
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error sending schedule emails:', error);
+            } else {
+                console.log('Schedule notification emails sent successfully');
+            }
+        });
+    });
+};
+
 
 export const editSchedule = (req, res) => {
     const scheduleId = req.params.id;

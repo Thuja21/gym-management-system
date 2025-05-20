@@ -327,20 +327,20 @@ const Signup = () => {
                   />
                   Member Registration
                 </label>
-                <label className={`flex items-center px-8 py-3 rounded-lg text-lg font-semibold cursor-pointer ${
-                    userType === "CUSTOMER" ? 'bg-[#FF4500] text-white' : 'bg-white/90 text-gray-900 hover:bg-white'
-                } transition duration-300`}>
-                  <Users className="w-6 h-6 mr-2" />
-                  <input
-                      type="radio"
-                      name="userType"
-                      value="CUSTOMER"
-                      checked={userType === "CUSTOMER"}
-                      onChange={handleUserTypeChange}
-                      className="hidden"
-                  />
-                  Customer Registration
-                </label>
+                {/*<label className={`flex items-center px-8 py-3 rounded-lg text-lg font-semibold cursor-pointer ${*/}
+                {/*    userType === "CUSTOMER" ? 'bg-[#FF4500] text-white' : 'bg-white/90 text-gray-900 hover:bg-white'*/}
+                {/*} transition duration-300`}>*/}
+                {/*  <Users className="w-6 h-6 mr-2" />*/}
+                {/*  <input*/}
+                {/*      type="radio"*/}
+                {/*      name="userType"*/}
+                {/*      value="CUSTOMER"*/}
+                {/*      checked={userType === "CUSTOMER"}*/}
+                {/*      onChange={handleUserTypeChange}*/}
+                {/*      className="hidden"*/}
+                {/*  />*/}
+                {/*  Customer Registration*/}
+                {/*</label>*/}
               </div>
 
               {/* Registration Form */}
