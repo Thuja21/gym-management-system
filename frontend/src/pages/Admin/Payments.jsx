@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AdminSideBar from "./AdminSideBar.jsx";
-import { IconButton, Paper, Table, TableBody, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { IconButton, Paper, Table, TableBody, TableContainer, TableHead, TableRow, Typography, Button } from "@mui/material";
 import { Search } from "lucide-react";
 import { FiFilter } from "react-icons/fi";
 import axios from "axios";
@@ -11,8 +11,10 @@ const Payment = () => {
     const [error, setError] = useState(null);
     const [filterStatus, setFilterStatus] = useState("all");
     const [payments, setPayments] = useState([]);
+    const [supplementPayments, setSupplementPayments] = useState([]);
+    const [activeTable, setActiveTable] = useState("planPayments"); // Track which table is active
 
-    // Fetch payments from backend
+    // Fetch planpayments from backend
     useEffect(() => {
         const fetchPaymentDetails = async () => {
             try {
@@ -28,29 +30,64 @@ const Payment = () => {
         fetchPaymentDetails();
     }, []);
 
+    // Fetch payments from backend
+    useEffect(() => {
+        const fetchSupplementPaymentDetails = async () => {
+            try {
+                const response = await axios.get("http://localhost:8800/api/planpayments/supplementPayments");
+                setSupplementPayments(response.data);
+                setLoading(false);
+            } catch (error) {
+                console.error("Error fetching payment details:", error);
+                setError("Failed to load payment data");
+                setLoading(false);
+            }
+        };
+        fetchSupplementPaymentDetails();
+    }, []);
+
     // Add this function to handle marking payment as paid
     const handleMarkPayment = (payment) => {
         console.log("Marking payment as paid:", payment);
         // Implement your payment update logic here
     };
 
+    // Toggle between plan payments and supplement payments
+    const toggleTable = (tableType) => {
+        setActiveTable(tableType);
+    };
+
     // Filter payments based on search term and status
-    const filteredPayments = payments.filter((payment) => {
-        const lowerSearchTerm = searchTerm.toLowerCase();
+    const filteredPayments = activeTable === "planPayments"
+        ? payments.filter((payment) => {
+            const lowerSearchTerm = searchTerm.toLowerCase();
 
-        return (
-            (filterStatus === "all" || payment?.status?.toLowerCase() === filterStatus.toLowerCase()) &&
-            (
-                payment?.member_id?.toString().toLowerCase().includes(lowerSearchTerm) ||
-                payment?.plan_name?.toLowerCase().includes(lowerSearchTerm) ||
-                payment?.full_name?.toLowerCase().includes(lowerSearchTerm) ||
-                payment?.payment_date?.toString().toLowerCase().includes(lowerSearchTerm) ||  // Add due_date search
-                payment?.status?.toLowerCase().includes(lowerSearchTerm)       // Add status search
-            )
-        );
-    });
+            return (
+                (filterStatus === "all" || payment?.status?.toLowerCase() === filterStatus.toLowerCase()) &&
+                (
+                    payment?.member_id?.toString().toLowerCase().includes(lowerSearchTerm) ||
+                    payment?.plan_name?.toLowerCase().includes(lowerSearchTerm) ||
+                    payment?.full_name?.toLowerCase().includes(lowerSearchTerm) ||
+                    payment?.payment_date?.toString().toLowerCase().includes(lowerSearchTerm) ||
+                    payment?.status?.toLowerCase().includes(lowerSearchTerm)
+                )
+            );
+        })
+        : supplementPayments.filter((payment) => {
+            const lowerSearchTerm = searchTerm.toLowerCase();
 
-
+            return (
+                (filterStatus === "all" || payment?.status?.toLowerCase() === filterStatus.toLowerCase()) &&
+                (
+                    payment?.payment_id?.toString().toLowerCase().includes(lowerSearchTerm) ||
+                    payment?.member_id?.toString().toLowerCase().includes(lowerSearchTerm) ||
+                    payment?.full_name?.toLowerCase().includes(lowerSearchTerm) ||
+                    payment?.supplement_id?.toString().toLowerCase().includes(lowerSearchTerm) ||
+                    payment?.supplement_name?.toLowerCase().includes(lowerSearchTerm) ||
+                    payment?.payment_date?.toString().toLowerCase().includes(lowerSearchTerm)
+                )
+            );
+        });
 
     const statusStyles = {
         paid: "bg-green-100 text-green-700",
@@ -66,7 +103,32 @@ const Payment = () => {
                     GYM TRAINERS
                 </Typography>
 
+                {/* Toggle Buttons */}
                 <div className="bg-white rounded-xl shadow-sm p-4 mb-4">
+                    <div className="flex items-center mb-4">
+                        <Button
+                            variant={activeTable === "planPayments" ? "contained" : "outlined"}
+                            onClick={() => toggleTable("planPayments")}
+                            className="mr-4"
+                            sx={{
+                                backgroundColor: activeTable === "planPayments" ? "#731b1b" : "transparent",
+                                color: activeTable === "planPayments" ? "white" : "#731b1b",
+                            }}
+                        >
+                            Plan Payments
+                        </Button>
+                        <Button
+                            variant={activeTable === "supplementPayments" ? "contained" : "outlined"}
+                            onClick={() => toggleTable("supplementPayments")}
+                            sx={{
+                                backgroundColor: activeTable === "supplementPayments" ? "#731b1b" : "transparent",
+                                color: activeTable === "supplementPayments" ? "white" : "#731b1b",
+                            }}
+                        >
+                            Supplement Payments
+                        </Button>
+                    </div>
+
                     <div className="flex items-center">
                         {/* Search Input */}
                         <div className="relative flex-1">
@@ -116,67 +178,94 @@ const Payment = () => {
                     >
                         <Table className="w-full border-collapse">
                             <TableHead style={{ position: "sticky", top: 0, zIndex: 10 }}>
-                                <TableRow className="bg-gray-300  text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
-                                    <th className="px-6 py-3 text-center">ID</th>
-                                    <th className="px-6 py-3 text-center">Member Id</th>
-                                    <th className="px-6 py-3 text-center">Member</th>
-                                    <th className="pl-14 py-3">Plan</th>
-                                    <th className="pl-32 py-3">Amount</th>
-                                    <th className="pl-24 py-3">Due Date</th>
-                                    <th className="px-5 py-3">Status</th>
-                                    {/*<th className="pl-14 py-3">Action</th>*/}
-                                </TableRow>
+                                {activeTable === "planPayments" ? (
+                                    <TableRow className="bg-gray-300 text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-center">ID</th>
+                                        <th className="px-6 py-3 text-center">Member Id</th>
+                                        <th className="pl-14 py-3">Plan</th>
+                                        <th className="pl-6 py-3">Amount</th>
+                                        <th className="pl-6 py-3">Payment Date</th>
+                                        <th className="px-5 py-3">Status</th>
+                                    </TableRow>
+                                ) : (
+                                    <TableRow className="bg-gray-300 text-blue-950 text-left text-xs font-medium uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-center">ID</th>
+                                        <th className="px-6 py-3 text-center">User ID</th>
+                                        {/*<th className="px-6 py-3 text-center">Name</th>*/}
+                                        <th className="px-6 py-3 text-center">Supplement ID</th>
+                                        <th className="px-6 py-3 text-center">Supplement Name</th>
+                                        <th className="px-6 py-3 text-center">Quantity</th>
+                                        <th className="px-6 py-3 text-center">Amount</th>
+                                        <th className="px-6 py-3 text-center">Payment Date</th>
+                                    </TableRow>
+                                )}
                             </TableHead>
                             <TableBody className="divide-y divide-gray-200 text-[15px]">
                                 {loading ? (
                                     <TableRow>
-                                        <td colSpan={6} className="px-6 py-4 text-center">Loading payment data...</td>
+                                        <td colSpan={activeTable === "planPayments" ? 7 : 7} className="px-6 py-4 text-center">Loading payment data...</td>
                                     </TableRow>
                                 ) : error ? (
                                     <TableRow>
-                                        <td colSpan={6} className="px-6 py-4 text-center text-red-500">{error}</td>
+                                        <td colSpan={activeTable === "planPayments" ? 7 : 7} className="px-6 py-4 text-center text-red-500">{error}</td>
                                     </TableRow>
                                 ) : filteredPayments.length === 0 ? (
                                     <TableRow>
-                                        <td colSpan={6} className="px-6 py-4 text-center">No payment records found</td>
+                                        <td colSpan={activeTable === "planPayments" ? 7 : 7} className="px-6 py-4 text-center">No payment records found</td>
                                     </TableRow>
                                 ) : (
-                                    filteredPayments.map((payment, index) => (
-                                        <TableRow key={payment.payment_id || index}>
-                                            {/*<td className="px-6 py-3 text-center">{index + 1}</td>  /!* Auto incremented ID *!/*/}
-                                            <td className="px-6 py-3 text-center">{payment.payment_id}</td>  {/* Auto incremented ID */}
-                                            <td className="px-6 py-3 text-center">{payment.member_id}</td>
-                                            <td className="px-6 py-3 text-center">{payment.full_name}</td>
-                                            <td className="pl-6 py-3">
-                                                <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
-                                                    {payment.plan_name}
-                                                </span>
-                                            </td>
-                                            <td className="pl-16 py-3 text-center">{payment.amount}</td>
-                                            <td className="px-16 py-3 text-center">
-                                                {payment.payment_date &&
-                                                    new Date(payment.payment_date).toLocaleDateString("en-GB", {
-                                                        day: "2-digit",
-                                                        month: "2-digit",
-                                                        year: "numeric",
-                                                    })}
-                                            </td>
-                                            <td className="pr-10 ">
-                                                <span
-                                                    className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[payment.status] || "bg-gray-100 text-gray-700"}`}>
-                                                    {payment.status}
-                                                </span>
-                                            </td>
-                                            {/*<td className="pr-6 ">*/}
-                                            {/*    <button*/}
-                                            {/*        onClick={() => handleMarkPayment(payment)}*/}
-                                            {/*        className="text-indigo-600 hover:text-indigo-900"*/}
-                                            {/*    >*/}
-                                            {/*        Mark as Paid*/}
-                                            {/*    </button>*/}
-                                            {/*</td>*/}
-                                        </TableRow>
-                                    ))
+                                    activeTable === "planPayments" ? (
+                                        filteredPayments.map((payment, index) => (
+                                            <TableRow key={payment.payment_id || index}>
+                                                <td className="px-6 py-3 text-center">{payment.payment_id}</td>
+                                                <td className="px-6 py-3 text-center">{payment.member_id}</td>
+                                                <td className="pl-6 py-3">
+                                                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+                                                        {payment.plan_name}
+                                                    </span>
+                                                </td>
+                                                <td className="pl-6 py-3 text-center">{payment.amount}</td>
+                                                <td className="px-6 py-3 text-center">
+                                                    {payment.payment_date &&
+                                                        new Date(payment.payment_date).toLocaleDateString("en-GB", {
+                                                            day: "2-digit",
+                                                            month: "2-digit",
+                                                            year: "numeric",
+                                                        })}
+                                                </td>
+                                                <td className="pr-10">
+                                                    <span
+                                                        className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[payment.status] || "bg-gray-100 text-gray-700"}`}>
+                                                        {payment.status}
+                                                    </span>
+                                                </td>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        filteredPayments.map((payment, index) => (
+                                            <TableRow key={payment.payment_id || index}>
+                                                <td className="px-6 py-3 text-center">{payment.payment_id}</td>
+                                                <td className="px-6 py-3 text-center">{payment.user_id}</td>
+                                                {/*<td className="px-6 py-3 text-center">{payment.full_name}</td>*/}
+                                                <td className="px-6 py-3 text-center">{payment.supplement_id}</td>
+                                                <td className="px-6 py-3 text-center">
+                                                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+                                                        {payment.supplement_name}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-3 text-center">{payment.purchased_quantity}</td>
+                                                <td className="px-6 py-3 text-center">{payment.amount}</td>
+                                                <td className="px-6 py-3 text-center">
+                                                    {payment.payment_date &&
+                                                        new Date(payment.payment_date).toLocaleDateString("en-GB", {
+                                                            day: "2-digit",
+                                                            month: "2-digit",
+                                                            year: "numeric",
+                                                        })}
+                                                </td>
+                                            </TableRow>
+                                        ))
+                                    )
                                 )}
                             </TableBody>
                         </Table>

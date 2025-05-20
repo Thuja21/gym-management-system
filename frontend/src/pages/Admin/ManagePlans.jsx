@@ -8,11 +8,13 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle,
+    DialogTitle, FormControl,
     Grid,
     Paper,
     TextField,
-    Typography
+    Typography,
+    InputLabel,
+    Select,Box ,MenuItem,
 } from "@mui/material";
 import axios from "axios";
 
@@ -289,30 +291,60 @@ const ManagePlans = () => {
                                 <TextField
                                     key={field}
                                     margin="dense"
-                                    label={field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())}
+                                    label={field === "plan_price"
+                                        ? "Plan Price (Rs)"
+                                        : field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())}
                                     fullWidth
                                     variant="outlined"
                                     name={field}
                                     value={newPlan[field]}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => {
+                                        if (field === "plan_price" && !/^\d*$/.test(e.target.value)) {
+                                            return; // Prevent non-numeric input for plan_price
+                                        }
+                                        handleInputChange(e);
+                                    }}
+                                    inputProps={field === "plan_price" ? { inputMode: 'numeric', pattern: '[0-9]*' } : {}}
                                 />
                             ))}
                         </Grid>
 
                         {/* Right Column */}
                         <Grid item xs={6}>
-                            {["plan_duration", "features"].map((field) => (
-                                <TextField
-                                    key={field}
-                                    margin="dense"
-                                    label={field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())}
-                                    fullWidth
-                                    variant="outlined"
-                                    name={field}
-                                    value={newPlan[field]}
+                            <FormControl fullWidth variant="outlined" margin="dense">
+                                <InputLabel id="plan-duration-label">Plan Duration</InputLabel>
+                                <Select
+                                    labelId="plan-duration-label"
+                                    id="plan-duration"
+                                    name="plan_duration"
+                                    value={newPlan.plan_duration || ""}
                                     onChange={handleInputChange}
-                                />
-                            ))}
+                                    label="Plan Duration"
+                                >
+                                    <MenuItem value="1 Month">1 Month</MenuItem>
+                                    <MenuItem value="2 Months">2 Months</MenuItem>
+                                    <MenuItem value="3 Months">3 Months</MenuItem>
+                                    <MenuItem value="4 Months">4 Months</MenuItem>
+                                    <MenuItem value="5 Months">5 Months</MenuItem>
+                                    <MenuItem value="6 Months">6 Months</MenuItem>
+                                    <MenuItem value="7 Months">7 Months</MenuItem>
+                                    <MenuItem value="8 Months">8 Months</MenuItem>
+                                    <MenuItem value="9 Months">9 Months</MenuItem>
+                                    <MenuItem value="10 Months">10 Months</MenuItem>
+                                    <MenuItem value="11 Months">11 Months</MenuItem>
+                                    <MenuItem value="1 Year">1 Year</MenuItem>
+                                </Select>
+                            </FormControl>
+
+                            <TextField
+                                margin="dense"
+                                label="Features"
+                                fullWidth
+                                variant="outlined"
+                                name="features"
+                                value={newPlan.features || ""}
+                                onChange={handleInputChange}
+                            />
                         </Grid>
                     </Grid>
                 </DialogContent>
@@ -337,7 +369,9 @@ const ManagePlans = () => {
                                 <TextField
                                     key={field}
                                     margin="dense"
-                                    label={field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())}
+                                    label={field === "plan_price"
+                                        ? "Plan Price (Rs)"
+                                        : field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())}
                                     fullWidth
                                     variant="outlined"
                                     name={field}

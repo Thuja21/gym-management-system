@@ -5,12 +5,12 @@ import { Paper, Typography, Avatar, Divider } from "@mui/material";
 
 function AdminProfile() {
     const [profile, setProfile] = useState({
-        name: "John Doe",
-        email: "john.doe@example.com",
-        phone: "+1 (555) 123-4567",
-        address: "123 Admin Street, City, Country",
+        name: "Santh",
+        email: "jkfitnessppt@gmail.com",
+        phone: "076 7870 779",
+        address: "Sarayadi, PointPedro",
         department: "IT Administration",
-        joinDate: "2023-01-15",
+        joinDate: "2025-01-15",
         bio: "Experienced administrator with over 8 years in system management and team leadership. Passionate about optimizing workflows and implementing efficient solutions."
     });
 

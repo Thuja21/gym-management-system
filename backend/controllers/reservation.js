@@ -320,7 +320,6 @@ export const deleteReservation = (req, res) => {
     });
 };
 
-
 export const updateReservationStatusByAdmin = (req, res) => {
     const reservationId = req.params.id;
     const { status } = req.body;
@@ -346,6 +345,8 @@ export const updateReservationStatusByAdmin = (req, res) => {
         const oldStatus = reservation.status;
         const supplementId = reservation.supplement_id;
         const quantity = reservation.quantity;
+        const totalPrice = reservation.total_price;
+        const userId = reservation.user_id;
 
         // Check if the reservation is already in the requested status
         if (oldStatus === status) {
@@ -387,6 +388,58 @@ export const updateReservationStatusByAdmin = (req, res) => {
                             WHERE supplement_id = ?
                         `;
                         queryParams = [quantity, supplementId];
+
+                        // Add payment data to payment_table
+                        const paymentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+                        const paymentId = 'PAY-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+                        const insertPaymentQuery = `
+                            INSERT INTO supplement_payments (
+                                payment_id,                             
+                                user_id, 
+                                amount, 
+                                purchased_quantity,
+                                payment_date, 
+                                supplement_id,
+                                payment_method
+                            ) VALUES (?, ?, ?, ? ,?, ?, 'Cash')
+                        `;
+
+                        db.query(insertPaymentQuery, [paymentId, userId, totalPrice, quantity, paymentDate, supplementId], (paymentErr) => {
+                            console.log("userId", userId);
+                            console.log("totalPrice", totalPrice);
+                            console.log("paymentDate", paymentDate);
+                            console.log("supplementId", supplementId);
+                            console.log("quant", quantity);
+
+                            if (paymentErr) {
+                                return db.rollback(() => {
+                                    res.status(500).json({ error: "Failed to add payment data: " + paymentErr.message });
+                                });
+                            }
+
+                            // Execute the supplement update query
+                            db.query(updateSupplementQuery, queryParams, (suppErr) => {
+                                if (suppErr) {
+                                    return db.rollback(() => {
+                                        res.status(500).json({ error: "Reservation status updated, but failed to update supplement quantities: " + suppErr.message });
+                                    });
+                                }
+
+                                // Commit the transaction
+                                db.commit(err => {
+                                    if (err) {
+                                        return db.rollback(() => {
+                                            res.status(500).json({ error: err.message });
+                                        });
+                                    }
+                                    return res.status(200).json({
+                                        message: "Reservation status updated, supplement quantities updated, and payment recorded successfully",
+                                        reservationId: reservationId
+                                    });
+                                });
+                            });
+                        });
                     } else if (status === 'cancelled') {
                         // For cancelled: Reduce reservation_quantity AND increase quantity_in_stock
                         updateSupplementQuery = `
@@ -397,9 +450,31 @@ export const updateReservationStatusByAdmin = (req, res) => {
                             WHERE supplement_id = ?
                         `;
                         queryParams = [quantity, quantity, supplementId];
+
+                        // Execute the supplement update query
+                        db.query(updateSupplementQuery, queryParams, (suppErr) => {
+                            if (suppErr) {
+                                return db.rollback(() => {
+                                    res.status(500).json({ error: "Reservation status updated, but failed to update supplement quantities: " + suppErr.message });
+                                });
+                            }
+
+                            // Commit the transaction
+                            db.commit(err => {
+                                if (err) {
+                                    return db.rollback(() => {
+                                        res.status(500).json({ error: err.message });
+                                    });
+                                }
+                                return res.status(200).json({
+                                    message: "Reservation status and supplement quantities updated successfully",
+                                    reservationId: reservationId
+                                });
+                            });
+                        });
                     } else {
                         // If status is something else, just commit the transaction
-                        return db.commit(err => {
+                        db.commit(err => {
                             if (err) {
                                 return db.rollback(() => {
                                     res.status(500).json({ error: err.message });
@@ -411,28 +486,6 @@ export const updateReservationStatusByAdmin = (req, res) => {
                             });
                         });
                     }
-
-                    // Execute the supplement update query
-                    db.query(updateSupplementQuery, queryParams, (suppErr) => {
-                        if (suppErr) {
-                            return db.rollback(() => {
-                                res.status(500).json({ error: "Reservation status updated, but failed to update supplement quantities: " + suppErr.message });
-                            });
-                        }
-
-                        // Commit the transaction
-                        db.commit(err => {
-                            if (err) {
-                                return db.rollback(() => {
-                                    res.status(500).json({ error: err.message });
-                                });
-                            }
-                            return res.status(200).json({
-                                message: "Reservation status and supplement quantities updated successfully",
-                                reservationId: reservationId
-                            });
-                        });
-                    });
                 } else {
                     // If not changing from pending status, just commit the transaction
                     db.commit(err => {
@@ -451,5 +504,4 @@ export const updateReservationStatusByAdmin = (req, res) => {
         });
     });
 };
-
 

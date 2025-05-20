@@ -9,7 +9,7 @@ export const viewAllProgress = (req, res) => {
             member_id,
             date,
             weight,
-            body_fat AS bodyFat,
+            height,
             chest_size AS chestSize,
             waist_size AS waistSize,
             arm_size AS armSize,
@@ -37,7 +37,7 @@ export const addProgress = async (req, res) => {
     const {
         date,
         weight,
-        bodyFat,
+        height,
         chestSize,
         waistSize,
         armSize,
@@ -60,7 +60,7 @@ export const addProgress = async (req, res) => {
         // If not exists, insert new progress
         const insertQuery = `
             INSERT INTO progress 
-            (member_id, date, weight, body_fat, chest_size, waist_size, arm_size, leg_size, notes) 
+            (member_id, date, weight, height, chest_size, waist_size, arm_size, leg_size, notes) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
@@ -68,7 +68,7 @@ export const addProgress = async (req, res) => {
             memberId,
             date,
             weight,
-            bodyFat,
+            height,
             chestSize,
             waistSize,
             armSize,
@@ -96,7 +96,7 @@ export const getLoggedInMemberProgress= (req, res) => {
             member_id,
             date,
             weight,
-            body_fat AS bodyFat,
+            height,
             chest_size AS chestSize,
             waist_size AS waistSize,
             arm_size AS armSize,

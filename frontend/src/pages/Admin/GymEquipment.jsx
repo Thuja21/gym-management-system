@@ -6,16 +6,12 @@ import {
     DialogActions, DialogContent, DialogTitle, TextField, IconButton, Grid, MenuItem, Select, InputLabel,
     FormControl, Collapse, Box, CircularProgress, Alert
 } from "@mui/material";
+import { Autocomplete, createFilterOptions } from '@mui/material';
 
 // Styles
 const styles = {
     tableHeader: { backgroundColor: "#f0f4f8", color: "#334155", fontWeight: "600", borderBottom: "2px solid #e2e8f0", fontSize: "0.9rem", padding: "16px" },
     tableContainer: {height: "calc(100vh - 230px)", width: "calc(100vw - 305px)", marginLeft: "13px", boxShadow: "none", borderRadius: "12px", overflow: "auto"},
-        // "&::-webkit-scrollbar": { width: "8px", height: "8px" },
-        // "&::-webkit-scrollbar-track": { background: "#f1f1f1" },
-        // "&::-webkit-scrollbar-thumb": { background: "#c1c1c1", borderRadius: "4px" },
-        // "&::-webkit-scrollbar-thumb:hover": { background: "#a8a8a8" }
-    // },
     formField: {
         marginBottom: "16px",
         "& .MuiOutlinedInput-root": {
@@ -23,7 +19,6 @@ const styles = {
             "&:hover fieldset": { borderColor: "#438cd5" },
             "&.Mui-focused fieldset": { borderColor: "#3b72cf" }
         },
-        // "& .MuiInputLabel-root.Mui-focused": { color: "#7f1d1d" }
     },
     dialogTitle: { backgroundColor: "#f8fafc", borderBottom: "1px solid #e2e8f0", color: "#1e293b", fontWeight: "600" },
     itemDialogTitle: { backgroundColor: "#f0f9ff", borderBottom: "1px solid #bae6fd", color: "#0c4a6e", fontWeight: "600" },
@@ -62,6 +57,10 @@ const ManageEquipments = () => {
     const [equipmentItems, setEquipmentItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
     const [filteredCounts, setFilteredCounts] = useState({});
+    const [existingEquipmentNames, setExistingEquipmentNames] = useState([]);
+
+    // Create a filter function for the autocomplete
+    const filter = createFilterOptions();
 
     // Fetch equipments
     useEffect(() => {
@@ -86,6 +85,11 @@ const ManageEquipments = () => {
                     acc[item.equipment_id].total_quantity += item.quantity;
                     return acc;
                 }, {});
+
+                // Extract unique equipment names for autocomplete
+                const uniqueNames = [...new Set(Object.values(grouped).map(item => item.equipment_name))];
+                setExistingEquipmentNames(uniqueNames);
+
                 setEquipments(Object.values(grouped));
             } catch (err) {
                 setError(err.message);
@@ -183,7 +187,7 @@ const ManageEquipments = () => {
 
         try {
             const equipmentData = {
-                equipment_id: parseInt(newEquipment.equipment_id),//
+                equipment_id: parseInt(newEquipment.equipment_id),
                 equipment_name: newEquipment.equipment_name.trim(),
                 category: newEquipment.category.trim(),
                 brand: newEquipment.brand.trim(),
@@ -401,7 +405,8 @@ const ManageEquipments = () => {
         const matchesSearch = (
             equipment.equipment_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             equipment.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            equipment.variants.some(v => v.brand.toLowerCase().includes(searchTerm.toLowerCase()))
+            equipment.variants.some(v => v.brand.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            equipment.equipment_id.toString().includes(searchTerm.toLowerCase())
         );
 
         if (!matchesSearch) return false;
@@ -422,40 +427,117 @@ const ManageEquipments = () => {
     }, 0);
 
     // Render form fields
-    const renderTextField = (field) => (
-        <TextField
-            key={field}
-            margin="dense"
-            label={field.replace(/_/g, " ").replace(/^./, (str) => str.toUpperCase())}
-            fullWidth
-            variant="outlined"
-            name={field}
-            value={newEquipment[field] || ""}
-            onChange={handleInputChange}
-            error={!!errors[field]}
-            helperText={errors[field]}
-            type={
-                field === "purchase_date" ? "date" :
-                    field === "price" || field === "quantity" ? "number" : "text"
-            }
-            InputLabelProps={field === "purchase_date" ? { shrink: true } : {}}
-            select={field === "status"}
-            inputProps={
-                field === "purchase_date" ? { max: new Date().toISOString().split('T')[0] } :
-                    field === "price" || field === "quantity" ? { min: 0 } : {}
-            }
-            onInput={
-                field === "price" || field === "quantity"
-                    ? (e) => { e.target.value = Math.abs(e.target.value) }
-                    : undefined
-            }
-            sx={styles.formField}
-        >
-            {field === "status" && ["Available", "In Use", "Under Maintenance"].map((option) => (
-                <MenuItem key={option} value={option}>{option}</MenuItem>
-            ))}
-        </TextField>
-    );
+    const renderTextField = (field) => {
+        if (field === "equipment_name") {
+            return (
+                <Autocomplete
+                    key={field}
+                    value={newEquipment.equipment_name}
+                    onChange={(event, newValue) => {
+                        if (typeof newValue === 'string') {
+                            // User entered a string
+                            setNewEquipment({
+                                ...newEquipment,
+                                equipment_name: newValue.trim()
+                            });
+                        } else if (newValue && newValue.inputValue) {
+                            // User added a new value
+                            setNewEquipment({
+                                ...newEquipment,
+                                equipment_name: newValue.inputValue.trim()
+                            });
+                        } else {
+                            // User selected an existing option
+                            setNewEquipment({
+                                ...newEquipment,
+                                equipment_name: newValue || ''
+                            });
+                        }
+                    }}
+                    filterOptions={(options, params) => {
+                        const filtered = filter(options, params);
+                        const { inputValue } = params;
+
+                        // Add "Add [new value]" option
+                        const isExisting = options.some(option => inputValue === option);
+                        if (inputValue !== '' && !isExisting) {
+                            filtered.push({
+                                inputValue,
+                                equipment_name: `Add "${inputValue}"`
+                            });
+                        }
+
+                        return filtered;
+                    }}
+                    selectOnFocus
+                    clearOnBlur
+                    handleHomeEndKeys
+                    options={existingEquipmentNames}
+                    getOptionLabel={(option) => {
+                        // Value selected with enter, right from the input
+                        if (typeof option === 'string') {
+                            return option;
+                        }
+                        // Add "xxx" option created dynamically
+                        if (option.inputValue) {
+                            return option.inputValue;
+                        }
+                        // Regular option
+                        return option;
+                    }}
+                    renderOption={(props, option) => <li {...props} style={{ backgroundColor: '#3f80c1' }}>{typeof option === 'string' ? option : option.equipment_name}</li>}
+                    freeSolo
+                    fullWidth
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            label="Equipment Name"
+                            margin="dense"
+                            variant="outlined"
+                            error={!!errors.equipment_name}
+                            helperText={errors.equipment_name}
+                            sx={styles.formField}
+                        />
+                    )}
+                />
+            );
+        }
+
+        return (
+            <TextField
+                key={field}
+                margin="dense"
+                label={field.replace(/_/g, " ").replace(/^./, (str) => str.toUpperCase())}
+                fullWidth
+                variant="outlined"
+                name={field}
+                value={newEquipment[field] || ""}
+                onChange={handleInputChange}
+                error={!!errors[field]}
+                helperText={errors[field]}
+                type={
+                    field === "purchase_date" ? "date" :
+                        field === "price" || field === "quantity" ? "number" : "text"
+                }
+                InputLabelProps={field === "purchase_date" ? { shrink: true } : {}}
+                select={field === "status"}
+                inputProps={
+                    field === "purchase_date" ? { max: new Date().toISOString().split('T')[0] } :
+                        field === "price" || field === "quantity" ? { min: 0 } : {}
+                }
+                onInput={
+                    field === "price" || field === "quantity"
+                        ? (e) => { e.target.value = Math.abs(e.target.value) }
+                        : undefined
+                }
+                sx={styles.formField}
+            >
+                {field === "status" && ["Available", "In Use", "Under Maintenance"].map((option) => (
+                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                ))}
+            </TextField>
+        );
+    };
 
     return (
         <div className="bg-gray-100" style={{ display: "flex", height: "100vh", paddingRight: "30px" }}>
@@ -707,10 +789,79 @@ const ManageEquipments = () => {
                     <DialogContent sx={{ padding: "24px 20px" }}>
                         <Grid container spacing={3}>
                             <Grid item xs={6}>
-                                {["equipment_name", "category", "brand", "quantity"].map(renderTextField)}
+                                <Autocomplete
+                                    value={newEquipment.equipment_name}
+                                    onChange={(event, newValue) => {
+                                        if (typeof newValue === 'string') {
+                                            // User entered a string
+                                            setNewEquipment({
+                                                ...newEquipment,
+                                                equipment_name: newValue.trim()
+                                            });
+                                        } else if (newValue && newValue.inputValue) {
+                                            // User added a new value
+                                            setNewEquipment({
+                                                ...newEquipment,
+                                                equipment_name: newValue.inputValue.trim()
+                                            });
+                                        } else {
+                                            // User selected an existing option
+                                            setNewEquipment({
+                                                ...newEquipment,
+                                                equipment_name: newValue || ''
+                                            });
+                                        }
+                                    }}
+                                    filterOptions={(options, params) => {
+                                        const filtered = filter(options, params);
+                                        const { inputValue } = params;
+
+                                        // Add "Add [new value]" option
+                                        const isExisting = options.some(option => inputValue === option);
+                                        if (inputValue !== '' && !isExisting) {
+                                            filtered.push({
+                                                inputValue,
+                                                equipment_name: `Add "${inputValue}"`
+                                            });
+                                        }
+
+                                        return filtered;
+                                    }}
+                                    selectOnFocus
+                                    clearOnBlur
+                                    handleHomeEndKeys
+                                    options={existingEquipmentNames}
+                                    getOptionLabel={(option) => {
+                                        // Value selected with enter, right from the input
+                                        if (typeof option === 'string') {
+                                            return option;
+                                        }
+                                        // Add "xxx" option created dynamically
+                                        if (option.inputValue) {
+                                            return option.inputValue;
+                                        }
+                                        // Regular option
+                                        return option;
+                                    }}
+                                    renderOption={(props, option) => <li {...props}>{typeof option === 'string' ? option : option.equipment_name}</li>}
+                                    freeSolo
+                                    fullWidth
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Equipment Name"
+                                            margin="dense"
+                                            variant="outlined"
+                                            error={!!errors.equipment_name}
+                                            helperText={errors.equipment_name}
+                                            sx={styles.formField}
+                                        />
+                                    )}
+                                />
+                                {["category", "brand"].map(renderTextField)}
                             </Grid>
                             <Grid item xs={6}>
-                                {["purchase_date", "price", "status"].map(renderTextField)}
+                                {["quantity", "purchase_date", "price", "status"].map(renderTextField)}
                             </Grid>
                         </Grid>
                     </DialogContent>

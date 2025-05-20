@@ -70,9 +70,6 @@ const ManageTrainers = () => {
                     (trainer.trainer_id && trainer.trainer_id.toString().includes(searchTerm)) ||
                     (trainer.user_name && trainer.user_name.toLowerCase().includes(lowercasedTerm)) ||
                     (trainer.full_name && trainer.full_name.toLowerCase().includes(lowercasedTerm)) ||
-                    (trainer.email && trainer.email.toLowerCase().includes(lowercasedTerm)) ||
-                    (trainer.contact_no && trainer.contact_no.includes(searchTerm)) ||
-                    (trainer.address && trainer.address.toLowerCase().includes(lowercasedTerm)) ||
                     (trainer.specialization && trainer.specialization.toLowerCase().includes(lowercasedTerm))
                 );
             });

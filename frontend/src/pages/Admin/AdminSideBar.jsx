@@ -56,7 +56,7 @@ const AdminSideBar = () => {
 
     return (
         <>
-            <TopBar userName="Admin" title={currentTitle} icon={IconComponent} />
+            <TopBar userName="Santh" title={currentTitle} icon={IconComponent} />
             <Box sx={{ display: "flex" }}>
                 <Drawer variant="permanent" open sx={{
                     width: isCollapsed ? 80 : 240, transition: "width 0.3s",

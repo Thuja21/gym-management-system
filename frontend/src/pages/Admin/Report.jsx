@@ -79,7 +79,7 @@ function ReportDashboard() {
         switch(reportType) {
             case "attendance": return "Attendance Report";
             case "membership": return "Membership Report";
-            case "payment": return "Payment Report";
+            case "revenue": return "Monthly Revenue Report";
             default: return "Select Report Type";
         }
     };
@@ -103,7 +103,7 @@ function ReportDashboard() {
                             >
                                 <MenuItem value="attendance">Attendance Report</MenuItem>
                                 <MenuItem value="membership">Membership Report</MenuItem>
-                                <MenuItem value="payment">Payment Report</MenuItem>
+                                <MenuItem value="revenue">Monthly Revenue Report</MenuItem>
                             </Select>
                         </FormControl>
 

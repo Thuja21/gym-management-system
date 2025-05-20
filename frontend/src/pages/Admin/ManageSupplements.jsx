@@ -27,24 +27,57 @@ const ManageSupplements = () => {
     const [previewUrl, setPreviewUrl] = useState(null)
     const [categories, setCategories] = useState([]);
     const [customCategory, setCustomCategory] = useState('');
+    const [sortField, setSortField] = useState(""); // Field to sort by, e.g., "expiry_date" or "quantity_in_stock"
+    const [sortOrder, setSortOrder] = useState(""); // "" for no sort, "asc" for ascending, "desc" for descending
 
 
-    // Filter supplements based on search term
-    const filteredSupplements = supplements.filter((supplement) => {
-        if (!searchTerm) return true;
+    // // Filter supplements based on search term
+    // const filteredSupplements = supplements.filter((supplement) => {
+    //     if (!searchTerm) return true;
+    //
+    //     const searchTermLower = searchTerm.toLowerCase();
+    //
+    //     return (
+    //         supplement.supplement_name?.toLowerCase().includes(searchTermLower) ||
+    //         supplement.description?.toLowerCase().includes(searchTermLower) ||
+    //         supplement.category?.toLowerCase().includes(searchTermLower) ||
+    //         supplement.brand?.toLowerCase().includes(searchTermLower) ||
+    //         supplement.size?.toLowerCase().includes(searchTermLower) ||
+    //         String(supplement.price).includes(searchTerm) ||
+    //         String(supplement.supplement_id).includes(searchTerm)
+    //     );
+    // });
 
-        const searchTermLower = searchTerm.toLowerCase();
+    const filteredSupplements = supplements
+        .filter((supplement) => {
+            if (!searchTerm) return true;
+            const searchTermLower = searchTerm.toLowerCase();
+            return (
+                supplement.supplement_name?.toLowerCase().includes(searchTermLower) ||
+                supplement.category?.toLowerCase().includes(searchTermLower) ||
+                supplement.brand?.toLowerCase().includes(searchTermLower) ||
+                String(supplement.supplement_id).includes(searchTerm)
+            );
+        })
+        .sort((a, b) => {
+            if (!sortField || !sortOrder) return 0; // No sorting if either is empty
+            if (sortField === "expiry_date") {
+                const dateA = new Date(a.expiry_date);
+                const dateB = new Date(b.expiry_date);
+                // Handle invalid dates
+                if (isNaN(dateA) && isNaN(dateB)) return 0;
+                if (isNaN(dateA)) return sortOrder === "asc" ? 1 : -1;
+                if (isNaN(dateB)) return sortOrder === "asc" ? -1 : 1;
+                return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+            } else if (sortField === "quantity_in_stock") {
+                return sortOrder === "asc"
+                    ? a.quantity_in_stock - b.quantity_in_stock
+                    : b.quantity_in_stock - a.quantity_in_stock;
+            }
+            return 0;
+        });
 
-        return (
-            supplement.supplement_name?.toLowerCase().includes(searchTermLower) ||
-            supplement.description?.toLowerCase().includes(searchTermLower) ||
-            supplement.category?.toLowerCase().includes(searchTermLower) ||
-            supplement.brand?.toLowerCase().includes(searchTermLower) ||
-            supplement.size?.toLowerCase().includes(searchTermLower) ||
-            String(supplement.price).includes(searchTerm) ||
-            String(supplement.supplement_id).includes(searchTerm)
-        );
-    });
+
 
     // Clear search function
     const clearSearch = () => {
@@ -265,9 +298,6 @@ const ManageSupplements = () => {
         return d.toISOString().slice(0, 10);
     }
 
-
-
-
     return (
         <div  className="bg-gray-100" style={{ display: "flex", height: "100vh" ,paddingRight: "30px" }}>
             <AdminSideBar/>
@@ -304,6 +334,43 @@ const ManageSupplements = () => {
                                 Found {filteredSupplements.length} of {supplements.length} supplements
                             </div>
                         )}
+
+
+                        {/* Sort by Expiry Date Dropdown */}
+                        <FormControl variant="outlined" size="small" style={{ minWidth: 200 }}>
+                            <InputLabel>Sort by Expiry Date</InputLabel>
+                            <Select
+                                value={sortField === "expiry_date" ? sortOrder : ""}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setSortField(value ? "expiry_date" : "");
+                                    setSortOrder(value);
+                                }}
+                                label="Sort by Expiry Date"
+                            >
+                                <MenuItem value="">None</MenuItem>
+                                <MenuItem value="asc">Ascending (Earliest First)</MenuItem>
+                                <MenuItem value="desc">Descending (Latest First)</MenuItem>
+                            </Select>
+                        </FormControl>
+
+                        {/* Sort by Stock Quantity Dropdown */}
+                        <FormControl variant="outlined" size="small" style={{ minWidth: 200 }}>
+                            <InputLabel>Sort by Stock Quantity</InputLabel>
+                            <Select
+                                value={sortField === "quantity_in_stock" ? sortOrder : ""}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setSortField(value ? "quantity_in_stock" : "");
+                                    setSortOrder(value);
+                                }}
+                                label="Sort by Stock Quantity"
+                            >
+                                <MenuItem value="">None</MenuItem>
+                                <MenuItem value="asc">Ascending (Lowest First)</MenuItem>
+                                <MenuItem value="desc">Descending (Highest First)</MenuItem>
+                            </Select>
+                        </FormControl>
 
                         {/* Filters */}
                         <div className="ml-4 flex space-x-2">
@@ -380,7 +447,7 @@ const ManageSupplements = () => {
                                                 <td className="px-2 py-1 text-center">{supplement.category}</td>
                                                 <td className="px-6 py-1 text-center">{supplement.brand}</td>
                                                 <td className="px-6 py-1 text-center">{supplement.size}</td>
-                                                <td className="px-6 py-1 text-center">${supplement.price}</td>
+                                                <td className="px-6 py-1 text-center">Rs.{supplement.price}</td>
                                                 <td className="px-6 py-1 text-center">{supplement.expiry_date ? new Date(supplement.expiry_date).toLocaleDateString() : "N/A"}</td>
                                                 <td className="px-6 py-1 text-center">{supplement.quantity_in_stock}</td>
 

@@ -8,9 +8,9 @@ import logo from '../../assets/images/logo.png';
 const GYM_INFO = {
     name: 'JK FITNESS',
     tagline: 'Where Passion Sparks Progress',
-    address: '123 Gym Lane, Mumbai, India',
-    contact: '+91-98XXXXXX99',
-    email: 'info@jkfitness.com'
+    address: 'Sarayadi,PointPedro',
+    contact: '077 529 8455',
+    email: 'jkfitnessppt@gmail.com'
 };
 
 const TABLE_HEAD = [

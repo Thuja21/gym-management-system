@@ -9,7 +9,7 @@ import {
     Bell,
     TrendingUp,
     Clock,
-    Award
+    Banknote
 } from 'lucide-react';
 import AdminSideBar from "./AdminSideBar.jsx";
 import "./Admin.css";
@@ -75,7 +75,7 @@ function AdminDashboard() {
 
     const stats = [
         { title: 'Active Members', value: totalActiveMembers, icon: Users, trend: ' from last month', color: 'from-violet-500 to-violet-600', lightColor: 'bg-violet-50', textColor: 'text-violet-600' },
-        { title: 'Monthly Revenue', value: 'Rs.24,890', icon: DollarSign, trend: ' from last month', color: 'from-blue-500 to-blue-600', lightColor: 'bg-blue-50', textColor: 'text-blue-600' },
+        { title: 'Monthly Revenue', value: 'Rs.24,890', icon: Banknote, trend: ' from last month', color: 'from-blue-500 to-blue-600', lightColor: 'bg-blue-50', textColor: 'text-blue-600' },
         { title: 'Class Attendance', value: attendanceRate + "%", icon: Calendar, trend: ' from last week', color: 'from-emerald-500 to-emerald-600', lightColor: 'bg-emerald-50', textColor: 'text-emerald-600' },
         { title: 'New Registrations', value: totalRegistrations, icon: Activity, trend: ' from this month',  color: 'from-pink-500 to-pink-600', lightColor: 'bg-pink-50', textColor: 'text-pink-600'},
     ];

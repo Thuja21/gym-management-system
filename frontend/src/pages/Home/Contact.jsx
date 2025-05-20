@@ -105,7 +105,7 @@ const Contact = () => {
                             </div>
                             <h3 className="text-xl font-bold mb-2">Phone Number</h3>
                             <p className="text-gray-600">
-                                Main: 077 239 5819
+                                Main: 077 529 8455
                                 <br />
                                 Support: 077 539 6467
                             </p>
@@ -123,7 +123,7 @@ const Contact = () => {
                             </div>
                             <h3 className="text-xl font-bold mb-2">Email Address</h3>
                             <p className="text-gray-600">
-                                General: info@jkfitness.com
+                                General: jkfitnessppt@gmail.com
                                 <br />
                                 Support: help@jkfitness.com
                             </p>

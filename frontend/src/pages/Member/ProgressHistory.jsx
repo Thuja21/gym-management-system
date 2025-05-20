@@ -67,7 +67,7 @@ function MemberProgressHistory({ records = [], userProfile }) {
 
         return {
             weight: (newest.weight - oldest.weight).toFixed(1),
-            bodyFat: (newest.bodyFat - oldest.bodyFat).toFixed(1),
+            height: (newest.height - oldest.height).toFixed(1),
             chestSize: (newest.chestSize - oldest.chestSize).toFixed(1),
             waistSize: (newest.waistSize - oldest.waistSize).toFixed(1),
             armSize: (newest.armSize - oldest.armSize).toFixed(1),
@@ -152,12 +152,12 @@ function MemberProgressHistory({ records = [], userProfile }) {
                                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 transition-all hover:shadow-md">
                                                 <div className="flex items-center justify-between">
                                                     <div>
-                                                        <p className="text-sm font-medium text-gray-500">Body Fat Change</p>
-                                                        <p className={`text-2xl font-bold mt-1 ${Number(progress.bodyFat) < 0 ? 'text-green-600' : Number(progress.bodyFat) > 0 ? 'text-red-600' : 'text-gray-700'}`}>
-                                                            {Number(progress.bodyFat) > 0 ? '+' : ''}{progress.bodyFat}%
+                                                        <p className="text-sm font-medium text-gray-500">Height Change</p>
+                                                        <p className={`text-2xl font-bold mt-1 ${Number(progress.height) < 0 ? 'text-green-600' : Number(progress.height) > 0 ? 'text-red-600' : 'text-gray-700'}`}>
+                                                            {Number(progress.height) > 0 ? '+' : ''}{progress.height}
                                                         </p>
                                                     </div>
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${Number(progress.bodyFat) < 0 ? 'bg-green-100 text-green-600' : Number(progress.bodyFat) > 0 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${Number(progress.height) < 0 ? 'bg-green-100 text-green-600' : Number(progress.height) > 0 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                                             <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z" />
                                                             <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z" />
@@ -246,10 +246,10 @@ function MemberProgressHistory({ records = [], userProfile }) {
                                                     <Line
                                                         yAxisId="right"
                                                         type="monotone"
-                                                        dataKey="bodyFat"
+                                                        dataKey="height"
                                                         stroke="#DC2626"
                                                         strokeWidth={2}
-                                                        name="Body Fat %"
+                                                        name="Height cm"
                                                         dot={{ r: 4, strokeWidth: 2 }}
                                                         activeDot={{ r: 6, strokeWidth: 2 }}
                                                     />
@@ -278,8 +278,8 @@ function MemberProgressHistory({ records = [], userProfile }) {
                                                     <p className="text-xl font-bold mt-1">{filteredRecords[filteredRecords.length-1].weight} kg</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-medium text-gray-500">Body Fat</p>
-                                                    <p className="text-xl font-bold mt-1">{filteredRecords[filteredRecords.length-1].bodyFat}%</p>
+                                                    <p className="text-sm font-medium text-gray-500">Height</p>
+                                                    <p className="text-xl font-bold mt-1">{filteredRecords[filteredRecords.length-1].height} cm</p>
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-medium text-gray-500">Chest Size</p>
@@ -331,8 +331,8 @@ function MemberProgressHistory({ records = [], userProfile }) {
                                                     <p className="text-xl font-bold mt-1">{record.weight} kg</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-medium text-gray-500">Body Fat</p>
-                                                    <p className="text-xl font-bold mt-1">{record.bodyFat}%</p>
+                                                    <p className="text-sm font-medium text-gray-500">Height</p>
+                                                    <p className="text-xl font-bold mt-1">{record.height} cm</p>
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-medium text-gray-500">Chest Size</p>

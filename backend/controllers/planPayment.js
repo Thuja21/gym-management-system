@@ -38,3 +38,18 @@ export const getAllPaymentDetails =(req,res)=> {
         return res.status(200).json(data);
     } )
 }
+
+export const getAllSuppmentPaymentDetails =(req,res)=> {
+    const q = `
+        SELECT supplement_payments.*, supplements.supplement_name, users.full_name
+        FROM supplement_payments
+                 JOIN supplements ON supplements.supplement_id = supplement_payments.supplement_id
+                 JOIN users ON users.id = supplement_payments.user_id
+        ORDER BY supplement_payments.payment_date DESC
+    `;
+
+    db.query(q, (err, data) => {
+        if (err) return res.status(500).json(err);
+        return res.status(200).json(data);
+    } )
+}

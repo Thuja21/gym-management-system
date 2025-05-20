@@ -72,10 +72,6 @@ const ManageMembers = () => {
                     (member.member_id && member.member_id.toString().includes(searchTerm)) ||
                     (member.user_name && member.user_name.toLowerCase().includes(lowercasedTerm)) ||
                     (member.full_name && member.full_name.toLowerCase().includes(lowercasedTerm)) ||
-                    (member.email && member.email.toLowerCase().includes(lowercasedTerm)) ||
-                    (member.contact_no && member.contact_no.includes(searchTerm)) ||
-                    (member.address && member.address.toLowerCase().includes(lowercasedTerm)) ||
-                    (member.fitness_goal && member.fitness_goal.toLowerCase().includes(lowercasedTerm)) ||
                     (member.plan_name && member.plan_name.toLowerCase().includes(lowercasedTerm))
                 );
             });
@@ -499,7 +495,11 @@ const ManageMembers = () => {
                                 <TextField
                                     key={field}
                                     margin="dense"
-                                    label={field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())}
+                                    label={
+                                        field === "weight"
+                                            ? "Weight (kg)"
+                                            : field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())
+                                    }
                                     fullWidth
                                     variant="outlined"
                                     name={field}
@@ -509,6 +509,11 @@ const ManageMembers = () => {
                                     helperText={errors[field]}
                                     type={field === "dob" ? "date" : "text"}
                                     InputLabelProps={field === "dob" ? { shrink: true } : {}}
+                                    inputProps={
+                                        field === "dob"
+                                            ? { max: new Date(Date.now() - 86400000).toISOString().split("T")[0] }
+                                            : {}
+                                    }
                                 />
                             ))}
                             <FormControl fullWidth margin="dense">
@@ -555,7 +560,11 @@ const ManageMembers = () => {
                                 <TextField
                                     key={field}
                                     margin="dense"
-                                    label={field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())}
+                                    label={
+                                        field === "height"
+                                            ? "Height (cm)"
+                                            : field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())
+                                    }
                                     fullWidth
                                     variant="outlined"
                                     name={field}
@@ -693,6 +702,9 @@ const ManageMembers = () => {
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
+                                    inputProps={{
+                                        max: new Date(Date.now() - 86400000).toISOString().split("T")[0],
+                                    }}
                                     fullWidth
                                     variant="outlined"
                                     name="dob"
@@ -707,7 +719,11 @@ const ManageMembers = () => {
                                     <TextField
                                         key={field}
                                         margin="dense"
-                                        label={field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())}
+                                        label={
+                                            field === "height"
+                                                ? "Height (cm)"
+                                                : field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())
+                                        }
                                         fullWidth
                                         variant="outlined"
                                         name={field}
@@ -758,7 +774,11 @@ const ManageMembers = () => {
                                     <TextField
                                         key={field}
                                         margin="dense"
-                                        label={field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())}
+                                        label={
+                                            field === "weight"
+                                                ? "Weight (kg)"
+                                                : field.replace(/([A-Z])/g, " $1").replace(/[^a-zA-Z0-9 ]/g, "").replace(/^./, (str) => str.toUpperCase())
+                                        }
                                         fullWidth
                                         variant="outlined"
                                         name={field}

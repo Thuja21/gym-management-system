@@ -384,7 +384,15 @@ const Signup = () => {
                                 type="text"
                                 name="fullname"
                                 value={formData.fullname}
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                  const value = e.target.value.replace(/[0-9]/g, '');
+                                  handleChange({
+                                    target: {
+                                      name: 'fullname',
+                                      value: value
+                                    }
+                                  });
+                                }}
                                 className="w-full px-3 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                             />
                             {errors.fullname && <span className="text-red-500 text-sm">{errors.fullname}</span>}
@@ -410,11 +418,26 @@ const Signup = () => {
                                 type="tel"
                                 name="contactNo"
                                 value={formData.contactNo}
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                  // Only allow digits
+                                  const value = e.target.value.replace(/\D/g, '');
+                                  // Limit to 10 digits
+                                  const truncatedValue = value.slice(0, 10);
+                                  // Update form with cleaned value
+                                  handleChange({
+                                    target: {
+                                      name: 'contactNo',
+                                      value: truncatedValue
+                                    }
+                                  });
+                                }}
+                                pattern="[0-9]{10}"
+                                maxLength="10"
                                 className="w-full px-3 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                             />
                             {errors.contactNo && <span className="text-red-500 text-sm">{errors.contactNo}</span>}
                           </div>
+
 
                           {/* Address */}
                           <div>
@@ -439,10 +462,10 @@ const Signup = () => {
                                       value={dob}
                                       onChange={handleDobChange}
                                       className="w-full px-3 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                      max={new Date(Date.now() - 86400000).toISOString().split("T")[0]}
                                   />
                                   {errors.dob && <span className="text-red-500 text-sm">{errors.dob}</span>}
                                 </div>
-
                                 <div>
                                   <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
                                   <input
@@ -503,8 +526,15 @@ const Signup = () => {
                                   value={formData.height}
                                   onChange={handleChange}
                                   step="0.1"
+                                  min="0" // Prevent negative values
                                   placeholder="Height (cm)"
                                   className="w-full px-3 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                  onInput={(e) => {
+                                    // Additional validation to prevent negative values
+                                    if (e.target.value < 0) {
+                                      e.target.value = 0;
+                                    }
+                                  }}
                               />
                               {errors.height && <span className="text-red-500 text-sm">{errors.height}</span>}
                             </div>

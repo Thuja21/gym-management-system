@@ -10,12 +10,13 @@ const TrainerDashboard = () => {
     const [completedSessions, setCompletedSessions] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [count, setCount] = useState(0);
+    const [totalRegistrations, setTotalRegistrations] = useState(0);
 
     const stats = [
         { title: 'Active Members', value: totalActiveMembers, icon: Users, color: 'bg-blue-500', lightColor: 'bg-blue-50', textColor: 'text-blue-600' },
+        { title: 'New Registrations', value: totalRegistrations, icon: TrendingUp, color: 'bg-yellow-500', lightColor: 'bg-yellow-50', textColor: 'text-yellow-600' },
         { title: 'Sessions Today', value: count, icon: Calendar, color: 'bg-green-500', lightColor: 'bg-green-50', textColor: 'text-green-600' },
         { title: 'Sessions Last Week', value: completedSessions, icon: CheckCircle, color: 'bg-orange-500', lightColor: 'bg-orange-50', textColor: 'text-orange-600' },
-        { title: 'Client Progress', value: '87%', icon: TrendingUp, color: 'bg-yellow-500', lightColor: 'bg-yellow-50', textColor: 'text-yellow-600' },
     ];
 
     // useEffect(() => {
@@ -103,6 +104,16 @@ const TrainerDashboard = () => {
             })
             .finally(() => {
                 setIsLoading(false);
+            });
+
+        axios.get("http://localhost:8800/api/dash/totalRegistration")
+            .then(response => {
+                console.log("API Response:", response.data);  // ✅ Debugging API response
+                setTotalRegistrations(response.data.total_registrations);
+                console.log(response.data.total_registrations);
+            })
+            .catch(error => {
+                console.error("Error fetching total registrations:", error);
             });
     }, []);
 
@@ -212,7 +223,7 @@ const TrainerDashboard = () => {
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex justify-between">
-                                        <p className="font-medium text-gray-800">New workout plan created</p>
+                                        <p className="font-medium text-gray-800">New session created</p>
                                         <span className="text-xs text-gray-500">2 hours ago</span>
                                     </div>
                                     <div className="w-full bg-gray-100 h-1.5 mt-2 rounded-full">

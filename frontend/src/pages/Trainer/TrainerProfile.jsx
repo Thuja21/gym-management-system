@@ -6,11 +6,11 @@ import axios from "axios";
 
 function TrainerProfile() {
     const [profile, setProfile] = useState({
-        name: "Sarah Johnson", // done
-        email: "sarah.johnson@example.com", // done
-        phone: "+1 (555) 987-6543", // done
-        address: "456 Fitness Avenue, Gym City, Country", // done
-        specialization: "Strength & Conditioning", // done
+        name: "john", // done
+        email: "akshu@gmail.com", // done
+        phone: "077 6343 288", // done
+        address: "Puttalai,Pointpedro", // done
+        specialization: "Zumba Instructor", // done
         experience: "7 years",
         joinDate: "2021-03-10",  // done
         certifications: ["NASM Certified Personal Trainer", "CrossFit Level 2", "Nutrition Specialist"],
